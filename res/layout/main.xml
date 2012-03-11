@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+    <SurfaceView 
+      android:layout_alignParentTop="true"
+      android:layout_alignParentLeft="true"
+	  android:layout_width="fill_parent" 
+	  android:layout_height="fill_parent"
+	  android:id="@+id/surface_view"
+      />  
+      
+   <RelativeLayout android:id="@+id/message_view" 
+    	android:layout_width="fill_parent" 
+    	android:layout_height="fill_parent"
+    	xmlns:android="http://schemas.android.com/apk/res/android"> 
+    	<View android:layout_width="fill_parent" 
+    	    android:id="@+id/transparent_view"
+   			android:layout_height="fill_parent"
+   			android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+    		android:background="#88000000" />
+    	<LinearLayout 
+    	    android:id="@+id/message_layout" 
+    	    android:layout_centerInParent="true"
+	    	android:layout_width="wrap_content" 
+	    	android:layout_height="wrap_content"
+	    	android:orientation="vertical">
+	    	<TextView android:layout_width="wrap_content"
+	    	    android:id="@+id/message_label" 
+	    	    android:layout_height="wrap_content"
+	    	    android:textSize="20dip"
+	    	    android:textColor="#ffffffff"
+	    	    android:paddingBottom="20dip" />
+	    	<Button
+	    	    android:layout_gravity="center"
+	        	android:id="@+id/continue_button"
+	        	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content"
+       			android:text="@string/continue_string"/>
+	    </LinearLayout>
+	</RelativeLayout>
+
+</RelativeLayout>

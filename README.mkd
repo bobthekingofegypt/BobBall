@@ -5,7 +5,7 @@ BobBall is a simple free opensource version of the old game Jezzball.
 # Features
 
 * Easy to play, hard to master
-* Infite levels
+* Infinite levels
 * Top scores table
 
 # Screen shots

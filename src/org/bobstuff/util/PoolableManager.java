@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package android.util;
+package org.bobstuff.util;
 
 /**
  * @hide
  */
-public interface Poolable<T> {
-    void setNextPoolable(T element);
-    T getNextPoolable();
+public interface PoolableManager<T extends Poolable<T>> {
+    T newInstance();
+
+    void onAcquired(T element);
+    void onReleased(T element);
 }

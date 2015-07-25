@@ -11,10 +11,10 @@ import java.util.Stack;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
+import org.bobstuff.util.Pool;
+import org.bobstuff.util.Poolable;
+import org.bobstuff.util.PoolableManager;
+import org.bobstuff.util.Pools;
 
 public class Grid {
 	public final static int GRID_SQUARE_INVALID = 0;
@@ -162,14 +162,17 @@ public class Grid {
         private static final Pool<StackState> sPool = 
 				Pools.synchronizedPool( 
 	                Pools.finitePool(new PoolableManager<StackState>() { 
+                        @Override
 	                    public StackState newInstance() { 
 	                        return new StackState(); 
 	                    } 
+                        @Override
 	                    public void onAcquired(StackState element) { 
 	                    } 
+                        @Override
 	                    public void onReleased(StackState element) { 
 	                    } 
-	                }, POOL_LIMIT) 
+	                }, StackState.POOL_LIMIT) 
 		        ); 
         private StackState mNext; 
         public void setNextPoolable(StackState element) { 

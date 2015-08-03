@@ -1,46 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <SurfaceView 
-      android:layout_alignParentTop="true"
-      android:layout_alignParentLeft="true"
-	  android:layout_width="fill_parent" 
-	  android:layout_height="fill_parent"
-	  android:id="@+id/surface_view"
-      />  
-      
-   <RelativeLayout android:id="@+id/message_view" 
-    	android:layout_width="fill_parent" 
-    	android:layout_height="fill_parent"
-    	xmlns:android="http://schemas.android.com/apk/res/android"> 
-    	<View android:layout_width="fill_parent" 
-    	    android:id="@+id/transparent_view"
-   			android:layout_height="fill_parent"
-   			android:layout_alignParentTop="true"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/status_topleft"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:id="@+id/status_topright"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:gravity="right"
+                android:textAlignment="gravity" />
+        </LinearLayout>
+
+        <SurfaceView
+            android:id="@+id/surface_view"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/status_botleft"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:layout_weight="1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/status_botright"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:layout_weight="1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:maxLines="1"
+                android:gravity="right"
+                android:textAlignment="gravity" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/message_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <View
+            android:id="@+id/transparent_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
-    		android:background="#88000000" />
-    	<LinearLayout 
-    	    android:id="@+id/message_layout" 
-    	    android:layout_centerInParent="true"
-	    	android:layout_width="wrap_content" 
-	    	android:layout_height="wrap_content"
-	    	android:orientation="vertical">
-	    	<TextView android:layout_width="wrap_content"
-	    	    android:id="@+id/message_label" 
-	    	    android:layout_height="wrap_content"
-	    	    android:textSize="20dip"
-	    	    android:textColor="#ffffffff"
-	    	    android:paddingBottom="20dip" />
-	    	<Button
-	    	    android:layout_gravity="center"
-	        	android:id="@+id/continue_button"
-	        	android:layout_width="wrap_content" 
-            	android:layout_height="wrap_content"
-       			android:text="@string/continue_string"/>
-	    </LinearLayout>
-	</RelativeLayout>
+            android:layout_alignParentTop="true"
+            android:background="#88000000" />
+
+        <LinearLayout
+            android:id="@+id/message_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/message_label"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="20dip"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ffffffff" />
+
+            <Button
+                android:id="@+id/continue_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/continue_string"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -32,6 +32,7 @@ import android.widget.TextView;
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
     public static final int NUMBER_OF_FRAMES_PER_SECOND = 60;
     public static final int ITERATIONS_PER_STATUSUPDATE = 10;
+    public static final double TOUCH_DETECT_SQUARES = 2.5;
 
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
@@ -55,6 +56,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private TextView statusTopright;
     private TextView statusBotright;
     private Button button;
+    private int touchDetectPix;
 
     private boolean dontDraw;
 
@@ -88,6 +90,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         statusTopright = (TextView) findViewById(R.id.status_topright);
         statusBotleft = (TextView) findViewById(R.id.status_botleft);
         statusBotright = (TextView) findViewById(R.id.status_botright);
+
 
         player = new Player();
         scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
@@ -198,10 +201,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             touchDirection = null;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             if (initialTouchPoint != null && touchDirection == null) {
-                if (gameView.getOffsetX((int) event.getX()) > (initialTouchPoint.x + 20) || gameView.getOffsetX((int) event.getX()) < initialTouchPoint.x - 20) {
+                if (gameView.getOffsetX((int) event.getX()) > (initialTouchPoint.x +touchDetectPix) || gameView.getOffsetX((int) event.getX()) < initialTouchPoint.x - touchDetectPix) {
                     touchDirection = TouchDirection.HORIZONTAL;
                 }
-                if (gameView.getOffsetY((int) event.getY()) > (initialTouchPoint.y + 20) || gameView.getOffsetY((int) event.getY()) < initialTouchPoint.y - 20) {
+                if (gameView.getOffsetY((int) event.getY()) > (initialTouchPoint.y + touchDetectPix) || gameView.getOffsetY((int) event.getY()) < initialTouchPoint.y - touchDetectPix) {
                     touchDirection = TouchDirection.VERTICAL;
                 }
             }
@@ -216,6 +219,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         gameManager.init(player.getLevel());
         gameView = new GameView();
         gameLoop.iteration = 0;
+        touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
 
         handler.post(gameLoop);
     }

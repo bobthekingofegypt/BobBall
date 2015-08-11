@@ -130,12 +130,13 @@ public class GameManager {
 		
 		for (int i=0; i<balls.size(); ++i) {
 			Ball ball = balls.get(i);
+			Rect collisionRect = grid.collide(ball.getFrame());
+
 			ball.move();
 			if (bar.collide(ball)) {
 				lives = lives - 1;
 			}
-			
-			Rect collisionRect = grid.collide(ball.getFrame());
+
 			if (collisionRect != null) {
 				ball.collision(collisionRect);
 			}

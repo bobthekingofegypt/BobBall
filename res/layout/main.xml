@@ -60,8 +60,7 @@
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:maxLines="1"
-                android:gravity="right"
-                android:textAlignment="gravity" />
+                android:gravity="right" />
 
         </LinearLayout>
 

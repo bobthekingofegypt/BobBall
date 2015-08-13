@@ -157,7 +157,7 @@ public class GameManager {
 			}
 		}
 		
-		if (touchDirection != null && touchDirection != null && !bar.isActive()){
+		if (initialTouchPoint != null && touchDirection != null && !bar.isActive()){
 			int x = initialTouchPoint.x;
 			int y = initialTouchPoint.y;
 				

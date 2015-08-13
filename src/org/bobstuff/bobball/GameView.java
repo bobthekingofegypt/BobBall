@@ -51,7 +51,10 @@ public class GameView {
         List<Ball> balls = gameManager.getBalls();
         for (int i = 0; i < balls.size(); ++i) {
             Ball ball = balls.get(i);
+            // uncomment the following line for debugging the collisionRects
+            // canvas.drawRect(xOffset + ball.getX1(), yOffset + ball.getY1(), xOffset + ball.getX2(), yOffset + ball.getY2(), Paints.bluePaint);
             canvas.drawBitmap(circleBitmap, xOffset + ball.getX1(), yOffset + ball.getY1(), null);
+
         }
 
         Bar bar = gameManager.getBar();

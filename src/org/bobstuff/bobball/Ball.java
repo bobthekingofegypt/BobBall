@@ -125,22 +125,22 @@ public class Ball {
 		int minDistance = size;
 		int direction = BALL_UNDEFINED;
 		int distance = x2 - otherX1;
-		if (distance < minDistance && distance >= 0){
+		if (distance < minDistance && distance > -size){
 			minDistance = distance;
 			direction = BALL_RIGHT;
 		}
 		distance = y2 - otherY1;
-		if (distance < minDistance && distance >= 0 ){
+		if (distance < minDistance && distance > -size ){
 			minDistance = distance;
 			direction = BALL_UP;
 		}
 		distance = otherX2 - x1;
-		if (distance < minDistance && distance >= 0 ){
+		if (distance < minDistance && distance > -size ){
 			minDistance = distance;
 			direction = BALL_LEFT;
 		}
 		distance = otherY2 - y1;
-		if (distance < minDistance && distance >= 0 ){
+		if (distance < minDistance && distance > -size ){
 			minDistance = distance;
 			direction = BALL_DOWN;
 		}
@@ -158,7 +158,7 @@ public class Ball {
 				break;
 			}
 		}
-		
+
 		while (Rect.intersects(frame, other))
 			move();
 	}

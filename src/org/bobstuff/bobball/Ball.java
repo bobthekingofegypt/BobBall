@@ -159,11 +159,8 @@ public class Ball {
 			}
 		}
 		
-		while (Rect.intersects(frame, other)){
-			int x = (int)(frame.left + (horizontalVelocity * speed));
-			int y = (int)(frame.top + (verticalVelocity * speed));
-			frame.set(x, y, x+size, y+size);
-		}
+		while (Rect.intersects(frame, other))
+			move();
 	}
 	
 	public boolean collide(Ball other) {

@@ -42,7 +42,10 @@ public class GameView {
         List<Rect> collisionRects = gameManager.getGrid().getCollisionRects();
         for (int i = 0; i < collisionRects.size(); ++i) {
             Rect rect = collisionRects.get(i);
+            // uncomment the following line for debugging the collisionRects
+            //canvas.drawRect(xOffset + rect.left-1, yOffset + rect.top-1, xOffset + rect.right+1, yOffset + rect.bottom+1, Paints.redPaint);
             canvas.drawRect(xOffset + rect.left, yOffset + rect.top, xOffset + rect.right, yOffset + rect.bottom, Paints.backgroundPaint);
+
         }
 
         List<Ball> balls = gameManager.getBalls();

@@ -26,9 +26,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textAppearance="?android:attr/textAppearanceLarge"
                 android:gravity="right"
-                android:textAlignment="gravity" />
+                android:textAppearance="?android:attr/textAppearanceLarge" />
         </LinearLayout>
 
         <SurfaceView
@@ -47,27 +46,25 @@
                 android:id="@+id/status_botleft"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:singleLine="false"
                 android:layout_weight="1"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:singleLine="false"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/status_botright"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:singleLine="false"
                 android:layout_weight="1"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:gravity="right"
                 android:maxLines="1"
-                android:gravity="right" />
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/message_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">

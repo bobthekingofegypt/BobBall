@@ -142,7 +142,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
                 .setTitle("Enter your name:")
-                .setMessage("Congratulations you have achieved a high score")
+                .setMessage(R.string.HighScoreAchieved)
                 .setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -167,6 +167,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         builder.setItems(items, null);
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void showPauseScreen() {
+        setMessageViewsVisible(true);
+        dontDraw = true;
+        messageView.setText(R.string.pausedText);
+        button.setText(R.string.bttnTextResume);
+        if (gameManager != null)
+            gameManager.pause();
     }
 
     private class GameLoop implements Runnable {
@@ -201,7 +210,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             touchDirection = null;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             if (initialTouchPoint != null && touchDirection == null) {
-                if (gameView.getOffsetX((int) event.getX()) > (initialTouchPoint.x +touchDetectPix) || gameView.getOffsetX((int) event.getX()) < initialTouchPoint.x - touchDetectPix) {
+                if (gameView.getOffsetX((int) event.getX()) > (initialTouchPoint.x + touchDetectPix) || gameView.getOffsetX((int) event.getX()) < initialTouchPoint.x - touchDetectPix) {
                     touchDirection = TouchDirection.HORIZONTAL;
                 }
                 if (gameView.getOffsetY((int) event.getY()) > (initialTouchPoint.y + touchDetectPix) || gameView.getOffsetY((int) event.getY()) < initialTouchPoint.y - touchDetectPix) {
@@ -228,8 +237,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                                int height) {
         mWidth = width;
         mHeight = height;
-
-        resetGame();
+        if (gameManager == null)
+            resetGame();
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -240,9 +249,27 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         handler.removeCallbacks(gameLoop);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        showPauseScreen();
+    }
 
     @Override
-    public void onClick(View v) {
+    protected void onResume() {
+        super.onResume();
+        if (gameManager != null)
+            showPauseScreen();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (gameManager != null)
+            showPauseScreen();
+    }
+
+    @Override
+    public void onClick(View v) { // called when the message button is clicked
         setMessageViewsVisible(false);
         dontDraw = false;
 
@@ -250,9 +277,12 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             player.setLevel(player.getLevel() + 1);
             gameManager.init(player.getLevel());
             handler.post(gameLoop);
-        } else {
+        } else if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
             handler.removeCallbacks(gameLoop);
             resetGame();
+        } else {
+            gameManager.resume();
+            handler.post(gameLoop);
         }
     }
 

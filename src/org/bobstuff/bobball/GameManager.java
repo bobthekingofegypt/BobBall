@@ -17,7 +17,8 @@ import android.graphics.Rect;
 public class GameManager {
 	public static final int NUMBER_OF_ROWS = 28;
 	public static final int NUMBER_OF_COLUMNS = 20;
-	
+	public static final int LEVEL_DURATION_MS = 200000;
+
 	private static Random randomGenerator = new Random(System.currentTimeMillis());
 	
 	private int size;
@@ -28,6 +29,8 @@ public class GameManager {
 	
 	private int lives;
 	private long startTime;
+	private boolean paused;
+	private long elapsedTime;
 	private int lastTimeLeft;
 	
 	private int width;
@@ -71,9 +74,9 @@ public class GameManager {
 	}
 	
 	public int timeLeft() {
-		if (hasLivesLeft() && !isLevelComplete()) {
+		if (hasLivesLeft() && !isLevelComplete() && !paused) {
 			long currentTime = System.currentTimeMillis();
-			lastTimeLeft = ((int)(200000 - (currentTime - startTime)));
+			lastTimeLeft = ((int)(LEVEL_DURATION_MS - (currentTime - startTime + elapsedTime)));
 		}
 		
 		return lastTimeLeft;
@@ -81,7 +84,6 @@ public class GameManager {
 	
 	public void init(int level) {
 		this.lives = level + 1;
-		this.startTime = System.currentTimeMillis();
 		int widthSize = width / NUMBER_OF_ROWS;
 		int heightSize = height / NUMBER_OF_COLUMNS;
 		
@@ -89,8 +91,24 @@ public class GameManager {
 		grid = new Grid(NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, size);
 		bar = new Bar();
 		makeBalls(level + 1);
+
+		this.elapsedTime =0;
+		this.resume();
 	}
 	
+	public void pause()
+	{
+		if (!paused) {
+			this.elapsedTime += System.currentTimeMillis() - startTime;
+			paused=true;
+		}
+	}
+
+	public void resume()
+	{
+		this.startTime = System.currentTimeMillis();
+		paused=false;
+	}
 	public void makeBalls(final int numberOfBalls){
 		boolean collision = false;
 		do{

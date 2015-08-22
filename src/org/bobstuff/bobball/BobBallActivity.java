@@ -29,6 +29,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+enum GameStateEnum {
+    GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON
+}
+
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
     public static final int NUMBER_OF_FRAMES_PER_SECOND = 60;
     public static final int ITERATIONS_PER_STATUSUPDATE = 10;
@@ -58,7 +62,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private Button button;
     private int touchDetectPix;
 
-    private boolean dontDraw;
+    public GameStateEnum gameState;
+
 
 
     @Override
@@ -122,17 +127,18 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
         if (!gameManager.hasLivesLeft() || gameManager.isLevelComplete() || !gameManager.hasTimeLeft()) {
             setMessageViewsVisible(true);
-            dontDraw = true;
             if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
                 if (scores.isTopScore(player.getScore())) {
                     promptUsername();
                 }
                 messageView.setText("You are dead");
                 button.setText("Retry");
+                gameState=GameStateEnum.GAMELOST;
             } else {
                 player.setScore(player.getScore() + ((gameManager.getPercentageComplete() * (gameManager.timeLeft() / 10000)) * player.getLevel()));
-                messageView.setText("Well done, you have completed Level " + player.getLevel());
+                messageView.setText("Well done, you have completed level " + player.getLevel());
                 button.setText("NEXT LEVEL");
+                gameState=GameStateEnum.GAMEWON;
             }
 
         }
@@ -170,8 +176,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showPauseScreen() {
+        gameState=GameStateEnum.GAMEPAUSED;
         setMessageViewsVisible(true);
-        dontDraw = true;
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
         if (gameManager != null)
@@ -195,7 +201,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
             iteration += 1;
 
-            if (!dontDraw) {
+            if (gameState==GameStateEnum.GAMERUNNING) {
                 handler.postDelayed(this, timeLeft);
             }
         }
@@ -229,6 +235,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         gameView = new GameView();
         gameLoop.iteration = 0;
         touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
+        gameState=GameStateEnum.GAMERUNNING;
 
         handler.post(gameLoop);
     }
@@ -264,25 +271,28 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public void onBackPressed() {
-        if (gameManager != null)
+        if (gameState == GameStateEnum.GAMERUNNING)
             showPauseScreen();
+        else
+            super.onBackPressed();
     }
 
     @Override
     public void onClick(View v) { // called when the message button is clicked
         setMessageViewsVisible(false);
-        dontDraw = false;
 
-        if (gameManager.isLevelComplete()) {
+        if (gameState==GameStateEnum.GAMEWON) {
             player.setLevel(player.getLevel() + 1);
             gameManager.init(player.getLevel());
             handler.post(gameLoop);
-        } else if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
+            gameState=GameStateEnum.GAMERUNNING;
+        } else if (gameState == GameStateEnum.GAMELOST) {
             handler.removeCallbacks(gameLoop);
             resetGame();
-        } else {
+        } else if (gameState == GameStateEnum.GAMEPAUSED){
             gameManager.resume();
             handler.post(gameLoop);
+            gameState=GameStateEnum.GAMERUNNING;
         }
     }
 

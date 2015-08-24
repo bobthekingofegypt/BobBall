@@ -38,6 +38,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     public static final int ITERATIONS_PER_STATUSUPDATE = 10;
     public static final double TOUCH_DETECT_SQUARES = 2.5;
 
+    static final String STATE_GAME_MANAGER = "state_game_manager";
+    static final String STATE_PLAYER = "state_player";
+    static final String STATE_GAMESTATE = "state_gamestate";
+
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
 
@@ -52,6 +56,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private GameManager gameManager;
     private GameView gameView;
+    private GameStateEnum gameState;
 
     private View transparentView;
     private TextView messageView;
@@ -62,7 +67,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private Button button;
     private int touchDetectPix;
 
-    public GameStateEnum gameState;
 
 
 
@@ -131,14 +135,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 if (scores.isTopScore(player.getScore())) {
                     promptUsername();
                 }
-                messageView.setText("You are dead");
-                button.setText("Retry");
-                gameState=GameStateEnum.GAMELOST;
+                show_dead_screen();
             } else {
                 player.setScore(player.getScore() + ((gameManager.getPercentageComplete() * (gameManager.timeLeft() / 10000)) * player.getLevel()));
-                messageView.setText("Well done, you have completed level " + player.getLevel());
-                button.setText("NEXT LEVEL");
-                gameState=GameStateEnum.GAMEWON;
+                show_won_screen();
             }
 
         }
@@ -177,11 +177,23 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void showPauseScreen() {
         gameState=GameStateEnum.GAMEPAUSED;
-        setMessageViewsVisible(true);
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
-        if (gameManager != null)
-            gameManager.pause();
+        setMessageViewsVisible(true);
+    }
+
+    private void show_won_screen() {
+        messageView.setText("Well done, you have completed level " + player.getLevel());
+        button.setText("NEXT LEVEL");
+        setMessageViewsVisible(true);
+        gameState = GameStateEnum.GAMEWON;
+    }
+
+    private void show_dead_screen() {
+        messageView.setText("You are dead");
+        button.setText("Retry");
+        setMessageViewsVisible(true);
+        gameState = GameStateEnum.GAMELOST;
     }
 
     private class GameLoop implements Runnable {
@@ -259,14 +271,22 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onPause() {
         super.onPause();
-        showPauseScreen();
+        if (gameManager != null)
+            gameManager.pause();
+        if (gameState == GameStateEnum.GAMERUNNING)
+            showPauseScreen();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (gameManager != null)
+        if (gameState == GameStateEnum.GAMEPAUSED) {
             showPauseScreen();
+        } else if (gameState == GameStateEnum.GAMELOST) {
+            show_dead_screen();
+        } else if (gameState == GameStateEnum.GAMEWON) {
+            show_won_screen();
+        }
     }
 
     @Override
@@ -274,8 +294,32 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         if (gameState == GameStateEnum.GAMERUNNING)
             showPauseScreen();
         else
-            super.onBackPressed();
+            moveTaskToBack(true);
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        savedInstanceState.putParcelable(STATE_GAME_MANAGER, gameManager);
+        savedInstanceState.putParcelable(STATE_PLAYER, player);
+        savedInstanceState.putInt(STATE_GAMESTATE, gameState.ordinal());
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore value of members from saved state
+        gameManager = savedInstanceState.getParcelable(STATE_GAME_MANAGER);
+        player = savedInstanceState.getParcelable(STATE_PLAYER);
+        gameState = GameStateEnum.values()[savedInstanceState.getInt(STATE_GAMESTATE, 0)];
+        gameView = new GameView();
+    }
+
 
     @Override
     public void onClick(View v) { // called when the message button is clicked

@@ -5,7 +5,10 @@
 
 package org.bobstuff.bobball;
 
-public class Player {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Player implements Parcelable {
 
 	private int score;
 	private int level;
@@ -26,5 +29,36 @@ public class Player {
 		score = 0;
 		level = 1;
 	}
-	
+
+	//implement parcelable
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(score);
+		dest.writeInt(level);
+	}
+
+	public static final Parcelable.Creator<Player> CREATOR
+			= new Parcelable.Creator<Player>() {
+		public Player createFromParcel(Parcel in) {
+
+			int score = in.readInt();
+			int level = in.readInt();
+
+			Player p = new Player();
+			p.score = score;
+			p.level = level;
+			return p;
+		}
+
+		public Player[] newArray(int size) {
+			return new Player[size];
+		}
+
+
+	};
+
 }

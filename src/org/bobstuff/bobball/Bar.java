@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 
-public class Bar {
+public class Bar implements Parcelable {
 	private BarDirection barDirection;
 	
 	private BarSection sectionOne;
@@ -135,4 +137,45 @@ public class Bar {
 		
 		return sectionCollisionRects;
 	}
+
+	//implement parcelable
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+
+		dest.writeInt(barDirection == BarDirection.VERTICAL ? 0 : 1);
+		dest.writeInt(active ? 1 : 0);
+
+		dest.writeParcelable(sectionOne, 0);
+		dest.writeParcelable(sectionTwo, 0);
+	}
+
+	public static final Parcelable.Creator<Bar> CREATOR
+			= new Parcelable.Creator<Bar>() {
+		public Bar createFromParcel(Parcel in) {
+			ClassLoader classLoader = getClass().getClassLoader();
+
+			int bd = in.readInt();
+			int active = in.readInt();
+
+
+			Bar bar = new Bar();
+			bar.sectionOne = in.readParcelable(classLoader);
+			bar.sectionTwo = in.readParcelable(classLoader);
+			bar.barDirection = (bd == 0) ? BarDirection.VERTICAL : BarDirection.HORIZONTAL;
+			bar.active = active > 0;
+
+			return bar;
+		}
+
+		public Bar[] newArray(int size) {
+			return new Bar[size];
+		}
+
+
+	};
+
 }

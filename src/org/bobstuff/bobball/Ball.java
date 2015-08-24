@@ -7,8 +7,10 @@ package org.bobstuff.bobball;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Ball {
+public class Ball implements Parcelable {
 	private static final int BALL_UNDEFINED = 0;
 	private static final int BALL_LEFT = 1;
 	private static final int BALL_RIGHT = 2;
@@ -182,4 +184,44 @@ public class Ball {
 		int y = (int)(frame.top + (verticalVelocity * speed));
 		frame.set(x, y, x+size, y+size);
 	}
+
+
+	//implement parcelable
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(frame.left);
+		dest.writeInt(frame.top);
+
+		dest.writeDouble(speed);
+		dest.writeInt(size);
+
+		dest.writeInt(horizontalVelocity);
+		dest.writeInt(verticalVelocity);
+
+	}
+
+	public static final Parcelable.Creator<Ball> CREATOR
+			= new Parcelable.Creator<Ball>() {
+		public Ball createFromParcel(Parcel in) {
+
+			int left = in.readInt();
+			int top = in.readInt();
+			double speed = in.readDouble();
+			int size = in.readInt();
+			int horizontalVelocity = in.readInt();
+			int verticalVelocity = in.readInt();
+
+			Ball b = new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
+			return b;
+		}
+
+		public Ball[] newArray(int size) {
+			return new Ball[size];
+		}
+	};
+
 }

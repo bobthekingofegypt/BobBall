@@ -56,7 +56,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private GameManager gameManager;
     private GameView gameView;
-    private GameStateEnum gameState;
+    private GameStateEnum gameState = GameStateEnum.GAMERUNNING;
+    private int touchDetectPix;
 
     private View transparentView;
     private TextView messageView;
@@ -65,7 +66,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private TextView statusTopright;
     private TextView statusBotright;
     private Button button;
-    private int touchDetectPix;
+
 
 
 
@@ -240,24 +241,30 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         return true;
     }
 
+
+    private void initGame() {
+        gameLoop.iteration = 0;
+        touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
+        gameView = new GameView();
+    }
+
+    ;
     private void resetGame() {
+        handler.removeCallbacks(gameLoop);
         player.reset();
         gameManager = new GameManager(mWidth, mHeight);
         gameManager.init(player.getLevel());
-        gameView = new GameView();
-        gameLoop.iteration = 0;
-        touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
-        gameState=GameStateEnum.GAMERUNNING;
-
-        handler.post(gameLoop);
+        initGame();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
         mWidth = width;
         mHeight = height;
-        if (gameManager == null)
+        if (gameManager == null) { //first run
             resetGame();
+            startGame();
+        }
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -317,7 +324,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         gameManager = savedInstanceState.getParcelable(STATE_GAME_MANAGER);
         player = savedInstanceState.getParcelable(STATE_PLAYER);
         gameState = GameStateEnum.values()[savedInstanceState.getInt(STATE_GAMESTATE, 0)];
-        gameView = new GameView();
+        initGame();
     }
 
 
@@ -326,18 +333,22 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         setMessageViewsVisible(false);
 
         if (gameState==GameStateEnum.GAMEWON) {
+            initGame();
             player.setLevel(player.getLevel() + 1);
             gameManager.init(player.getLevel());
-            handler.post(gameLoop);
-            gameState=GameStateEnum.GAMERUNNING;
+            startGame();
         } else if (gameState == GameStateEnum.GAMELOST) {
-            handler.removeCallbacks(gameLoop);
             resetGame();
+            startGame();
         } else if (gameState == GameStateEnum.GAMEPAUSED){
-            gameManager.resume();
-            handler.post(gameLoop);
-            gameState=GameStateEnum.GAMERUNNING;
+            startGame();
         }
+    }
+
+    private void startGame() {
+        gameManager.resume();
+        handler.post(gameLoop);
+        gameState = GameStateEnum.GAMERUNNING;
     }
 
     public void setMessageViewsVisible(boolean visible) {

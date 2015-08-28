@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Richard Martin. All rights reserved.
+  Copyright (c) 2015 Richard Martin. All rights reserved.
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -107,10 +106,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         scores.loadScores();
     }
 
-    @Override
-    public void onConfigurationChanged(final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
 
     protected void update(final Canvas canvas) {
         for (int x = 0; x < 4 && gameManager.hasLivesLeft() && !gameManager.isLevelComplete() && gameManager.hasTimeLeft(); ++x) {
@@ -241,14 +236,13 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         return true;
     }
 
-
     private void initGame() {
         gameLoop.iteration = 0;
-        touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
         gameView = new GameView();
+        if ((gameManager != null) && (gameManager.getGrid() != null))
+            touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
     }
 
-    ;
     private void resetGame() {
         handler.removeCallbacks(gameLoop);
         player.reset();

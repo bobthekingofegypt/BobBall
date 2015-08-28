@@ -196,8 +196,7 @@ public class GameManager implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        if (!paused)
-            throw new AssertionError();
+        pause();//just to be shure that we are paused
 
         dest.writeInt(width);
         dest.writeInt(height);

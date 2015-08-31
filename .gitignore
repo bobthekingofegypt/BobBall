@@ -2,3 +2,9 @@
 .project
 bin/
 gen/
+
+*~
+\#*
+.\#*
+*.save
+*.autosave

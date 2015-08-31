@@ -90,7 +90,8 @@ public class Bar implements Parcelable {
 				active = false;
 			}
 			return true;
-		} else if (sectionTwo != null && ball.collide(sectionTwo.getFrame())) {
+		}
+		if (sectionTwo != null && ball.collide(sectionTwo.getFrame())) {
 			sectionTwo = null;
 			if (sectionOne == null) {
 				active = false;
@@ -145,7 +146,6 @@ public class Bar implements Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-
 		dest.writeInt(barDirection == BarDirection.VERTICAL ? 0 : 1);
 		dest.writeInt(active ? 1 : 0);
 
@@ -174,7 +174,6 @@ public class Bar implements Parcelable {
 		public Bar[] newArray(int size) {
 			return new Bar[size];
 		}
-
 
 	};
 

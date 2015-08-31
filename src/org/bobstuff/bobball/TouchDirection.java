@@ -8,6 +8,4 @@ package org.bobstuff.bobball;
 public enum TouchDirection {
 	VERTICAL,
 	HORIZONTAL;
-	
-	
 }

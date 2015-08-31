@@ -80,6 +80,5 @@ public class BarSection implements Parcelable {
 			return new BarSection[size];
 		}
 
-
 	};
 }

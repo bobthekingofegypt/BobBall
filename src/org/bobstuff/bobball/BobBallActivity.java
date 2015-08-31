@@ -68,8 +68,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
 
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -84,8 +84,7 @@ public class GameView {
         int timeLeft = (gameManager.timeLeft() / 100);
         if (timeLeft > 0)
             return TIME_LEFT_LABEL + timeLeft;
-        else
-            return "";
+        return "";
     }
 
     public String get_status_topright(GameManager gameManager, int score) {

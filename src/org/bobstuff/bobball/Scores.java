@@ -87,7 +87,8 @@ public class Scores {
 					
 					if (scoreOne < scoreTwo) {
 						return 1;
-					} else if (scoreOne == scoreTwo) {
+					}
+					if (scoreOne == scoreTwo) {
 						return 0;
 					}
 					

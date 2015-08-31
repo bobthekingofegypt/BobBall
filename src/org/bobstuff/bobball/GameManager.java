@@ -238,8 +238,6 @@ public class GameManager implements Parcelable {
             return new GameManager[size];
         }
 
-
     };
-
 
 }

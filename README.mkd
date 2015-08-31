@@ -1,15 +1,19 @@
 # BobBall
 
-BobBall is a simple free opensource version of the old game Jezzball.
+BobBall is a simple [free/libre](https://www.gnu.org/philosophy/free-sw.html) and [open-source](http://opensource.org/) version of the old game [JezzBall](https://en.wikipedia.org/wiki/JezzBall) for Android.
 
-# Features
+## Features
 
 * Easy to play, hard to master
 * Infinite levels
 * Top scores table
 
-# Screen shots
+## Screenshots
 
 ![Screenshot 1](http://bobstuff.org/media/screenshot1.png)
 ![Screenshot 2](http://bobstuff.org/media/screenshot2.png)
 ![Screenshot 3](http://bobstuff.org/media/screenshot3.png)
+
+## Download
+
+* [F-Droid](https://f-droid.org/repository/browse/?fdid=org.bobstuff.bobball)

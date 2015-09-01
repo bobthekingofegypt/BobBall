@@ -16,15 +16,19 @@ public class Player implements Parcelable {
 	public int getScore() {
 		return score;
 	}
+	
 	public void setScore(int score) {
 		this.score = score;
 	}
+	
 	public int getLevel() {
 		return level;
 	}
+	
 	public void setLevel(int level) {
 		this.level = level;
 	}
+	
 	public void reset() {
 		score = 0;
 		level = 1;
@@ -57,7 +61,6 @@ public class Player implements Parcelable {
 		public Player[] newArray(int size) {
 			return new Player[size];
 		}
-
 
 	};
 

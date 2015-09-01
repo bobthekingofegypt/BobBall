@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!--
+		Copyright (C) 2015, Nicola Spanti (also known as RyDroid) <dev@nicola-spanti.info>
+		
+		Copying and distribution of this file, with or without modification,
+		are permitted in any medium without royalty provided the copyright
+		notice and this notice are preserved.  This file is offered as-is,
+		without any warrant.
+	-->
+	
+    <string name="hello">Bonjour le monde, BobBallActivity!</string>
+    <string name="app_name">BobBall</string>
+    <string name="continue_string">cliquer pour continuer</string>
+    <string name="HighScoreAchieved">Félicitation vous avez fait un record</string>
+    <string name="pausedText">pause</string>
+    <string name="bttnTextResume">reprendre la partie</string>
+</resources>

@@ -197,29 +197,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         gameState = GameStateEnum.GAMEINTRO;
     }
 
-    private class GameLoop implements Runnable {
-        public int iteration = 0;
-
-        @Override
-        public void run() {
-            long startTime = System.nanoTime();
-
-            Canvas canvas = surfaceHolder.lockCanvas();
-            update(canvas);
-            surfaceHolder.unlockCanvasAndPost(canvas);
-
-            long updateTime = System.nanoTime() - startTime;
-            long timeLeft = (long) ((1000L / NUMBER_OF_FRAMES_PER_SECOND) - (updateTime / 1000000.0));
-            if (timeLeft < 5) timeLeft = 5;
-
-            iteration += 1;
-
-            if (gameState == GameStateEnum.GAMERUNNING) {
-                handler.postDelayed(this, timeLeft);
-            }
-        }
-    }
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         PointF evPoint = gameView.transformPix2Coords(new PointF(event.getX(), event.getY()));
@@ -306,7 +283,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             moveTaskToBack(true);
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the user's current game state
@@ -318,7 +294,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         super.onSaveInstanceState(savedInstanceState);
     }
 
-
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -328,7 +303,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         gameState = GameStateEnum.values()[savedInstanceState.getInt(STATE_GAMESTATE, 0)];
         initGame();
     }
-
 
     @Override
     public void onClick(View v) { // called when the message button is clicked
@@ -364,6 +338,29 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             transparentView.setBackgroundColor(0x00000000);
             button.setVisibility(View.INVISIBLE);
             messageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private class GameLoop implements Runnable {
+        public int iteration = 0;
+
+        @Override
+        public void run() {
+            long startTime = System.nanoTime();
+
+            Canvas canvas = surfaceHolder.lockCanvas();
+            update(canvas);
+            surfaceHolder.unlockCanvasAndPost(canvas);
+
+            long updateTime = System.nanoTime() - startTime;
+            long timeLeft = (long) ((1000L / NUMBER_OF_FRAMES_PER_SECOND) - (updateTime / 1000000.0));
+            if (timeLeft < 5) timeLeft = 5;
+
+            iteration += 1;
+
+            if (gameState == GameStateEnum.GAMERUNNING) {
+                handler.postDelayed(this, timeLeft);
+            }
         }
     }
 }

@@ -17,3 +17,23 @@ BobBall is a simple [free/libre](https://www.gnu.org/philosophy/free-sw.html) an
 ## Download
 
 * [F-Droid](https://f-droid.org/repository/browse/?fdid=org.bobstuff.bobball)
+
+## TODOs
+
+If you like to improve BobBall feel free to send a pull request, there is plenty to do!
+
+### small/easy tasks
+
+* move the remaining hardcoded strings to strings.xml
+* translate strings.xml to some other languages
+
+### medium tasks
+
+* add a nice introduction screen
+* add a menu screen
+* introduce multiple difficulty settings
+* share your high score with a screenshot
+
+### big/hard tasks
+
+* add a multiplayer mode, e.g. cooperative play via bluetooth

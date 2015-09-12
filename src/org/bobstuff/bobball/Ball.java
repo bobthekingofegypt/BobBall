@@ -11,217 +11,217 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Ball implements Parcelable {
-	private static final int BALL_UNDEFINED = 0;
-	private static final int BALL_LEFT = 1;
-	private static final int BALL_RIGHT = 2;
-	private static final int BALL_UP = 3;
-	private static final int BALL_DOWN = 4;
+    private static final int BALL_UNDEFINED = 0;
+    private static final int BALL_LEFT = 1;
+    private static final int BALL_RIGHT = 2;
+    private static final int BALL_UP = 3;
+    private static final int BALL_DOWN = 4;
 
-	private RectF frame = new RectF();
+    private RectF frame = new RectF();
 
-	private float speed;
-	private float size;
+    private float speed;
+    private float size;
 
-	private float horizontalVelocity;
-	private float verticalVelocity;
+    private float horizontalVelocity;
+    private float verticalVelocity;
 
-	private PointF pointOne = new PointF();
-	private PointF pointTwo = new PointF();
+    private PointF pointOne = new PointF();
+    private PointF pointTwo = new PointF();
 
-	public Ball(final float x,
-				final float y,
-				final float horizontalVelocity,
-				final float verticalVelocity,
-				final float speed,
-				final float size) {
-		this.size = size;
-		
-		this.frame.set(x, y, x+this.size, y+this.size);
-		
-		this.horizontalVelocity = horizontalVelocity;
-		this.verticalVelocity = verticalVelocity;
-		this.speed = speed;
-	}
-	
-	public Ball(final Ball ball) {
-		this.size = ball.getSize();
-		this.frame.set(ball.getX1(), ball.getY1(), ball.getX2(), ball.getY2());
-		
-		this.horizontalVelocity = ball.getHorizontalVelocity();
-		this.verticalVelocity = ball.getVerticalVelocity();
-		this.speed = ball.getSpeed();
-	}
+    public Ball(final float x,
+                final float y,
+                final float horizontalVelocity,
+                final float verticalVelocity,
+                final float speed,
+                final float size) {
+        this.size = size;
 
-	public float getX1() {
-		return frame.left;
-	}
+        this.frame.set(x, y, x + this.size, y + this.size);
 
-	public float getY1() {
-		return frame.top;
-	}
+        this.horizontalVelocity = horizontalVelocity;
+        this.verticalVelocity = verticalVelocity;
+        this.speed = speed;
+    }
 
-	public float getX2() {
-		return frame.right;
-	}
+    public Ball(final Ball ball) {
+        this.size = ball.getSize();
+        this.frame.set(ball.getX1(), ball.getY1(), ball.getX2(), ball.getY2());
 
-	public float getY2() {
-		return frame.bottom;
-	}
+        this.horizontalVelocity = ball.getHorizontalVelocity();
+        this.verticalVelocity = ball.getVerticalVelocity();
+        this.speed = ball.getSpeed();
+    }
 
-	public float getSize() {
-		return size;
-	}
+    public float getX1() {
+        return frame.left;
+    }
 
-	public float getSpeed() {
-		return speed;
-	}
+    public float getY1() {
+        return frame.top;
+    }
 
-	public float getHorizontalVelocity() {
-		return horizontalVelocity;
-	}
+    public float getX2() {
+        return frame.right;
+    }
 
-	public float getVerticalVelocity() {
-		return verticalVelocity;
-	}
+    public float getY2() {
+        return frame.bottom;
+    }
 
-	public RectF getFrame() {
-		return frame;
-	}
-	
-	public void collision(Ball other) {
-		float radius = size / 2;
-		pointOne.set(frame.left + radius, frame.top + radius);
-		pointTwo.set(other.frame.left + radius, other.frame.top + radius);
-		float xDistance = pointTwo.x - pointOne.x;
-		float yDistance = pointTwo.y - pointOne.y;
+    public float getSize() {
+        return size;
+    }
 
-        if((horizontalVelocity>0 && xDistance>0) || (horizontalVelocity<0 && xDistance<0)) {
-            horizontalVelocity=-horizontalVelocity;
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getHorizontalVelocity() {
+        return horizontalVelocity;
+    }
+
+    public float getVerticalVelocity() {
+        return verticalVelocity;
+    }
+
+    public RectF getFrame() {
+        return frame;
+    }
+
+    public void collision(Ball other) {
+        float radius = size / 2;
+        pointOne.set(frame.left + radius, frame.top + radius);
+        pointTwo.set(other.frame.left + radius, other.frame.top + radius);
+        float xDistance = pointTwo.x - pointOne.x;
+        float yDistance = pointTwo.y - pointOne.y;
+
+        if ((horizontalVelocity > 0 && xDistance > 0) || (horizontalVelocity < 0 && xDistance < 0)) {
+            horizontalVelocity = -horizontalVelocity;
         }
 
-        if((verticalVelocity>0 && yDistance>0) || (verticalVelocity<0 && yDistance<0)) {
-        	verticalVelocity=-verticalVelocity;
+        if ((verticalVelocity > 0 && yDistance > 0) || (verticalVelocity < 0 && yDistance < 0)) {
+            verticalVelocity = -verticalVelocity;
         }
 
-		float distanceSquared = 0;
-		do {
-			float x = (frame.left + (horizontalVelocity * speed));
-			float y = (frame.top + (verticalVelocity * speed));
-			frame.set(x, y, x+size, y+size);
-			pointOne.set(frame.left + radius, frame.top + radius);
-			distanceSquared = ((pointOne.x - pointTwo.x) * (pointOne.x - pointTwo.x)) + ((pointOne.y - pointTwo.y) * (pointOne.y - pointTwo.y));
-		} while (distanceSquared < (size*size));
-	}
+        float distanceSquared = 0;
+        do {
+            float x = (frame.left + (horizontalVelocity * speed));
+            float y = (frame.top + (verticalVelocity * speed));
+            frame.set(x, y, x + size, y + size);
+            pointOne.set(frame.left + radius, frame.top + radius);
+            distanceSquared = ((pointOne.x - pointTwo.x) * (pointOne.x - pointTwo.x)) + ((pointOne.y - pointTwo.y) * (pointOne.y - pointTwo.y));
+        } while (distanceSquared < (size * size));
+    }
 
-	public void collision(final RectF other) {
-		float x1 = getX1();
-		float y1 = getY1();
-		float x2 = getX2();
-		float y2 = getY2();
+    public void collision(final RectF other) {
+        float x1 = getX1();
+        float y1 = getY1();
+        float x2 = getX2();
+        float y2 = getY2();
 
-		float otherX1 = other.left;
-		float otherY1 = other.top;
-		float otherX2 = other.right;
-		float otherY2 = other.bottom;
+        float otherX1 = other.left;
+        float otherY1 = other.top;
+        float otherX2 = other.right;
+        float otherY2 = other.bottom;
 
-		float minDistance = size;
-		int direction = BALL_UNDEFINED;
-		float distance = x2 - otherX1;
-		if (distance < minDistance && distance > -size){
-			minDistance = distance;
-			direction = BALL_RIGHT;
-		}
-		distance = y2 - otherY1;
-		if (distance < minDistance && distance > -size ){
-			minDistance = distance;
-			direction = BALL_UP;
-		}
-		distance = otherX2 - x1;
-		if (distance < minDistance && distance > -size ){
-			minDistance = distance;
-			direction = BALL_LEFT;
-		}
-		distance = otherY2 - y1;
-		if (distance < minDistance && distance > -size ){
-			minDistance = distance;
-			direction = BALL_DOWN;
-		}
+        float minDistance = size;
+        int direction = BALL_UNDEFINED;
+        float distance = x2 - otherX1;
+        if (distance < minDistance && distance > -size) {
+            minDistance = distance;
+            direction = BALL_RIGHT;
+        }
+        distance = y2 - otherY1;
+        if (distance < minDistance && distance > -size) {
+            minDistance = distance;
+            direction = BALL_UP;
+        }
+        distance = otherX2 - x1;
+        if (distance < minDistance && distance > -size) {
+            minDistance = distance;
+            direction = BALL_LEFT;
+        }
+        distance = otherY2 - y1;
+        if (distance < minDistance && distance > -size) {
+            minDistance = distance;
+            direction = BALL_DOWN;
+        }
 
-		switch(direction){
-			case BALL_LEFT :
-			case BALL_RIGHT :
-				horizontalVelocity = -horizontalVelocity;
-				break;
-			case BALL_DOWN : 
-			case BALL_UP :
-				verticalVelocity = -verticalVelocity;
-				break;
-			default : {
-				break;
-			}
-		}
+        switch (direction) {
+            case BALL_LEFT:
+            case BALL_RIGHT:
+                horizontalVelocity = -horizontalVelocity;
+                break;
+            case BALL_DOWN:
+            case BALL_UP:
+                verticalVelocity = -verticalVelocity;
+                break;
+            default: {
+                break;
+            }
+        }
 
-		while (RectF.intersects(frame, other))
-			move();
-	}
-	
-	public boolean collide(Ball other) {
-		float radius = size / 2;
-		pointOne.set(frame.left + radius, frame.top + radius);
-		pointTwo.set(other.frame.left + radius, other.frame.top + radius);
+        while (RectF.intersects(frame, other))
+            move();
+    }
 
-		float distance = ((pointOne.x - pointTwo.x) * (pointOne.x - pointTwo.x)) + ((pointOne.y - pointTwo.y) * (pointOne.y - pointTwo.y));
-		
-		return distance < (size*size);
-	}
+    public boolean collide(Ball other) {
+        float radius = size / 2;
+        pointOne.set(frame.left + radius, frame.top + radius);
+        pointTwo.set(other.frame.left + radius, other.frame.top + radius);
 
-	public boolean collide(RectF otherRect) {
-		return RectF.intersects(frame, otherRect);
-	}
-	
-	public void move(){
-		float x = (frame.left + (horizontalVelocity * speed));
-		float y = (frame.top + (verticalVelocity * speed));
-		frame.set(x, y, x+size, y+size);
-	}
+        float distance = ((pointOne.x - pointTwo.x) * (pointOne.x - pointTwo.x)) + ((pointOne.y - pointTwo.y) * (pointOne.y - pointTwo.y));
+
+        return distance < (size * size);
+    }
+
+    public boolean collide(RectF otherRect) {
+        return RectF.intersects(frame, otherRect);
+    }
+
+    public void move() {
+        float x = (frame.left + (horizontalVelocity * speed));
+        float y = (frame.top + (verticalVelocity * speed));
+        frame.set(x, y, x + size, y + size);
+    }
 
 
-	//implement parcelable
+    //implement parcelable
 
-	public int describeContents() {
-		return 0;
-	}
+    public int describeContents() {
+        return 0;
+    }
 
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeFloat(frame.left);
-		dest.writeFloat(frame.top);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeFloat(frame.left);
+        dest.writeFloat(frame.top);
 
-		dest.writeFloat(speed);
-		dest.writeFloat(size);
+        dest.writeFloat(speed);
+        dest.writeFloat(size);
 
-		dest.writeFloat(horizontalVelocity);
-		dest.writeFloat(verticalVelocity);
+        dest.writeFloat(horizontalVelocity);
+        dest.writeFloat(verticalVelocity);
 
-	}
+    }
 
-	public static final Parcelable.Creator<Ball> CREATOR
-			= new Parcelable.Creator<Ball>() {
-		public Ball createFromParcel(Parcel in) {
+    public static final Parcelable.Creator<Ball> CREATOR
+            = new Parcelable.Creator<Ball>() {
+        public Ball createFromParcel(Parcel in) {
 
-			float left = in.readFloat();
-			float top = in.readFloat();
-			float speed = in.readFloat();
-			float size = in.readFloat();
-			float horizontalVelocity = in.readFloat();
-			float verticalVelocity = in.readFloat();
+            float left = in.readFloat();
+            float top = in.readFloat();
+            float speed = in.readFloat();
+            float size = in.readFloat();
+            float horizontalVelocity = in.readFloat();
+            float verticalVelocity = in.readFloat();
 
-			Ball b = new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
-			return b;
-		}
+            Ball b = new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
+            return b;
+        }
 
-		public Ball[] newArray(int size) {
-			return new Ball[size];
-		}
-	};
+        public Ball[] newArray(int size) {
+            return new Ball[size];
+        }
+    };
 
 }

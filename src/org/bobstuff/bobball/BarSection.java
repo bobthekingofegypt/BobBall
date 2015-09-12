@@ -5,7 +5,7 @@
 
 package org.bobstuff.bobball;
 
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -14,24 +14,24 @@ public class BarSection implements Parcelable {
 	public static final int MOVE_RIGHT = 2;
 	public static final int MOVE_UP = 3;
 	public static final int MOVE_DOWN = 4;
-	
-	public static final int DEFAULT_SPEED = 1;
-	
-	private int speed = DEFAULT_SPEED;
-	
-	private Rect frame;
+
+	private float speed;
+
+	private RectF frame;
 	private int direction;
-	
-	public BarSection(final int x1,
-					  final int y1,
-					  final int x2,
-					  final int y2,
-					  final int direction) {
-		this.frame = new Rect(x1, y1, x2, y2);
+
+	public BarSection(final float x1,
+					  final float y1,
+					  final float x2,
+					  final float y2,
+					  final int direction,
+					  final float speed) {
+		this.frame = new RectF(x1, y1, x2, y2);
 		this.direction = direction;
+		this.speed = speed;
 	}
-	
-	public Rect getFrame() {
+
+	public RectF getFrame() {
 		return frame;
 	}
 	
@@ -60,7 +60,7 @@ public class BarSection implements Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(speed);
+		dest.writeFloat(speed);
 		dest.writeParcelable(frame, 0);
 		dest.writeInt(direction);
 	}
@@ -68,11 +68,10 @@ public class BarSection implements Parcelable {
 	public static final Parcelable.Creator<BarSection> CREATOR
 			= new Parcelable.Creator<BarSection>() {
 		public BarSection createFromParcel(Parcel in) {
-			int speed = in.readInt();
-			Rect frame = in.readParcelable(null);
+			float speed = in.readFloat();
+			RectF frame = in.readParcelable(null);
 			int direction = in.readInt();
-			BarSection bs = new BarSection(frame.left, frame.top, frame.right, frame.bottom, direction);
-			bs.speed = speed;
+			BarSection bs = new BarSection(frame.left, frame.top, frame.right, frame.bottom, direction, speed);
 			return bs;
 		}
 

@@ -8,9 +8,10 @@ package org.bobstuff.bobball;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.lang.Math.*;
 
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,26 +26,22 @@ public class Grid implements Parcelable {
 	public final static int GRID_SQUARE_FILLED = 1;
 	public final static int GRID_SQUARE_COMPRESSED = 2;
 
-	private int gridSquareSize;
-
 	private int maxX;
 	private int maxY;
 
 	private int totalGridSquares;
 	private int clearGridSquares;
 
-	private List<Rect> collisionRects = new ArrayList<Rect>();
+	private List<RectF> collisionRects = new ArrayList<RectF>();
 
 	private int[][] gridSquares;
 	private int[][] tempGridSquares;
 
 	public Grid(final int numberOfRows,
-				final int numberOfColumns,
-				final int gridSquareSize) {
+				final int numberOfColumns) {
 
 		this.maxX = numberOfRows + 2;
 		this.maxY = numberOfColumns + 2;
-		this.gridSquareSize = gridSquareSize;
 
 		this.totalGridSquares = numberOfRows * numberOfColumns;
 		this.clearGridSquares = totalGridSquares;
@@ -65,11 +62,7 @@ public class Grid implements Parcelable {
 		compressColissionAreas();
 	}
 
-	public void resetGrid() {
-
-	}
-
-	public List<Rect> getCollisionRects() {
+	public List<RectF> getCollisionRects() {
 		return collisionRects;
 	}
 
@@ -82,42 +75,32 @@ public class Grid implements Parcelable {
 		return ((totalGridSquares - clearGridSquares)*100) / totalGridSquares;
 	}
 
-	public int getGridSquareSize() {
-		return gridSquareSize;
+
+	public float getWidth() {
+		return (maxX - 1);
 	}
 
-	public int getWidth() {
-		return (maxX-1) * gridSquareSize;
+	public float getHeight() {
+		return (maxY - 1);
 	}
 
-	public int getHeight() {
-		return (maxY-1) * gridSquareSize;
-	}
-
-	public Rect getGridSquareFrameContainingPoint(Point point) {
-		Rect gridSquareFrame = new Rect();
-		gridSquareFrame.left = getCoordX(point.x);
-		gridSquareFrame.top = getCoordY(point.y);
-		gridSquareFrame.right = gridSquareFrame.left + gridSquareSize;
-		gridSquareFrame.bottom = gridSquareFrame.top + gridSquareSize;
+	public RectF getGridSquareFrameContainingPoint(PointF point) {
+		RectF gridSquareFrame = new RectF();
+		gridSquareFrame.left = (float) Math.floor(point.x);
+		gridSquareFrame.top = (float) Math.floor(point.y);
+		gridSquareFrame.right = gridSquareFrame.left + 1;
+		gridSquareFrame.bottom = gridSquareFrame.top + 1;
 
 		return gridSquareFrame;
 	}
 
-	public int getCoordX(int x){
-		return (x / gridSquareSize) * gridSquareSize;
+
+	public int getGridX(float x) {
+		return (int) Math.floor(x);
 	}
 
-	public int getCoordY(int y){
-		return (y / gridSquareSize) * gridSquareSize;
-	}
-
-	public int getGridX(int x){
-		return x / gridSquareSize;
-	}
-
-	public int getGridY(int y){
-		return y / gridSquareSize;
+	public int getGridY(float y) {
+		return (int) Math.floor(y);
 	}
 
 	public int getGridSquareState(int x, int y){
@@ -126,13 +109,13 @@ public class Grid implements Parcelable {
 		return GRID_SQUARE_INVALID;
 	}
 
-	public boolean validPoint(int x, int y){
+	public boolean validPoint(float x, float y) {
 		int gridX = getGridX(x);
 		int gridY = getGridY(y);
 		return !(( gridX >= maxX-1 ) || (gridY >= maxY-1) || (gridX <= 0) || (gridY <= 0));
 	}
 
-	public void addBox(Rect rect) {
+	public void addBox(RectF rect) {
 		int x1 = getGridX(rect.left);
 		int y1 = getGridY(rect.top);
 		int x2 = getGridX(rect.right);
@@ -147,10 +130,10 @@ public class Grid implements Parcelable {
 		collisionRects.add(rect);
 	}
 
-	public Rect collide(Rect rect) {
+	public RectF collide(RectF rect) {
 		for (int i=0; i<collisionRects.size(); ++i) {
-			Rect collisionRect = collisionRects.get(i);
-			if (Rect.intersects(rect, collisionRect)) {
+			RectF collisionRect = collisionRects.get(i);
+			if (RectF.intersects(rect, collisionRect)) {
 				return collisionRect;
 			}
 		}
@@ -224,7 +207,7 @@ public class Grid implements Parcelable {
 			int y = stackState.y;
 
 			clearGridSquares = clearGridSquares + 1;
-			tempRect.set(x*gridSquareSize, y*gridSquareSize, (x+1)*gridSquareSize, (y+1)*gridSquareSize);
+			tempRect.set(x, y, (x + 1), (y + 1));
 
 			for (int i=0; i<balls.size(); ++i) {
 				Ball ball = balls.get(i);
@@ -310,7 +293,7 @@ public class Grid implements Parcelable {
 		}
 	}
 
-	Rect tempRect = new Rect();
+	RectF tempRect = new RectF();
 	public void checkEmptyAreas(List<Ball> balls){
 		Utilities.arrayCopy(gridSquares, tempGridSquares);
 		clearGridSquares = 0;
@@ -393,7 +376,7 @@ public class Grid implements Parcelable {
 			}
 		}
 
-		collisionRects.add(new Rect(currentMinX * gridSquareSize, currentMinY * gridSquareSize, (currentMaxX+1) * gridSquareSize, (currentMaxY+1) * gridSquareSize));
+		collisionRects.add(new RectF(currentMinX, currentMinY, (currentMaxX + 1), (currentMaxY + 1)));
 	}
 
 	//implement parcelable
@@ -403,7 +386,6 @@ public class Grid implements Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(gridSquareSize);
 		dest.writeInt(maxX);
 		dest.writeInt(maxY);
 
@@ -419,7 +401,6 @@ public class Grid implements Parcelable {
 	public static final Parcelable.Creator<Grid> CREATOR
 			= new Parcelable.Creator<Grid>() {
 		public Grid createFromParcel(Parcel in) {
-			int gridSquareSize = in.readInt();
 			int maxX = in.readInt();
 			int maxY = in.readInt();
 
@@ -432,7 +413,7 @@ public class Grid implements Parcelable {
 				in.readIntArray(gridSquares[xind]);
 			}
 
-			Grid g = new Grid(maxX - 2, maxY - 2, gridSquareSize);
+			Grid g = new Grid(maxX - 2, maxY - 2);
 
 			g.tempGridSquares = new int[maxX][maxY];
 			g.totalGridSquares = totalGridSquares;

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, BobBallActivity!</string>
-    <string name="app_name">BobBall</string>
-    <string name="continue_string">click to continue</string>
-    <string name="HighScoreAchieved">Congratulations you have achieved a high score</string>
+    <string name="appName">BobBall</string>
+    <string name="continueString">click to continue</string>
+    <string name="highScoreAchieved">Congratulations you have achieved a high score</string>
     <string name="pausedText">paused</string>
     <string name="bttnTextResume">resume playing</string>
+    <string name="welcomeText">Welcome to BobBall</string>
+    <string name="levelCompleted">"Well done, you have completed level "</string>
+    <string name="dead">You are dead</string>
+    <string name="namePrompt">Enter your name:</string>
 
 </resources>

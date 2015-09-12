@@ -9,10 +9,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -29,7 +28,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 enum GameStateEnum {
-    GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON
+    GAMEINTRO, GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON
 }
 
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
@@ -45,18 +44,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private GameLoop gameLoop = new GameLoop();
 
     private SurfaceHolder surfaceHolder;
-    private int mWidth;
-    private int mHeight;
     private Player player;
     private Scores scores;
 
-    private Point initialTouchPoint = null;
+    private PointF initialTouchPoint = null;
     private TouchDirection touchDirection = null;
 
     private GameManager gameManager;
     private GameView gameView;
     private GameStateEnum gameState = GameStateEnum.GAMERUNNING;
-    private int touchDetectPix;
 
     private View transparentView;
     private TextView messageView;
@@ -67,11 +63,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private Button button;
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -98,10 +92,14 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         statusBotleft = (TextView) findViewById(R.id.status_botleft);
         statusBotright = (TextView) findViewById(R.id.status_botright);
 
-
         player = new Player();
         scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
         scores.loadScores();
+
+        if (savedInstanceState == null) {
+            resetGame();
+            showIntroScreen();
+        }
     }
 
 
@@ -116,33 +114,35 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
 
         int score = player.getScore();
-        gameView.draw(canvas, gameManager, score);
-        if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
-            statusTopleft.setText(gameView.get_status_topleft(gameManager, score));
-            statusTopright.setText(gameView.get_status_topright(gameManager, score));
-            statusBotleft.setText(gameView.get_status_botleft(gameManager, score));
-            statusBotright.setText(gameView.get_status_botright(gameManager, score));
-        }
-        if (!gameManager.hasLivesLeft() || gameManager.isLevelComplete() || !gameManager.hasTimeLeft()) {
-            setMessageViewsVisible(true);
-            if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
-                if (scores.isTopScore(player.getScore())) {
-                    promptUsername();
-                }
-                show_dead_screen();
-            } else {
-                player.setScore(player.getScore() + ((gameManager.getPercentageComplete() * (gameManager.timeLeft() / 10000)) * player.getLevel()));
-                show_won_screen();
+        if (gameView != null) {
+            gameView.draw(canvas, gameManager);
+            if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
+                statusTopleft.setText(gameView.get_status_topleft(gameManager, score));
+                statusTopright.setText(gameView.get_status_topright(gameManager, score));
+                statusBotleft.setText(gameView.get_status_botleft(gameManager, score));
+                statusBotright.setText(gameView.get_status_botright(gameManager, score));
             }
+            if (!gameManager.hasLivesLeft() || gameManager.isLevelComplete() || !gameManager.hasTimeLeft()) {
+                setMessageViewsVisible(true);
+                if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
+                    if (scores.isTopScore(player.getScore())) {
+                        promptUsername();
+                    }
+                    showDeadScreen();
+                } else {
+                    player.setScore(player.getScore() + ((gameManager.getPercentageComplete() * (gameManager.timeLeft() / 10000)) * player.getLevel()));
+                    showWonScreen();
+                }
 
+            }
         }
     }
 
     private void promptUsername() {
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
-                .setTitle("Enter your name:")
-                .setMessage(R.string.HighScoreAchieved)
+                .setTitle(R.string.namePrompt)
+                .setMessage(R.string.highScoreAchieved)
                 .setView(input)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -170,24 +170,31 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showPauseScreen() {
-        gameState=GameStateEnum.GAMEPAUSED;
+        gameState = GameStateEnum.GAMEPAUSED;
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
         setMessageViewsVisible(true);
     }
 
-    private void show_won_screen() {
-        messageView.setText("Well done, you have completed level " + player.getLevel());
+    private void showWonScreen() {
+        messageView.setText(getString(R.string.levelCompleted) + player.getLevel());
         button.setText("NEXT LEVEL");
         setMessageViewsVisible(true);
         gameState = GameStateEnum.GAMEWON;
     }
 
-    private void show_dead_screen() {
-        messageView.setText("You are dead");
+    private void showDeadScreen() {
+        messageView.setText(R.string.dead);
         button.setText("Retry");
         setMessageViewsVisible(true);
         gameState = GameStateEnum.GAMELOST;
+    }
+
+    private void showIntroScreen() {
+        messageView.setText(R.string.welcomeText);
+        button.setText("Start");
+        setMessageViewsVisible(true);
+        gameState = GameStateEnum.GAMEINTRO;
     }
 
     private class GameLoop implements Runnable {
@@ -207,7 +214,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
             iteration += 1;
 
-            if (gameState==GameStateEnum.GAMERUNNING) {
+            if (gameState == GameStateEnum.GAMERUNNING) {
                 handler.postDelayed(this, timeLeft);
             }
         }
@@ -215,17 +222,19 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        PointF evPoint = gameView.transformPix2Coords(new PointF(event.getX(), event.getY()));
+
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            initialTouchPoint = new Point(gameView.getOffsetX((int) event.getX()), gameView.getOffsetY((int) event.getY()));
+            initialTouchPoint = evPoint;
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             initialTouchPoint = null;
             touchDirection = null;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             if (initialTouchPoint != null && touchDirection == null) {
-                if (gameView.getOffsetX((int) event.getX()) > (initialTouchPoint.x + touchDetectPix) || gameView.getOffsetX((int) event.getX()) < initialTouchPoint.x - touchDetectPix) {
+                if (evPoint.x > (initialTouchPoint.x + TOUCH_DETECT_SQUARES) || evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES) {
                     touchDirection = TouchDirection.HORIZONTAL;
                 }
-                if (gameView.getOffsetY((int) event.getY()) > (initialTouchPoint.y + touchDetectPix) || gameView.getOffsetY((int) event.getY()) < initialTouchPoint.y - touchDetectPix) {
+                if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES) || evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES) {
                     touchDirection = TouchDirection.VERTICAL;
                 }
             }
@@ -236,27 +245,24 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void initGame() {
         gameLoop.iteration = 0;
-        gameView = new GameView();
-        if ((gameManager != null) && (gameManager.getGrid() != null))
-            touchDetectPix = (int) (TOUCH_DETECT_SQUARES * gameManager.getGrid().getGridSquareSize());
+        if (gameView != null)
+            gameView.reset();
     }
 
     private void resetGame() {
         handler.removeCallbacks(gameLoop);
         player.reset();
-        gameManager = new GameManager(mWidth, mHeight);
+        gameManager = new GameManager();
         gameManager.init(player.getLevel());
         initGame();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
-        mWidth = width;
-        mHeight = height;
-        if (gameManager == null) { //first run
-            resetGame();
-            startGame();
-        }
+        if (gameManager != null)
+            gameView = new GameView(width, height,
+                    (int) gameManager.getGrid().getWidth(), (int) gameManager.getGrid().getHeight());
+
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -265,6 +271,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         handler.removeCallbacks(gameLoop);
+        gameView = null;
     }
 
     @Override
@@ -279,13 +286,16 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onResume() {
         super.onResume();
-        if (gameState == GameStateEnum.GAMEPAUSED) {
+        if (gameState == GameStateEnum.GAMEINTRO) {
+            showIntroScreen();
+        } else if (gameState == GameStateEnum.GAMEPAUSED) {
             showPauseScreen();
         } else if (gameState == GameStateEnum.GAMELOST) {
-            show_dead_screen();
+            showDeadScreen();
         } else if (gameState == GameStateEnum.GAMEWON) {
-            show_won_screen();
+            showWonScreen();
         }
+
     }
 
     @Override
@@ -324,21 +334,22 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     public void onClick(View v) { // called when the message button is clicked
         setMessageViewsVisible(false);
 
-        if (gameState==GameStateEnum.GAMEWON) {
+        if (gameState == GameStateEnum.GAMEWON) {
             initGame();
             player.setLevel(player.getLevel() + 1);
             gameManager.init(player.getLevel());
             startGame();
-        } else if (gameState == GameStateEnum.GAMELOST) {
+        } else if ((gameState == GameStateEnum.GAMELOST) || (gameState == GameStateEnum.GAMEINTRO)) {
             resetGame();
             startGame();
-        } else if (gameState == GameStateEnum.GAMEPAUSED){
+        } else if (gameState == GameStateEnum.GAMEPAUSED) {
             startGame();
         }
     }
 
     private void startGame() {
-        gameManager.resume();
+        if (gameManager != null)
+            gameManager.resume();
         handler.post(gameLoop);
         gameState = GameStateEnum.GAMERUNNING;
     }

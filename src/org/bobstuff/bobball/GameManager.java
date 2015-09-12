@@ -7,15 +7,12 @@ package org.bobstuff.bobball;
 
 import static org.bobstuff.bobball.BarDirection.fromTouchDirection;
 
-import org.bobstuff.bobball.Grid;
-import org.bobstuff.bobball.Ball;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,13 +20,11 @@ public class GameManager implements Parcelable {
     public static final int NUMBER_OF_ROWS = 28;
     public static final int NUMBER_OF_COLUMNS = 20;
     public static final int LEVEL_DURATION_MS = 200000;
+    public static final float INITIAL_BALL_SPEED = 0.025f;
+    public static final float BAR_SPEED = INITIAL_BALL_SPEED;
 
     private static Random randomGenerator = new Random(System.currentTimeMillis());
 
-    private int width;
-    private int height;
-
-    private int size;
     private Grid grid;
     private List<Ball> balls = new ArrayList<Ball>();
 
@@ -42,9 +37,7 @@ public class GameManager implements Parcelable {
     private int lastTimeLeft;
 
 
-    public GameManager(final int width, final int height) {
-        this.width = width;
-        this.height = height;
+    public GameManager() {
     }
 
     public boolean isLevelComplete() {
@@ -90,11 +83,7 @@ public class GameManager implements Parcelable {
 
     public void init(int level) {
         this.lives = level + 1;
-        int widthSize = width / NUMBER_OF_ROWS;
-        int heightSize = height / NUMBER_OF_COLUMNS;
-
-        size = Math.min(widthSize, heightSize);
-        grid = new Grid(NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, size);
+        grid = new Grid(NUMBER_OF_ROWS, NUMBER_OF_COLUMNS);
         bar = new Bar();
         makeBalls(level + 1);
 
@@ -118,11 +107,11 @@ public class GameManager implements Parcelable {
         boolean collision = false;
         do {
             collision = false;
-            int xPoint = randomGenerator.nextInt(grid.getWidth() - (size * 4)) + (size * 2);
-            int yPoint = randomGenerator.nextInt(grid.getHeight() - (size * 4)) + (size * 2);
-            int verticalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            int horizontalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            Ball ball = new Ball(xPoint, yPoint, verticalSpeed, horizontalSpeed, 1.0, size);
+            float xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
+            float yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
+            float verticalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
+            float horizontalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
+            Ball ball = new Ball(xPoint, yPoint, verticalSpeed, horizontalSpeed, INITIAL_BALL_SPEED, 1.0f);
             for (int i = 0; i < balls.size() && !collision; i++) {
                 if (balls.get(i).collide(ball)) {
                     collision = true;
@@ -138,16 +127,16 @@ public class GameManager implements Parcelable {
     public void moveBar() {
         bar.move();
 
-        List<Rect> sectionCollisionRects = bar.collide(grid.getCollisionRects());
+        List<RectF> sectionCollisionRects = bar.collide(grid.getCollisionRects());
         if (sectionCollisionRects != null) {
-            for (Rect rect : sectionCollisionRects) {
+            for (RectF rect : sectionCollisionRects) {
                 grid.addBox(rect);
             }
             grid.checkEmptyAreas(balls);
         }
     }
 
-    public void runGameLoop(final Point initialTouchPoint,
+    public void runGameLoop(final PointF initialTouchPoint,
                             final TouchDirection touchDirection) {
         moveBar();
 
@@ -158,7 +147,7 @@ public class GameManager implements Parcelable {
                 lives = lives - 1;
             }
 
-            Rect collisionRect = grid.collide(ball.getFrame());
+            RectF collisionRect = grid.collide(ball.getFrame());
             if (collisionRect != null) {
                 ball.collision(collisionRect);
             }
@@ -180,11 +169,11 @@ public class GameManager implements Parcelable {
         }
 
         if (initialTouchPoint != null && touchDirection != null && !bar.isActive()) {
-            int x = initialTouchPoint.x;
-            int y = initialTouchPoint.y;
+            float x = initialTouchPoint.x;
+            float y = initialTouchPoint.y;
 
             if (grid.validPoint(x, y)) {
-                bar.start(fromTouchDirection(touchDirection), grid.getGridSquareFrameContainingPoint(initialTouchPoint));
+                bar.start(fromTouchDirection(touchDirection), grid.getGridSquareFrameContainingPoint(initialTouchPoint), BAR_SPEED);
             }
         }
     }
@@ -196,11 +185,8 @@ public class GameManager implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        pause();//just to be shure that we are paused
+        pause();//just to be sure that we are paused
 
-        dest.writeInt(width);
-        dest.writeInt(height);
-        dest.writeInt(size);
         dest.writeParcelable(grid, 0);
         dest.writeTypedList(balls);
 
@@ -217,13 +203,9 @@ public class GameManager implements Parcelable {
         public GameManager createFromParcel(Parcel in) {
             ClassLoader classLoader = getClass().getClassLoader();
 
-            int width = in.readInt();
-            int height = in.readInt();
-            int size = in.readInt();
             Grid grid = in.readParcelable(classLoader);
 
-            GameManager gm = new GameManager(width, height);
-            gm.size = size;
+            GameManager gm = new GameManager();
             gm.grid = grid;
             in.readTypedList(gm.balls, Ball.CREATOR);
             gm.bar = in.readParcelable(classLoader);

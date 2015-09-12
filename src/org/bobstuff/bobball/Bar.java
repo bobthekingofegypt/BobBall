@@ -8,7 +8,7 @@ package org.bobstuff.bobball;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -18,6 +18,8 @@ public class Bar implements Parcelable {
 	
 	private BarSection sectionOne;
 	private BarSection sectionTwo;
+
+	private float speed;
 	
 	private boolean active;
 	
@@ -28,37 +30,43 @@ public class Bar implements Parcelable {
 	public BarSection getSectionTwo() {
 		return sectionTwo;
 	}
-	
-	public void start(final BarDirection barDirectionIn, final Rect gridSquareFrame) {
+
+	public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame, float speed) {
+		this.speed = speed;
+
 		if (active) {
-			throw new IllegalStateException("Cannot start an already started bar");
+			throw new IllegalStateException("Cannot start an already started bar!");
 		}
 		
 		active = true;
 		barDirection = barDirectionIn;
 		
 		if (barDirection == BarDirection.VERTICAL) {
-			sectionOne = new BarSection(gridSquareFrame.left, 
-										gridSquareFrame.top-1,
+			sectionOne = new BarSection(gridSquareFrame.left,
+					gridSquareFrame.top,
 										gridSquareFrame.right, 
-										gridSquareFrame.top, 
-										BarSection.MOVE_UP);
-			sectionTwo = new BarSection(gridSquareFrame.left, 
-										gridSquareFrame.top+1,
+										gridSquareFrame.top,
+					BarSection.MOVE_UP,
+					speed);
+			sectionTwo = new BarSection(gridSquareFrame.left,
+					gridSquareFrame.top,
 										gridSquareFrame.right,
 										gridSquareFrame.bottom,
-										BarSection.MOVE_DOWN);
+					BarSection.MOVE_DOWN,
+					speed);
 		} else {
-			sectionOne = new BarSection(gridSquareFrame.left-1,
+			sectionOne = new BarSection(gridSquareFrame.left,
 										gridSquareFrame.top,
 										gridSquareFrame.left, 
-										gridSquareFrame.bottom, 
-										BarSection.MOVE_LEFT);
-			sectionTwo = new BarSection(gridSquareFrame.left+1, 
+										gridSquareFrame.bottom,
+					BarSection.MOVE_LEFT,
+					speed);
+			sectionTwo = new BarSection(gridSquareFrame.left,
 										gridSquareFrame.top,
-										gridSquareFrame.right, 
-										gridSquareFrame.bottom, 
-										BarSection.MOVE_RIGHT);
+					gridSquareFrame.right,
+										gridSquareFrame.bottom,
+					BarSection.MOVE_RIGHT,
+					speed);
 		}
 	}
 	
@@ -105,19 +113,19 @@ public class Bar implements Parcelable {
 		
 		return false;
 	}
-	
-	public List<Rect> collide(final List<Rect> collisionRects) {
+
+	public List<RectF> collide(final List<RectF> collisionRects) {
 		boolean sectionOneCollision = false;
 		boolean sectionTwoCollision = false;
 		
 		for (int i=0; i<collisionRects.size(); ++i) {
-			Rect collisionRect = collisionRects.get(i);
-			if (sectionOne != null && !sectionOneCollision && 
-					Rect.intersects(sectionOne.getFrame(), collisionRect)) {
+			RectF collisionRect = collisionRects.get(i);
+			if (sectionOne != null && !sectionOneCollision &&
+					RectF.intersects(sectionOne.getFrame(), collisionRect)) {
 				sectionOneCollision = true;
 			}
 			if (sectionTwo != null && !sectionTwoCollision &&
-					Rect.intersects(sectionTwo.getFrame(), collisionRect)) {
+					RectF.intersects(sectionTwo.getFrame(), collisionRect)) {
 				sectionTwoCollision = true;
 			}
 		}
@@ -125,8 +133,8 @@ public class Bar implements Parcelable {
 		if (!sectionOneCollision && !sectionTwoCollision) {
 			return null;
 		}
-		
-		List<Rect> sectionCollisionRects = new ArrayList<Rect>(2);
+
+		List<RectF> sectionCollisionRects = new ArrayList<RectF>(2);
 		if (sectionOneCollision) {
 			sectionCollisionRects.add(sectionOne.getFrame());
 			sectionOne = null;

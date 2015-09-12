@@ -8,11 +8,10 @@
 		notice and this notice are preserved.  This file is offered as-is,
 		without any warrant.
 	-->
-	
-    <string name="hello">Bonjour le monde, BobBallActivity!</string>
-    <string name="app_name">BobBall</string>
-    <string name="continue_string">cliquer pour continuer</string>
-    <string name="HighScoreAchieved">Félicitation vous avez fait un record</string>
+
+	<string name="appName">BobBall</string>
+	<string name="continueString">cliquer pour continuer</string>
+	<string name="highScoreAchieved">Félicitation vous avez fait un record</string>
     <string name="pausedText">pause</string>
     <string name="bttnTextResume">reprendre la partie</string>
 </resources>

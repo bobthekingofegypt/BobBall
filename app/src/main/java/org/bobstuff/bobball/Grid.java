@@ -7,23 +7,20 @@ package org.bobstuff.bobball;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.bobstuff.util.Pool;
-import org.bobstuff.util.Poolable;
-import org.bobstuff.util.PoolableManager;
-import org.bobstuff.util.Pools;
 
 public class Grid implements Parcelable {
     public final static int GRID_SQUARE_INVALID = 0;
     public final static int GRID_SQUARE_CLEAR = 0;
     public final static int GRID_SQUARE_FILLED = 1;
     public final static int GRID_SQUARE_COMPRESSED = 2;
+    public final static int GRID_SQUARE_SAFELY_CLEAR = 3;
+    public final static int GRID_SQUARE_SAFELY_CLEAR_FINISHED = 4;
 
     private int maxX;
     private int maxY;
@@ -58,7 +55,7 @@ public class Grid implements Parcelable {
             gridSquares[maxX - 1][y] = GRID_SQUARE_FILLED;
         }
 
-        compressColissionAreas();
+        compressCollissionAreas();
     }
 
     public List<RectF> getCollisionRects() {
@@ -70,7 +67,6 @@ public class Grid implements Parcelable {
     }
 
     public int getPercentComplete() {
-//		return 0;
         return ((totalGridSquares - clearGridSquares) * 100) / totalGridSquares;
     }
 
@@ -140,180 +136,76 @@ public class Grid implements Parcelable {
         return null;
     }
 
-    private static class StackState implements Poolable<StackState> {
-        public int x, y;
-
-        private static final int POOL_LIMIT = 400;
-        private static final Pool<StackState> sPool =
-                Pools.synchronizedPool(
-                        Pools.finitePool(new PoolableManager<StackState>() {
-                            @Override
-                            public StackState newInstance() {
-                                return new StackState();
-                            }
-
-                            @Override
-                            public void onAcquired(StackState element) {
-                            }
-
-                            @Override
-                            public void onReleased(StackState element) {
-                            }
-                        }, StackState.POOL_LIMIT)
-                );
-        private StackState mNext;
-
-        public void setNextPoolable(StackState element) {
-            mNext = element;
-        }
-
-        public StackState getNextPoolable() {
-            return mNext;
-        }
-
-        static StackState acquire() {
-            return sPool.acquire();
-        }
-
-        void release() {
-            reset();
-            sPool.release(this);
-        }
-
-        void reset() {
-            x = 0;
-            y = 0;
-        }
-
-        void set(int xIn, int yIn) {
-            this.x = xIn;
-            this.y = yIn;
-        }
-    }
-
-    Stack<StackState> stack = new Stack<StackState>();
-
-    private boolean getReachableClearSquaresListCheckBalls(int[][] gridSquaresIn, int xRow, int yRow, List<Ball> balls) {
-        StackState state = StackState.acquire();
-        state.set(xRow, yRow);
-        if (gridSquaresIn[xRow][yRow] == 0) {
-            gridSquaresIn[xRow][yRow] = 3;
-            stack.push(state);
-        }
-        boolean containsBall = false;
-        while (!stack.isEmpty()) {
-            StackState stackState = stack.pop();
-            int x = stackState.x;
-            int y = stackState.y;
-
-            clearGridSquares = clearGridSquares + 1;
-            tempRect.set(x, y, (x + 1), (y + 1));
-
-            for (int i = 0; i < balls.size(); ++i) {
-                Ball ball = balls.get(i);
-                if (ball.collide(tempRect)) {
-                    containsBall = true;
-                }
-            }
-
-            if (x > 0 && gridSquaresIn[x - 1][y] == 0) {
-                gridSquaresIn[x - 1][y] = 3;
-                StackState ss = StackState.acquire();
-                ss.set(x - 1, y);
-                stack.push(ss);
-            }
-            if (x < maxX - 1 && gridSquaresIn[x + 1][y] == 0) {
-                gridSquaresIn[x + 1][y] = 3;
-                StackState ss = StackState.acquire();
-                ss.set(x + 1, y);
-                stack.push(ss);
-            }
-
-            if (y > 0 && gridSquaresIn[x][y - 1] == 0) {
-                gridSquaresIn[x][y - 1] = 3;
-                StackState ss = StackState.acquire();
-                ss.set(x, y - 1);
-                stack.push(ss);
-            }
-            if (y < maxY - 1 && gridSquaresIn[x][y + 1] == 0) {
-                gridSquaresIn[x][y + 1] = 3;
-                StackState ss = StackState.acquire();
-                ss.set(x, y + 1);
-                stack.push(ss);
-            }
-
-            stackState.release();
-        }
-
-        return containsBall;
-    }
-
-    private void getReachableClearSquaresListMarkFilled(int[][] gridSquaresIn, int xRow, int yRow) {
-        StackState state = StackState.acquire();
-        state.set(xRow, yRow);
-        if (gridSquaresIn[xRow][yRow] == 3) {
-            gridSquaresIn[xRow][yRow] = 1;
-            stack.push(state);
-        }
-        while (!stack.isEmpty()) {
-            StackState stackState = stack.pop();
-            int x = stackState.x;
-            int y = stackState.y;
-
-            gridSquares[x][y] = GRID_SQUARE_FILLED;
-            clearGridSquares = clearGridSquares - 1;
-
-            if (x > 0 && gridSquaresIn[x - 1][y] == 3) {
-                gridSquaresIn[x - 1][y] = 1;
-                StackState ss = StackState.acquire();
-                ss.set(x - 1, y);
-                stack.push(ss);
-            }
-            if (x < maxX - 1 && gridSquaresIn[x + 1][y] == 3) {
-                gridSquaresIn[x + 1][y] = 1;
-                StackState ss = StackState.acquire();
-                ss.set(x + 1, y);
-                stack.push(ss);
-            }
-
-            if (y > 0 && gridSquaresIn[x][y - 1] == 3) {
-                gridSquaresIn[x][y - 1] = 1;
-                StackState ss = StackState.acquire();
-                ss.set(x, y - 1);
-                stack.push(ss);
-            }
-            if (y < maxY - 1 && gridSquaresIn[x][y + 1] == 3) {
-                gridSquaresIn[x][y + 1] = 1;
-                StackState ss = StackState.acquire();
-                ss.set(x, y + 1);
-                stack.push(ss);
-            }
-
-            stackState.release();
-        }
-    }
-
-    RectF tempRect = new RectF();
-
     public void checkEmptyAreas(List<Ball> balls) {
+
         Utilities.arrayCopy(gridSquares, tempGridSquares);
         clearGridSquares = 0;
 
-        for (int x = 0; x < maxX; ++x) {
-            for (int y = 0; y < maxY; ++y) {
-                if (tempGridSquares[x][y] == 0) {
-                    boolean containsBall = getReachableClearSquaresListCheckBalls(tempGridSquares, x, y, balls);
-                    if (!containsBall) {
-                        getReachableClearSquaresListMarkFilled(tempGridSquares, x, y);
+        //mark the squares containing the balls clear
+        for (int i = 0; i < balls.size(); ++i) {
+            Ball ball = balls.get(i);
+            tempGridSquares[getGridX(ball.getX1())][getGridY(ball.getY1())] = GRID_SQUARE_SAFELY_CLEAR;
+        }
+
+        // repeatedly increase the safely clear area around the balls
+        // (TODO: come up with a pun for this :)
+
+        boolean finished;
+        do  {
+            finished = true;
+
+            //extend the safely-clear area in all four directions
+
+            for (int x = 0; x < maxX; ++x) {
+                for (int y = 0; y < maxY; ++y) {
+                    if (tempGridSquares[x][y] == GRID_SQUARE_SAFELY_CLEAR) {
+
+                        // to the left
+                        if (x > 0 && tempGridSquares[x - 1][y] == GRID_SQUARE_CLEAR) {
+                            tempGridSquares[x - 1][y] = GRID_SQUARE_SAFELY_CLEAR;
+                            finished = false;
+                        }
+                        //to the right
+                        if (x < maxX - 1 && tempGridSquares[x + 1][y] == GRID_SQUARE_CLEAR) {
+                            tempGridSquares[x + 1][y] = GRID_SQUARE_SAFELY_CLEAR;
+                            finished = false;
+                        }
+                        // upwards
+                        if (y > 0 && tempGridSquares[x][y - 1] == GRID_SQUARE_CLEAR) {
+                            tempGridSquares[x][y - 1] = GRID_SQUARE_SAFELY_CLEAR;
+                            finished = false;
+                        }
+                        // downwards
+                        if (y < maxY - 1 && tempGridSquares[x][y + 1] == GRID_SQUARE_CLEAR) {
+                            tempGridSquares[x][y + 1] = GRID_SQUARE_SAFELY_CLEAR;
+                            finished = false;
+                        }
+
+                        tempGridSquares[x][y] = GRID_SQUARE_SAFELY_CLEAR_FINISHED;
                     }
                 }
             }
+        } while (!finished);
+
+
+
+        for (int x = 0; x < maxX; ++x) {
+            for (int y = 0; y < maxY; ++y) {
+
+                // fill all squares which are not safely clear
+                if (tempGridSquares[x][y] == GRID_SQUARE_CLEAR)
+                    gridSquares[x][y] = GRID_SQUARE_FILLED;
+
+                // and count the clear squares
+                if (gridSquares[x][y] == GRID_SQUARE_CLEAR)
+                    clearGridSquares = clearGridSquares + 1;
+            }
         }
 
-        compressColissionAreas();
+        compressCollissionAreas();
     }
 
-    private void compressColissionAreas() {
+    private void compressCollissionAreas() {
         collisionRects.clear();
         Utilities.arrayCopy(gridSquares, tempGridSquares);
 
@@ -420,7 +312,7 @@ public class Grid implements Parcelable {
             g.totalGridSquares = totalGridSquares;
             g.clearGridSquares = clearGridSquares;
             g.gridSquares = gridSquares;
-            g.compressColissionAreas();
+            g.compressCollissionAreas();
 
             return g;
         }

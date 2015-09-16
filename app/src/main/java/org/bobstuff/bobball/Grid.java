@@ -28,7 +28,7 @@ public class Grid implements Parcelable {
     private int totalGridSquares;
     private int clearGridSquares;
 
-    private List<RectF> collisionRects = new ArrayList<RectF>();
+    private List<RectF> collisionRects = new ArrayList<>();
 
     private int[][] gridSquares;
     private int[][] tempGridSquares;
@@ -55,7 +55,7 @@ public class Grid implements Parcelable {
             gridSquares[maxX - 1][y] = GRID_SQUARE_FILLED;
         }
 
-        compressCollissionAreas();
+        compressCollisionAreas();
     }
 
     public List<RectF> getCollisionRects() {
@@ -202,10 +202,10 @@ public class Grid implements Parcelable {
             }
         }
 
-        compressCollissionAreas();
+        compressCollisionAreas();
     }
 
-    private void compressCollissionAreas() {
+    private void compressCollisionAreas() {
         collisionRects.clear();
         Utilities.arrayCopy(gridSquares, tempGridSquares);
 
@@ -312,7 +312,7 @@ public class Grid implements Parcelable {
             g.totalGridSquares = totalGridSquares;
             g.clearGridSquares = clearGridSquares;
             g.gridSquares = gridSquares;
-            g.compressCollissionAreas();
+            g.compressCollisionAreas();
 
             return g;
         }

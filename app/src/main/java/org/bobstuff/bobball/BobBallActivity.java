@@ -80,7 +80,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView = (TextView) findViewById(R.id.message_label);
         messageView.setVisibility(View.INVISIBLE);
 
-        transparentView = (View) findViewById(R.id.transparent_view);
+        transparentView = findViewById(R.id.transparent_view);
         transparentView.setBackgroundColor(0x00000000);
 
         button = (Button) findViewById(R.id.continue_button);

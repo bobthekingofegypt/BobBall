@@ -22,7 +22,7 @@ public class Scores {
 	private SharedPreferences sharedPreferences;
 	
 	public Scores(SharedPreferences sharedPreferences) {
-		this.topScores = new ArrayList<Score>();
+		this.topScores = new ArrayList<>();
 		this.sharedPreferences = sharedPreferences;
 	}
 	

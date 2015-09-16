@@ -19,8 +19,6 @@ public class Bar implements Parcelable {
     private BarSection sectionOne;
     private BarSection sectionTwo;
 
-    private float speed;
-
     private boolean active;
 
     public BarSection getSectionOne() {
@@ -32,7 +30,6 @@ public class Bar implements Parcelable {
     }
 
     public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame, float speed) {
-        this.speed = speed;
 
         if (active) {
             throw new IllegalStateException("Cannot start an already started bar!");
@@ -134,7 +131,7 @@ public class Bar implements Parcelable {
             return null;
         }
 
-        List<RectF> sectionCollisionRects = new ArrayList<RectF>(2);
+        List<RectF> sectionCollisionRects = new ArrayList<>(2);
         if (sectionOneCollision) {
             sectionCollisionRects.add(sectionOne.getFrame());
             sectionOne = null;

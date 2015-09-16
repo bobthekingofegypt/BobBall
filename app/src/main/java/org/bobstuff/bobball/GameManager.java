@@ -26,7 +26,7 @@ public class GameManager implements Parcelable {
     private static Random randomGenerator = new Random(System.currentTimeMillis());
 
     private Grid grid;
-    private List<Ball> balls = new ArrayList<Ball>();
+    private List<Ball> balls = new ArrayList<>();
 
     private Bar bar;
 

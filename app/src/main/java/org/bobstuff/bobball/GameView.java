@@ -22,8 +22,6 @@ public class GameView {
 
     private int xOffset;
     private int yOffset;
-    private int boardWidth;
-    private int boardHeight;
     private int canvasWidth;
     private int canvasHeight;
 
@@ -46,8 +44,8 @@ public class GameView {
 
         this.gridSquareSize = (float) Math.floor(Math.min(canvasWidth / maxX, canvasHeight / maxY));
 
-        boardWidth = (int) (maxX * gridSquareSize);
-        boardHeight = (int) (maxY * gridSquareSize);
+        int boardWidth = (int) (maxX * gridSquareSize);
+        int boardHeight = (int) (maxY * gridSquareSize);
 
         xOffset = (canvasWidth - boardWidth) / 2;
         yOffset = (canvasHeight - boardHeight) / 2;

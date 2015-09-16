@@ -215,8 +215,7 @@ public class Ball implements Parcelable {
             float horizontalVelocity = in.readFloat();
             float verticalVelocity = in.readFloat();
 
-            Ball b = new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
-            return b;
+            return new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
         }
 
         public Ball[] newArray(int size) {

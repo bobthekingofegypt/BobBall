@@ -71,8 +71,7 @@ public class BarSection implements Parcelable {
             float speed = in.readFloat();
             RectF frame = in.readParcelable(null);
             int direction = in.readInt();
-            BarSection bs = new BarSection(frame.left, frame.top, frame.right, frame.bottom, direction, speed);
-            return bs;
+            return new BarSection(frame.left, frame.top, frame.right, frame.bottom, direction, speed);
         }
 
         public BarSection[] newArray(int size) {

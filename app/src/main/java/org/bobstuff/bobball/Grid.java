@@ -15,7 +15,7 @@ import android.os.Parcelable;
 
 
 public class Grid implements Parcelable {
-    public final static int GRID_SQUARE_INVALID = 0;
+    public final static int GRID_SQUARE_INVALID = -1;
     public final static int GRID_SQUARE_CLEAR = 0;
     public final static int GRID_SQUARE_FILLED = 1;
     public final static int GRID_SQUARE_COMPRESSED = 2;
@@ -136,6 +136,8 @@ public class Grid implements Parcelable {
         return null;
     }
 
+    // collapse clear areas if they do not contain a ball
+    // and update the clearGridSquares count
     public void checkEmptyAreas(List<Ball> balls) {
 
         Utilities.arrayCopy(gridSquares, tempGridSquares);

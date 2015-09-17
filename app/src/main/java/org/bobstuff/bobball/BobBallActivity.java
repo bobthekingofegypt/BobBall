@@ -14,6 +14,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.text.Editable;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -40,6 +41,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     static final String STATE_PLAYER = "state_player";
     static final String STATE_GAMESTATE = "state_gamestate";
 
+    static final int VIBRATE_LIVE_LOST_MS = 40;
+
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
 
@@ -51,6 +54,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private TouchDirection touchDirection = null;
 
     private GameManager gameManager;
+    private int lastLives;
     private GameView gameView;
     private GameStateEnum gameState = GameStateEnum.GAMERUNNING;
 
@@ -107,6 +111,16 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         for (int x = 0; x < 4 && gameManager.hasLivesLeft() && !gameManager.isLevelComplete() && gameManager.hasTimeLeft(); ++x) {
             gameManager.runGameLoop(initialTouchPoint, touchDirection);
         }
+
+        //vibrate if we lost a live
+        int livesLost=lastLives - gameManager.getLives();
+        if (livesLost > 0)
+        {
+            Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibs.vibrate(VIBRATE_LIVE_LOST_MS);
+        }
+        lastLives = gameManager.getLives();
+
 
         if (touchDirection != null) {
             initialTouchPoint = null;

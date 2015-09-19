@@ -10,6 +10,7 @@ import java.util.List;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
@@ -62,10 +63,18 @@ public class GameView {
 
         canvas.drawBitmap(backgroundBitmap, identityMatrix, null);
 
-        List<RectF> collisionRects = gameManager.getGrid().getCollisionRects();
-        for (int i = 0; i < collisionRects.size(); ++i) {
-            RectF rect = collisionRects.get(i);
-            canvas.drawRect(xOffset + rect.left * gridSquareSize, yOffset + rect.top * gridSquareSize, xOffset + rect.right * gridSquareSize, yOffset + rect.bottom * gridSquareSize, Paints.backgroundPaint);
+
+        List<List<RectF>> collisionRectsList = gameManager.getGrid().getCollisionRects();
+        for (int playerid = 0; playerid < collisionRectsList.size(); playerid++) {
+            List<RectF> collisionRects = collisionRectsList.get(playerid);
+            for (RectF rect : collisionRects) {
+
+                Paint paint = Paints.backgroundPaint;
+                if (playerid == 1) paint = Paints.playerOnePaint;
+                if (playerid == 2) paint = Paints.playerTwoPaint;
+
+                canvas.drawRect(xOffset + rect.left * gridSquareSize, yOffset + rect.top * gridSquareSize, xOffset + rect.right * gridSquareSize, yOffset + rect.bottom * gridSquareSize, paint);
+            }
         }
 
         List<Ball> balls = gameManager.getBalls();

@@ -31,6 +31,7 @@ public class GameManager implements Parcelable {
     private Bar bar;
 
     private int lives;
+    private int currPlayerId=1;
     private long startTime;
     private boolean paused;
     private long elapsedTime;
@@ -124,21 +125,22 @@ public class GameManager implements Parcelable {
         } while (balls.size() < numberOfBalls);
     }
 
-    public void moveBar() {
+    public void moveBar(int playerid) {
         bar.move();
-
-        List<RectF> sectionCollisionRects = bar.collide(grid.getCollisionRects());
-        if (sectionCollisionRects != null) {
-            for (RectF rect : sectionCollisionRects) {
-                grid.addBox(rect);
+        for (List<RectF> collisionRectsList : grid.getCollisionRects()) {
+            List<RectF> sectionCollisionRects = bar.collide(collisionRectsList);
+            if (sectionCollisionRects != null) {
+                for (RectF rect : sectionCollisionRects) {
+                    grid.addBox(rect, playerid);
+                }
             }
-            grid.checkEmptyAreas(balls);
         }
+        grid.checkEmptyAreas(balls, playerid);
     }
 
     public void runGameLoop(final PointF initialTouchPoint,
                             final TouchDirection touchDirection) {
-        moveBar();
+        moveBar(currPlayerId);
 
         for (int i = 0; i < balls.size(); ++i) {
             Ball ball = balls.get(i);
@@ -169,6 +171,10 @@ public class GameManager implements Parcelable {
         }
 
         if (initialTouchPoint != null && touchDirection != null && !bar.isActive()) {
+
+            //switch player
+            currPlayerId = (currPlayerId == 2 ? 1 : 2);
+
             float x = initialTouchPoint.x;
             float y = initialTouchPoint.y;
 

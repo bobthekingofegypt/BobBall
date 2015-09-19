@@ -15,12 +15,11 @@ import android.os.Parcelable;
 
 
 public class Grid implements Parcelable {
-    public final static int GRID_SQUARE_INVALID = -1;
     public final static int GRID_SQUARE_CLEAR = 0;
-    public final static int GRID_SQUARE_FILLED = 1;
-    public final static int GRID_SQUARE_COMPRESSED = 2;
-    public final static int GRID_SQUARE_SAFELY_CLEAR = 3;
-    public final static int GRID_SQUARE_SAFELY_CLEAR_FINISHED = 4;
+    public final static int GRID_SQUARE_SAFELY_CLEAR = 1;
+    public final static int GRID_SQUARE_SAFELY_CLEAR_FINISHED = 2;
+    public final static int GRID_SQUARE_FILLED = 32; // plus the player id
+    public final static int GRID_SQUARE_COMPRESSED = 64; // plus the player id
 
     private int maxX;
     private int maxY;
@@ -28,7 +27,8 @@ public class Grid implements Parcelable {
     private int totalGridSquares;
     private int clearGridSquares;
 
-    private List<RectF> collisionRects = new ArrayList<>();
+    // a list of all players collision rects
+    private List<List<RectF>> collisionRects = new ArrayList<>();
 
     private int[][] gridSquares;
     private int[][] tempGridSquares;
@@ -55,10 +55,15 @@ public class Grid implements Parcelable {
             gridSquares[maxX - 1][y] = GRID_SQUARE_FILLED;
         }
 
+        // for now, hardcode the "background" player and two others
+        collisionRects.add(new ArrayList<RectF>());
+        collisionRects.add(new ArrayList<RectF>());
+        collisionRects.add(new ArrayList<RectF>());
+
         compressCollisionAreas();
     }
 
-    public List<RectF> getCollisionRects() {
+    public List<List<RectF>> getCollisionRects() {
         return collisionRects;
     }
 
@@ -98,47 +103,42 @@ public class Grid implements Parcelable {
         return (int) Math.floor(y);
     }
 
-    public int getGridSquareState(int x, int y) {
-        if (x >= 0 && x < maxX && y >= 0 && y < maxY)
-            return gridSquares[x][y];
-        return GRID_SQUARE_INVALID;
-    }
-
     public boolean validPoint(float x, float y) {
         int gridX = getGridX(x);
         int gridY = getGridY(y);
         return !((gridX >= maxX - 1) || (gridY >= maxY - 1) || (gridX <= 0) || (gridY <= 0));
     }
 
-    public void addBox(RectF rect) {
+    public void addBox(RectF rect, int playerid) {
         int x1 = getGridX(rect.left);
         int y1 = getGridY(rect.top);
         int x2 = getGridX(rect.right);
         int y2 = getGridY(rect.bottom);
         for (int x = x1; x < x2; ++x) {
             for (int y = y1; y < y2; ++y) {
-                if (x >= 0 && x < maxX && y >= 0 && y < maxY) {
-                    gridSquares[x][y] = GRID_SQUARE_FILLED;
+                if (x >= 0 && x < maxX && y >= 0 && y < maxY && gridSquares[x][y] == GRID_SQUARE_CLEAR) {
+                    gridSquares[x][y] = GRID_SQUARE_FILLED + playerid;
                 }
             }
         }
-        collisionRects.add(rect);
+        collisionRects.get(playerid).add(rect);
     }
 
     public RectF collide(RectF rect) {
-        for (int i = 0; i < collisionRects.size(); ++i) {
-            RectF collisionRect = collisionRects.get(i);
-            if (RectF.intersects(rect, collisionRect)) {
-                return collisionRect;
+        for (List<RectF> crlist : collisionRects) {
+            for (RectF collisionRect : crlist) {
+                if (RectF.intersects(rect, collisionRect)) {
+                    return collisionRect;
+                }
             }
         }
-
         return null;
     }
 
     // collapse clear areas if they do not contain a ball
     // and update the clearGridSquares count
-    public void checkEmptyAreas(List<Ball> balls) {
+    // the newly filled squres are accouted to player playerid
+    public void checkEmptyAreas(List<Ball> balls, int playerid) {
 
         Utilities.arrayCopy(gridSquares, tempGridSquares);
         clearGridSquares = 0;
@@ -153,7 +153,7 @@ public class Grid implements Parcelable {
         // (TODO: come up with a pun for this :)
 
         boolean finished;
-        do  {
+        do {
             finished = true;
 
             //extend the safely-clear area in all four directions
@@ -190,13 +190,12 @@ public class Grid implements Parcelable {
         } while (!finished);
 
 
-
         for (int x = 0; x < maxX; ++x) {
             for (int y = 0; y < maxY; ++y) {
 
                 // fill all squares which are not safely clear
                 if (tempGridSquares[x][y] == GRID_SQUARE_CLEAR)
-                    gridSquares[x][y] = GRID_SQUARE_FILLED;
+                    gridSquares[x][y] = GRID_SQUARE_FILLED + playerid;
 
                 // and count the clear squares
                 if (gridSquares[x][y] == GRID_SQUARE_CLEAR)
@@ -205,36 +204,42 @@ public class Grid implements Parcelable {
         }
 
         compressCollisionAreas();
+
     }
 
+    // aggregate all filled squares to lager rectangles (per player)
+    // and update collisionRects
     private void compressCollisionAreas() {
-        collisionRects.clear();
-        Utilities.arrayCopy(gridSquares, tempGridSquares);
+        for (int playerid = 0; playerid < collisionRects.size(); playerid++) {
+            collisionRects.get(playerid).clear();
+            Utilities.arrayCopy(gridSquares, tempGridSquares);
 
-        for (int x = 0; x < maxX; ++x) {
-            for (int y = 0; y < maxY; ++y) {
-                if (tempGridSquares[x][y] == GRID_SQUARE_FILLED) {
-                    findLargestContiguousFilledArea(x, y);
+            for (int x = 0; x < maxX; ++x) {
+                for (int y = 0; y < maxY; ++y) {
+                    if (tempGridSquares[x][y] == GRID_SQUARE_FILLED + playerid) {
+                        findLargestContiguousFilledArea(x, y, playerid);
+                    }
                 }
             }
         }
     }
 
-    public void findLargestContiguousFilledArea(int x, int y) {
+    // update collisionRects
+    public void findLargestContiguousFilledArea(int x, int y, int playerid) {
         int currentMinX = x;
         int currentMaxX = x;
         int currentMinY = y;
         int currentMaxY = y;
 
         for (int currentY = y; currentY < maxY; ++currentY) {
-            if (tempGridSquares[x][currentY] == GRID_SQUARE_FILLED) {
+            if (tempGridSquares[x][currentY] == GRID_SQUARE_FILLED + playerid) {
                 currentMaxY = currentY;
             } else {
                 break;
             }
         }
         for (int currentY = (y - 1); currentY >= 0; --currentY) {
-            if (tempGridSquares[x][currentY] == GRID_SQUARE_FILLED) {
+            if (tempGridSquares[x][currentY] == GRID_SQUARE_FILLED + playerid) {
                 currentMinY = currentY;
             } else {
                 break;
@@ -244,13 +249,14 @@ public class Grid implements Parcelable {
         boolean lineMatch = true;
         for (int currentX = x; currentX < maxX && lineMatch; ++currentX) {
             for (int currentY = currentMinY; currentY <= currentMaxY && lineMatch; ++currentY) {
-                if (tempGridSquares[currentX][currentY] == GRID_SQUARE_CLEAR) {
+                if (!((tempGridSquares[currentX][currentY] == GRID_SQUARE_FILLED + playerid)
+                        || (tempGridSquares[currentX][currentY] == GRID_SQUARE_COMPRESSED + playerid))) {
                     lineMatch = false;
                 }
             }
             if (lineMatch) {
                 for (int currentY = currentMinY; currentY <= currentMaxY && lineMatch; ++currentY) {
-                    tempGridSquares[currentX][currentY] = GRID_SQUARE_COMPRESSED;
+                    tempGridSquares[currentX][currentY] = GRID_SQUARE_COMPRESSED + playerid;
                 }
                 currentMaxX = currentX;
             }
@@ -259,19 +265,20 @@ public class Grid implements Parcelable {
         lineMatch = true;
         for (int currentX = x - 1; currentX >= 0; --currentX) {
             for (int currentY = currentMinY; currentY <= currentMaxY && lineMatch; ++currentY) {
-                if (tempGridSquares[currentX][currentY] == GRID_SQUARE_CLEAR) {
+                if (!((tempGridSquares[currentX][currentY] == GRID_SQUARE_FILLED + playerid)
+                        || (tempGridSquares[currentX][currentY] == GRID_SQUARE_COMPRESSED + playerid))) {
                     lineMatch = false;
                 }
             }
             if (lineMatch) {
                 for (int currentY = currentMinY; currentY <= currentMaxY && lineMatch; ++currentY) {
-                    tempGridSquares[currentX][currentY] = GRID_SQUARE_COMPRESSED;
+                    tempGridSquares[currentX][currentY] = GRID_SQUARE_COMPRESSED + playerid;
                 }
                 currentMinX = currentX;
             }
         }
 
-        collisionRects.add(new RectF(currentMinX, currentMinY, (currentMaxX + 1), (currentMaxY + 1)));
+        collisionRects.get(playerid).add(new RectF(currentMinX, currentMinY, (currentMaxX + 1), (currentMaxY + 1)));
     }
 
     //implement parcelable

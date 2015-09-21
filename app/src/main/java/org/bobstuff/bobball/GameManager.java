@@ -23,130 +23,126 @@ public class GameManager implements Parcelable {
     public static final float INITIAL_BALL_SPEED = 0.025f;
     public static final float BAR_SPEED = INITIAL_BALL_SPEED;
 
-    private static Random randomGenerator = new Random(System.currentTimeMillis());
 
-    private Grid grid;
-    private List<Ball> balls = new ArrayList<>();
+    public GameState getGameState() {
+        return gameState;
+    }
 
-    private Bar bar;
+    private GameState gameState;
+    private int gameTime;
+    private GameEventQueue gameEvents;
 
-    private int lives;
-    private int currPlayerId=1;
-    private long startTime;
-    private boolean paused;
-    private long elapsedTime;
-    private int lastTimeLeft;
-
+    private int level;
+    private int currPlayerId = 1;
+    private int seed=42;
 
     public GameManager() {
+        gameEvents = new GameEventQueue();
+        gameState=new GameState(3);//FIXME
+        level=1;
     }
 
     public boolean isLevelComplete() {
-        return grid.getPercentComplete() >= 75;
+        return gameState.getGrid().getPercentComplete() >= 75;
     }
 
-    public int getPercentageComplete() {
-        return grid.getPercentComplete();
+    public int getLevel() {
+        return level;
     }
+
 
     public Grid getGrid() {
-        return grid;
-    }
-
-    public List<Ball> getBalls() {
-        return balls;
-    }
-
-    public Bar getBar() {
-        return bar;
+        return gameState.getGrid();
     }
 
     public boolean hasLivesLeft() {
-        return lives > 0;
+        return getCurrentPlayer().getLives() > 0;
+    }
+
+    public Player getCurrentPlayer()
+    {
+        return gameState.getPlayer(currPlayerId);
     }
 
     public int getLives() {
-        return (lives < 0) ? 0 : lives;
+        return getCurrentPlayer().getLives();
     }
 
     public boolean hasTimeLeft() {
-        return lastTimeLeft > 0;
+        return timeLeft() > 0;
     }
 
     public int timeLeft() {
-        if (hasLivesLeft() && !isLevelComplete() && !paused) {
-            long currentTime = System.currentTimeMillis();
-            lastTimeLeft = ((int) (LEVEL_DURATION_MS - (currentTime - startTime + elapsedTime)));
-        }
-
-        return lastTimeLeft;
+        return LEVEL_DURATION_MS - gameTime;
     }
 
-    public void init(int level) {
-        this.lives = level + 1;
-        grid = new Grid(NUMBER_OF_ROWS, NUMBER_OF_COLUMNS);
-        bar = new Bar();
-        makeBalls(level + 1);
-
-        this.elapsedTime = 0;
-        this.resume();
+    public void reset() {
+        GameEvent ev = new GameEventNewGame(gameTime, level, seed, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, BAR_SPEED, INITIAL_BALL_SPEED);
+        gameEvents.addEvent(ev);
+        runGameLoop();
     }
 
-    public void pause() {
-        if (!paused) {
-            this.elapsedTime += System.currentTimeMillis() - startTime;
-            paused = true;
-        }
+    public void nextLevel() {
+        level+=1;
+        GameEvent ev = new GameEventNewGame(gameTime, level, seed, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, BAR_SPEED, INITIAL_BALL_SPEED);
+        gameEvents.addEvent(ev);
+        runGameLoop();
     }
 
-    public void resume() {
-        this.startTime = System.currentTimeMillis();
-        paused = false;
-    }
+    private void moveBars() {
+        List<Player> players = gameState.getPlayers();
+        for (int playerid = 0; playerid < players.size(); playerid++) {
+            Bar bar = players.get(playerid).bar;
+            Grid grid = gameState.getGrid();
+            List<Ball> balls = gameState.getBalls();
 
-    public void makeBalls(final int numberOfBalls) {
-        boolean collision = false;
-        do {
-            collision = false;
-            float xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
-            float yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
-            float verticalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            float horizontalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            Ball ball = new Ball(xPoint, yPoint, verticalSpeed, horizontalSpeed, INITIAL_BALL_SPEED, 1.0f);
-            for (int i = 0; i < balls.size() && !collision; i++) {
-                if (balls.get(i).collide(ball)) {
-                    collision = true;
+            bar.move();
+            for (List<RectF> collisionRectsList : grid.getCollisionRects()) {
+                List<RectF> sectionCollisionRects = bar.collide(collisionRectsList);
+                if (sectionCollisionRects != null) {
+                    for (RectF rect : sectionCollisionRects) {
+                        grid.addBox(rect, playerid);
+                    }
                 }
             }
-
-            if (!collision) {
-                balls.add(ball);
-            }
-        } while (balls.size() < numberOfBalls);
-    }
-
-    public void moveBar(int playerid) {
-        bar.move();
-        for (List<RectF> collisionRectsList : grid.getCollisionRects()) {
-            List<RectF> sectionCollisionRects = bar.collide(collisionRectsList);
-            if (sectionCollisionRects != null) {
-                for (RectF rect : sectionCollisionRects) {
-                    grid.addBox(rect, playerid);
-                }
-            }
+            grid.checkEmptyAreas(balls, playerid);
         }
-        grid.checkEmptyAreas(balls, playerid);
     }
 
-    public void runGameLoop(final PointF initialTouchPoint,
-                            final TouchDirection touchDirection) {
-        moveBar(currPlayerId);
 
-        for (int i = 0; i < balls.size(); ++i) {
-            Ball ball = balls.get(i);
+    public void startBar(final PointF origin,
+                         final TouchDirection dir) {
+
+        GameEvent ev = new GameEventStartBar(gameTime, origin, dir, currPlayerId);
+        gameEvents.addEvent(ev);
+
+        //just a test for a dumb AI
+        PointF origin2=new PointF(origin.x+2,origin.y+2);
+        GameEvent ev2 = new GameEventStartBar(gameTime + 500, origin2, dir, 2);
+        gameEvents.addEvent(ev2);
+
+    }
+
+
+    public void runGameLoop() {
+        gameEvents.applyEventsUntil(gameTime, gameState);
+
+        moveBars();
+
+        Grid grid = gameState.getGrid();
+        List<Ball> balls = gameState.getBalls();
+
+
+        for (Ball ball : balls) {
             ball.move();
-            if (bar.collide(ball)) {
-                lives = lives - 1;
+
+            for (Player player: gameState.getPlayers()) {
+
+
+                if (player.bar.collide(ball)) {
+                    player.setLives(player.getLives() - 1);//FIXME per player
+                }
+
             }
 
             RectF collisionRect = grid.collide(ball.getFrame());
@@ -170,18 +166,8 @@ public class GameManager implements Parcelable {
             }
         }
 
-        if (initialTouchPoint != null && touchDirection != null && !bar.isActive()) {
+        gameTime++;
 
-            //switch player
-            currPlayerId = (currPlayerId == 2 ? 1 : 2);
-
-            float x = initialTouchPoint.x;
-            float y = initialTouchPoint.y;
-
-            if (grid.validPoint(x, y)) {
-                bar.start(fromTouchDirection(touchDirection), grid.getGridSquareFrameContainingPoint(initialTouchPoint), BAR_SPEED);
-            }
-        }
     }
 
     //implement parcelable
@@ -191,17 +177,10 @@ public class GameManager implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        pause();//just to be sure that we are paused
-
-        dest.writeParcelable(grid, 0);
-        dest.writeTypedList(balls);
-
-        dest.writeParcelable(bar, 0);
-
-        dest.writeInt(lives);
-        dest.writeLong(elapsedTime);
-
-
+        dest.writeParcelable(gameState, 0);
+        dest.writeParcelable(gameEvents, 0);
+        dest.writeInt(gameTime);
+        dest.writeInt(level);
     }
 
     public static final Parcelable.Creator<GameManager> CREATOR
@@ -209,16 +188,11 @@ public class GameManager implements Parcelable {
         public GameManager createFromParcel(Parcel in) {
             ClassLoader classLoader = getClass().getClassLoader();
 
-            Grid grid = in.readParcelable(classLoader);
-
             GameManager gm = new GameManager();
-            gm.grid = grid;
-            in.readTypedList(gm.balls, Ball.CREATOR);
-            gm.bar = in.readParcelable(classLoader);
-            gm.lives = in.readInt();
-            gm.elapsedTime = in.readLong();
-            gm.paused = true;
-
+            gm.gameState = in.readParcelable(classLoader);
+            gm.gameEvents = in.readParcelable(classLoader);
+            gm.gameTime = in.readInt();
+            gm.level = in.readInt();
             return gm;
         }
 

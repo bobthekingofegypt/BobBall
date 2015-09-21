@@ -18,8 +18,13 @@ public class Bar implements Parcelable {
 
     private BarSection sectionOne;
     private BarSection sectionTwo;
+    private float speed;
 
     private boolean active;
+
+    public Bar(float speed) {
+        this.speed = speed;
+    }
 
     public BarSection getSectionOne() {
         return sectionOne;
@@ -29,7 +34,7 @@ public class Bar implements Parcelable {
         return sectionTwo;
     }
 
-    public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame, float speed) {
+    public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame) {
 
         if (active) {
             throw new IllegalStateException("Cannot start an already started bar!");
@@ -153,6 +158,7 @@ public class Bar implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(barDirection == BarDirection.VERTICAL ? 0 : 1);
         dest.writeInt(active ? 1 : 0);
+        dest.writeFloat(speed);
 
         dest.writeParcelable(sectionOne, 0);
         dest.writeParcelable(sectionTwo, 0);
@@ -165,9 +171,10 @@ public class Bar implements Parcelable {
 
             int bd = in.readInt();
             int active = in.readInt();
+            float speed = in.readFloat();
 
 
-            Bar bar = new Bar();
+            Bar bar = new Bar(speed);
             bar.sectionOne = in.readParcelable(classLoader);
             bar.sectionTwo = in.readParcelable(classLoader);
             bar.barDirection = (bd == 0) ? BarDirection.VERTICAL : BarDirection.HORIZONTAL;

@@ -15,11 +15,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 
 public class GameView {
-    private static final String TIME_LEFT_LABEL = "Time Left: ";
-    private static final String SCORE_LABEL = "Score: ";
-    private static final String LIVES_LABEL = "Lives: ";
-    private static final String PERCENTAGE = "%";
-    private static final String AREA_CLEARED = "Area Cleared: ";
 
     private int xOffset;
     private int yOffset;
@@ -35,14 +30,18 @@ public class GameView {
     private Bitmap circleBitmap;
     private Matrix identityMatrix = new Matrix();
 
-    public GameView(int canvasWidth, int canvasHeight, int maxX, int maxY) {
+    public GameView(int canvasWidth, int canvasHeight, GameState gameState) {
 
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
 
-        this.maxX = maxX;
-        this.maxY = maxY;
-
+        if (gameState.getGrid() == null) {
+            this.maxX = 10;
+            this.maxY = 20;
+        } else {
+            this.maxX = (int) gameState.getGrid().getWidth();
+            this.maxY = (int) gameState.getGrid().getHeight();
+        }
         this.gridSquareSize = (float) Math.floor(Math.min(canvasWidth / maxX, canvasHeight / maxY));
 
         int boardWidth = (int) (maxX * gridSquareSize);
@@ -56,81 +55,70 @@ public class GameView {
         backgroundBitmap = null;
     }
 
-    public void draw(final Canvas canvas, GameManager gameManager) {
+    public void draw(final Canvas canvas, GameState gameState) {
         if (backgroundBitmap == null) {
-            preCacheBackground(canvas, gameManager);
+            preCacheBackground(canvas, gameState);
         }
 
         canvas.drawBitmap(backgroundBitmap, identityMatrix, null);
 
 
-        List<List<RectF>> collisionRectsList = gameManager.getGrid().getCollisionRects();
-        for (int playerid = 0; playerid < collisionRectsList.size(); playerid++) {
-            List<RectF> collisionRects = collisionRectsList.get(playerid);
+        List<List<RectF>> collisionRectsList = gameState.getGrid().getCollisionRects();
+        for (Player player: gameState.getPlayers()) {
+            int playerId=player.getPlayerId();
+
+            List<RectF> collisionRects = collisionRectsList.get(playerId);
             for (RectF rect : collisionRects) {
 
                 Paint paint = Paints.backgroundPaint;
-                if (playerid == 1) paint = Paints.playerOnePaint;
-                if (playerid == 2) paint = Paints.playerTwoPaint;
+                if (playerId == 1) paint = Paints.playerOnePaint;
+                if (playerId == 2) paint = Paints.playerTwoPaint;
 
                 canvas.drawRect(xOffset + rect.left * gridSquareSize, yOffset + rect.top * gridSquareSize, xOffset + rect.right * gridSquareSize, yOffset + rect.bottom * gridSquareSize, paint);
             }
+
+            Bar bar = player.bar;
+            BarSection sectionOne = bar.getSectionOne();
+            if (sectionOne != null) {
+                RectF sectionOneRect = sectionOne.getFrame();
+                canvas.drawRect(xOffset + sectionOneRect.left * gridSquareSize,
+                        yOffset + sectionOneRect.top * gridSquareSize,
+                        xOffset + sectionOneRect.right * gridSquareSize,
+                        yOffset + sectionOneRect.bottom * gridSquareSize,
+                        Paints.bluePaint);
+            }
+
+            BarSection sectionTwo = bar.getSectionTwo();
+            if (sectionTwo != null) {
+                RectF sectionTwoRect = sectionTwo.getFrame();
+                canvas.drawRect(xOffset + sectionTwoRect.left * gridSquareSize,
+                        yOffset + sectionTwoRect.top * gridSquareSize,
+                        xOffset + sectionTwoRect.right * gridSquareSize,
+                        yOffset + sectionTwoRect.bottom * gridSquareSize,
+                        Paints.redPaint);
+
+            }
+
         }
 
-        List<Ball> balls = gameManager.getBalls();
-        for (int i = 0; i < balls.size(); ++i) {
+        List<Ball> balls = gameState.getBalls();
+        for (
+                int i = 0;
+                i < balls.size(); ++i)
+
+        {
             Ball ball = balls.get(i);
             canvas.drawBitmap(circleBitmap, xOffset + ball.getX1() * gridSquareSize, yOffset + ball.getY1() * gridSquareSize, null);
         }
 
-        Bar bar = gameManager.getBar();
-        BarSection sectionOne = bar.getSectionOne();
-        if (sectionOne != null) {
-            RectF sectionOneRect = sectionOne.getFrame();
-            canvas.drawRect(xOffset + sectionOneRect.left * gridSquareSize,
-                    yOffset + sectionOneRect.top * gridSquareSize,
-                    xOffset + sectionOneRect.right * gridSquareSize,
-                    yOffset + sectionOneRect.bottom * gridSquareSize,
-                    Paints.bluePaint);
-        }
-
-        BarSection sectionTwo = bar.getSectionTwo();
-        if (sectionTwo != null) {
-            RectF sectionTwoRect = sectionTwo.getFrame();
-            canvas.drawRect(xOffset + sectionTwoRect.left * gridSquareSize,
-                    yOffset + sectionTwoRect.top * gridSquareSize,
-                    xOffset + sectionTwoRect.right * gridSquareSize,
-                    yOffset + sectionTwoRect.bottom * gridSquareSize,
-                    Paints.redPaint);
-        }
-
     }
 
-    public String get_status_topleft(GameManager gameManager, int score) {
-        int timeLeft = (gameManager.timeLeft() / 100);
-        if (timeLeft > 0)
-            return TIME_LEFT_LABEL + timeLeft;
-        return "";
-    }
 
-    public String get_status_topright(GameManager gameManager, int score) {
-        int lives = gameManager.getLives();
-        return LIVES_LABEL + lives;
-    }
-
-    public String get_status_botleft(GameManager gameManager, int score) {
-        return SCORE_LABEL + score;
-    }
-
-    public String get_status_botright(GameManager gameManager, int score) {
-        return AREA_CLEARED + gameManager.getPercentageComplete() + PERCENTAGE;
-    }
-
-    private void preCacheBackground(final Canvas canvas, final GameManager gameManager) {
+    private void preCacheBackground(final Canvas canvas, final GameState gameState) {
 
         backgroundBitmap = Bitmap.createBitmap(canvasWidth, canvasHeight, Bitmap.Config.RGB_565);
         Canvas bitmapCanvas = new Canvas(backgroundBitmap);
-        int[][] grid = gameManager.getGrid().getGridSquares();
+        int[][] grid = gameState.getGrid().getGridSquares();
 
         for (int x = 0; x < maxX; ++x) {
             for (int y = 0; y < maxY; ++y) {

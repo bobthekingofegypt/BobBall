@@ -8,60 +8,74 @@ package org.bobstuff.bobball;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Player implements Parcelable {
 
-	private int score;
-	private int level;
-	
-	public int getScore() {
-		return score;
-	}
-	
-	public void setScore(int score) {
-		this.score = score;
-	}
-	
-	public int getLevel() {
-		return level;
-	}
-	
-	public void setLevel(int level) {
-		this.level = level;
-	}
-	
-	public void reset() {
-		score = 0;
-		level = 1;
-	}
+    private int score;
+    public Bar bar;
+    private int lives;
+    private int playerId;
 
-	//implement parcelable
+    public Player(int playerId) {
+        this.score = 0;
+        this.playerId = playerId;
+    }
 
-	public int describeContents() {
-		return 0;
-	}
+    public int getPlayerId() {
+        return playerId;
+    }
 
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(score);
-		dest.writeInt(level);
-	}
+    public int getLives() {
+        return lives;
+    }
 
-	public static final Parcelable.Creator<Player> CREATOR
-			= new Parcelable.Creator<Player>() {
-		public Player createFromParcel(Parcel in) {
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
 
-			int score = in.readInt();
-			int level = in.readInt();
+    public int getScore() {
+        return score;
+    }
 
-			Player p = new Player();
-			p.score = score;
-			p.level = level;
-			return p;
-		}
+    public void setScore(int score) {
+        this.score = score;
+    }
 
-		public Player[] newArray(int size) {
-			return new Player[size];
-		}
+    //implement parcelable
 
-	};
+    public int describeContents() {
+        return 0;
+    }
+
+
+    protected Player(Parcel in) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        playerId = in.readInt();
+        score = in.readInt();
+        bar = in.readParcelable(classLoader);
+        lives = in.readInt();
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(playerId);
+        dest.writeInt(score);
+        dest.writeParcelable(bar, flags);
+        dest.writeInt(lives);
+    }
+
+
+    public static final Parcelable.Creator<Player> CREATOR
+            = new Parcelable.Creator<Player>() {
+        public Player createFromParcel(Parcel in) {
+            return new Player(in);
+        }
+
+        public Player[] newArray(int size) {
+            return new Player[size];
+        }
+
+    };
 
 }

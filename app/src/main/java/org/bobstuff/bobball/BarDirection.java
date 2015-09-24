@@ -6,14 +6,16 @@
 package org.bobstuff.bobball;
 
 public enum BarDirection {
-	VERTICAL,
-	HORIZONTAL;
-	
-	public static BarDirection fromTouchDirection(final TouchDirection touchDirection) {
-		if (touchDirection == TouchDirection.VERTICAL) {
-			return VERTICAL;
-		}
-		
-		return HORIZONTAL;
-	}
+    VERTICAL,
+    HORIZONTAL;
+
+    public static BarDirection fromTouchDirection(final TouchDirection touchDirection) {
+        if (touchDirection == TouchDirection.VERTICAL) {
+            return VERTICAL;
+        }
+
+        return HORIZONTAL;
+    }
+
+
 }

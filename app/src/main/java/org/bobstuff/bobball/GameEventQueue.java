@@ -6,8 +6,10 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.bobstuff.bobball.BarDirection.fromTouchDirection;
 
@@ -23,39 +25,75 @@ public class GameEventQueue implements Parcelable {
             return new GameEventQueue[size];
         }
     };
-    private PriorityBlockingQueue<GameEvent> queue;
+    private ConcurrentNavigableMap<Integer, List<GameEvent>> queue;
 
     public GameEventQueue() {
-        queue = new PriorityBlockingQueue<>();
+        queue = new ConcurrentSkipListMap<>();
     }
+
 
     protected GameEventQueue(Parcel in) {
         this();
         ClassLoader classLoader = getClass().getClassLoader();
-        List<GameEvent> l = new ArrayList<>();
-        in.readList(l, classLoader);
-        queue.addAll(l);
-    }
-
-    public int getEarliestEvTime() {
-        return queue.peek().getTime();
-    }
-
-    public void applyEventsUntil(int time, GameState gs) {
-
-        while (queue.size() > 0) {
-            try {
-                if (queue.peek().getTime() > time)
-                    break;
-                queue.take().apply(gs);
-            } catch (InterruptedException e) {
-            }
-            ;
+        ArrayList<GameEvent> list = in.readArrayList(classLoader);
+        for (GameEvent ev : list) {
+            addEvent(ev);
         }
     }
 
+    public int getEarliestEvTime() {
+        Integer t = queue.ceilingKey(0);
+        if (t != null)
+            return t;
+        else
+            return Integer.MAX_VALUE;
+    }
+
+    public GameEvent popEventAt(int time) {
+        GameEvent ret = null;
+        List<GameEvent> evlist = queue.get(time);
+
+        if (evlist != null && evlist.size() > 0) {
+            ret = evlist.remove(0);
+
+            if (evlist.size() == 0)
+                queue.remove(time);
+        }
+        return ret;
+    }
+
     public void addEvent(GameEvent ev) {
-        queue.add(ev);
+        int time = ev.getTime();
+        List<GameEvent> evlist = queue.get(time);
+        if (evlist == null) {
+            evlist = new ArrayList<>();
+        }
+        evlist.add(ev);
+        queue.put(time, evlist);
+    }
+
+    //get the oldest element newer than cutoff and remove it from the queue
+    public GameEvent popOldestEvent(int cutoff) {
+        GameEvent ret = null;
+        Integer oldestTime = queue.ceilingKey(cutoff);
+
+        if (oldestTime != null) {
+            ret = popEventAt(oldestTime);
+        }
+        return ret;
+    }
+
+    public void purgeOlderThan(int cutoff) {
+        for (Integer evtime : queue.descendingKeySet()) {
+            if (evtime < cutoff)
+                queue.remove(evtime);
+            else
+                break;
+        }
+    }
+
+    public void clear() {
+        queue.clear();
     }
 
     @Override
@@ -66,7 +104,9 @@ public class GameEventQueue implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         List<GameEvent> l = new ArrayList<>();
-        queue.drainTo(l);
+        for (List<GameEvent> evlist : queue.values()) {
+            l.addAll(evlist);
+        }
         dest.writeList(l);
     }
 
@@ -159,6 +199,8 @@ class GameEventNewGame extends GameEvent {
             player.setLives(level + 1);
         }
         makeBalls(gs, level + 1);
+        gs.time = 0;
+        gs.level=level;
     }
 
     private void makeBalls(GameState gs, final int numberOfBalls) {

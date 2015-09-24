@@ -67,6 +67,18 @@ public class Grid implements Parcelable {
         compressCollisionAreas();
     }
 
+    private static Parcel parcelGrid(Grid other) {
+        Parcel p = Parcel.obtain();
+        other.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        return p;
+    }
+
+    public Grid(Grid other) {
+        this(parcelGrid(other));
+    }
+
+
     public List<List<RectF>> getCollisionRects() {
         return collisionRects;
     }
@@ -291,7 +303,7 @@ public class Grid implements Parcelable {
     }
 
 
-    protected Grid(Parcel in){
+    protected Grid(Parcel in) {
         maxX = in.readInt();
         maxY = in.readInt();
 

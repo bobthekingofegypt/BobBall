@@ -111,7 +111,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
 
     protected void update(final Canvas canvas) {
-        for (int x = 0; x < 4 && gameManager.hasLivesLeft() && !gameManager.isLevelComplete() && gameManager.hasTimeLeft(); ++x) {
+        for (int x = 0; x < 4; ++x) {
             gameManager.runGameLoop();
         }
 
@@ -124,27 +124,25 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         lastLives = gameManager.getLives();
 
         Player currPlayer = gameManager.getCurrentPlayer();
+        GameState currGameState = gameManager.getCurrGameState();
+
         int score = currPlayer.getScore();
         if (gameView != null) {
-            gameView.draw(canvas, gameManager.getGameState());
+
+            gameView.draw(canvas, currGameState);
             if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
-                statusTopleft.setText(TIME_LEFT_LABEL + gameManager.timeLeft() / 100);
+                statusTopleft.setText(TIME_LEFT_LABEL + gameManager.timeLeft());
                 statusTopright.setText(LIVES_LABEL + currPlayer.getLives());
                 statusBotleft.setText(SCORE_LABEL + score);
-                statusBotright.setText(AREA_CLEARED + gameManager.getGameState().getPercentageComplete() + PERCENTAGE);
+                statusBotright.setText(AREA_CLEARED + currGameState.getGrid().getPercentComplete() + PERCENTAGE);
             }
-            if (!gameManager.hasLivesLeft() || gameManager.isLevelComplete() || !gameManager.hasTimeLeft()) {
-                setMessageViewsVisible(true);
-                if (!gameManager.hasLivesLeft() || !gameManager.hasTimeLeft()) {
-                    if (scores.isTopScore(currPlayer.getScore())) {
-                        promptUsername();
-                    }
-                    showDeadScreen();
-                } else {
-                    currPlayer.setScore(currPlayer.getScore() + ((gameManager.getGameState().getPercentageComplete() * (gameManager.timeLeft() / 10000)) * gameManager.getLevel()));
-                    showWonScreen();
+            if (gameManager.hasWonLevel()) {
+                showWonScreen();
+            } else if (gameManager.isGameLost()) {
+                if (scores.isTopScore(currPlayer.getScore())) {
+                    promptUsername();
                 }
-
+                showDeadScreen();
             }
         }
     }
@@ -241,7 +239,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private void resetGame() {
         handler.removeCallbacks(gameLoop);
         gameManager = new GameManager();
-        gameManager.reset();
+        gameManager.newGame();
         reinitGame();
     }
 
@@ -249,7 +247,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                                int height) {
         if (gameManager != null)
             gameView = new GameView(width, height,
-                    gameManager.getGameState());
+                    gameManager.getCurrGameState());
 
         //reinitGame();XXXXXXX FIXME
 

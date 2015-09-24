@@ -26,6 +26,16 @@ public class Bar implements Parcelable {
         this.speed = speed;
     }
 
+    public Bar(Bar other) {
+        this.speed = other.speed;
+        this.barDirection = other.barDirection;
+        if (other.sectionOne != null)
+            this.sectionOne = new BarSection(other.sectionOne);
+        if (other.sectionTwo != null)
+            this.sectionTwo = new BarSection(other.sectionTwo);
+        this.active=other.active;
+    }
+
     public BarSection getSectionOne() {
         return sectionOne;
     }

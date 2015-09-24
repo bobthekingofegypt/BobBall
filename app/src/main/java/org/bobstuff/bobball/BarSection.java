@@ -16,7 +16,6 @@ public class BarSection implements Parcelable {
     public static final int MOVE_DOWN = 4;
 
     private float speed;
-
     private RectF frame;
     private int direction;
 
@@ -29,6 +28,12 @@ public class BarSection implements Parcelable {
         this.frame = new RectF(x1, y1, x2, y2);
         this.direction = direction;
         this.speed = speed;
+    }
+
+    public BarSection(BarSection other) {
+        this.frame = new RectF(other.frame);
+        this.direction = other.direction;
+        this.speed = other.speed;
     }
 
     public RectF getFrame() {
@@ -61,17 +66,20 @@ public class BarSection implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloat(speed);
-        dest.writeParcelable(frame, 0);
+        dest.writeParcelable(frame, flags);
         dest.writeInt(direction);
+    }
+
+    public BarSection(Parcel in) {
+        speed = in.readFloat();
+        frame = in.readParcelable(null);
+        direction = in.readInt();
     }
 
     public static final Parcelable.Creator<BarSection> CREATOR
             = new Parcelable.Creator<BarSection>() {
         public BarSection createFromParcel(Parcel in) {
-            float speed = in.readFloat();
-            RectF frame = in.readParcelable(null);
-            int direction = in.readInt();
-            return new BarSection(frame.left, frame.top, frame.right, frame.bottom, direction, speed);
+            return new BarSection(in);
         }
 
         public BarSection[] newArray(int size) {

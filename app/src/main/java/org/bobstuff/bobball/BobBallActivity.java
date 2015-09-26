@@ -16,6 +16,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -28,32 +32,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+
 enum ActivityStateEnum {
     GAMEINTRO, GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON
 }
 
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
-    public static final int NUMBER_OF_FRAMES_PER_SECOND = 60;
-    public static final int ITERATIONS_PER_STATUSUPDATE = 10;
-    public static final double TOUCH_DETECT_SQUARES = 2.5;
+    static final int NUMBER_OF_FRAMES_PER_SECOND = 60;
+    static final int ITERATIONS_PER_STATUSUPDATE = 10;
+    static final double TOUCH_DETECT_SQUARES = 2.5;
+    static final int VIBRATE_LIVE_LOST_MS = 40;
 
     static final String STATE_GAME_MANAGER = "state_game_manager";
     static final String STATE_ACTIVITY = "state_activity_state";
-
-    private static final String TIME_LEFT_LABEL = "Time Left: ";
-    private static final String SCORE_LABEL = "Score: ";
-    private static final String LIVES_LABEL = "Lives: ";
-    private static final String PERCENTAGE = "%";
-    private static final String AREA_CLEARED = "Area Cleared: ";
-
-
-    static final int VIBRATE_LIVE_LOST_MS = 40;
 
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
 
     private SurfaceHolder surfaceHolder;
     private Scores scores;
+
+    private int numberPlayers = 1;
+    private int secretHandshake = 0;
 
     private PointF initialTouchPoint = null;
 
@@ -100,6 +100,33 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         statusBotleft = (TextView) findViewById(R.id.status_botleft);
         statusBotright = (TextView) findViewById(R.id.status_botright);
 
+        statusBotright.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                TextView tv = (TextView) v;
+                if (secretHandshake == 3) {
+                    numberPlayers += 1;
+                    tv.setTextColor(0xffCCCCFF);
+                    gameManager.newGame(numberPlayers);
+                    secretHandshake = 0;
+                    return true;
+                } else {
+                    numberPlayers = 1;
+                    secretHandshake = 0;
+                    statusTopright.setTextColor(0xffFFFFFF);
+                    statusBotright.setTextColor(0xffFFFFFF);
+                    return false;
+                }
+            }
+
+        });
+
+        statusTopright.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                statusTopright.setTextColor(0xffCCCCFF);
+                secretHandshake += 1;
+            }
+        });
+
         scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
         scores.loadScores();
 
@@ -109,32 +136,69 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
 
+    interface playstat {
+        int call(Player p);
+    }
+
+    public SpannableStringBuilder formatPerPlayer(String fixed, playstat query) {
+        SpannableStringBuilder sps = SpannableStringBuilder.valueOf(fixed);
+
+        for (Player p : gameManager.getCurrGameState().getPlayers()) {
+            if (p.getPlayerId() == 0)
+                continue;
+            SpannableString s = new SpannableString(String.valueOf(query.call(p)) + " ");
+            s.setSpan(new ForegroundColorSpan(p.getColor()), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sps.append(s);
+        }
+        return sps;
+    }
 
     protected void update(final Canvas canvas) {
         for (int x = 0; x < 4; ++x) {
             gameManager.runGameLoop();
         }
 
+        Player currPlayer = gameManager.getCurrentPlayer();
+        GameState currGameState = gameManager.getCurrGameState();
+
         //vibrate if we lost a live
-        int livesLost = lastLives - gameManager.getLives();
+        int livesLost = lastLives - currPlayer.getLives();
         if (livesLost > 0) {
             Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             vibs.vibrate(VIBRATE_LIVE_LOST_MS);
         }
-        lastLives = gameManager.getLives();
+        lastLives = currPlayer.getLives();
 
-        Player currPlayer = gameManager.getCurrentPlayer();
-        GameState currGameState = gameManager.getCurrGameState();
-
-        int score = currPlayer.getScore();
         if (gameView != null) {
 
             gameView.draw(canvas, currGameState);
             if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
-                statusTopleft.setText(TIME_LEFT_LABEL + gameManager.timeLeft());
-                statusTopright.setText(LIVES_LABEL + currPlayer.getLives());
-                statusBotleft.setText(SCORE_LABEL + score);
-                statusBotright.setText(AREA_CLEARED + currGameState.getGrid().getPercentComplete() + PERCENTAGE);
+
+                SpannableString timeLeftStr = SpannableString.valueOf(getString(R.string.timeLeftLabel) + gameManager.timeLeft() / 10);
+                SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
+                    @Override
+                    public int call(Player p) {
+                        return p.getLives();
+                    }
+                });
+                SpannableStringBuilder scoreStr = formatPerPlayer(getString(R.string.scoreLabel), new playstat() {
+                    @Override
+                    public int call(Player p) {
+                        return p.getScore();
+                    }
+                });
+
+                SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
+                    @Override
+                    public int call(Player p) {
+                        return gameManager.getCurrGameState().getGrid().getPercentComplete(p.getPlayerId());
+                    }
+                });
+                statusTopleft.setText(timeLeftStr);
+                statusTopright.setText(livesStr);
+                statusBotleft.setText(scoreStr);
+                statusBotright.setText(clearedStr);
+
             }
             if (gameManager.hasWonLevel()) {
                 showWonScreen();
@@ -239,7 +303,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private void resetGame() {
         handler.removeCallbacks(gameLoop);
         gameManager = new GameManager();
-        gameManager.newGame();
+        gameManager.newGame(numberPlayers);
         reinitGame();
     }
 
@@ -248,9 +312,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         if (gameManager != null)
             gameView = new GameView(width, height,
                     gameManager.getCurrGameState());
-
-        //reinitGame();XXXXXXX FIXME
-
     }
 
     public void surfaceCreated(SurfaceHolder holder) {

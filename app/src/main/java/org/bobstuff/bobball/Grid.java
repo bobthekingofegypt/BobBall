@@ -13,6 +13,11 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+//data is recreated, so no parcelable implementation needed
+class GridPerPlayer {
+    public List<RectF> collisionRects = new ArrayList<>();
+    public int filledGridSquares;
+};
 
 public class Grid implements Parcelable {
     public final static int GRID_SQUARE_CLEAR = 0;
@@ -25,12 +30,11 @@ public class Grid implements Parcelable {
     private int maxY;
 
     private int totalGridSquares;
-    private int clearGridSquares;
+    private int totalFilledGridSquares;
 
     private int maxPlayerId;
 
-    // a list of all players collision rects
-    private List<List<RectF>> collisionRects;
+    private List<GridPerPlayer> perPlayer;
 
     private int[][] gridSquares;
     private int[][] tempGridSquares;
@@ -43,7 +47,6 @@ public class Grid implements Parcelable {
         this.maxY = numberOfColumns + 2;
 
         this.totalGridSquares = numberOfRows * numberOfColumns;
-        this.clearGridSquares = totalGridSquares;
 
         this.maxPlayerId = maxPlayerId;
 
@@ -60,9 +63,9 @@ public class Grid implements Parcelable {
             gridSquares[maxX - 1][y] = GRID_SQUARE_FILLED;
         }
 
-        this.collisionRects = new ArrayList<>();
+        this.perPlayer = new ArrayList<>();
         for (int i = 0; i < maxPlayerId; i++)
-            collisionRects.add(new ArrayList<RectF>());
+            perPlayer.add(new GridPerPlayer());
 
         compressCollisionAreas();
     }
@@ -79,16 +82,20 @@ public class Grid implements Parcelable {
     }
 
 
-    public List<List<RectF>> getCollisionRects() {
-        return collisionRects;
+    public List<RectF> getCollisionRects(int playerId) {
+        return perPlayer.get(playerId).collisionRects;
     }
 
     public int[][] getGridSquares() {
         return gridSquares;
     }
 
+    public int getPercentComplete(int playerId) {
+        return ((perPlayer.get(playerId).filledGridSquares) * 100) / totalGridSquares;
+    }
+
     public int getPercentComplete() {
-        return ((totalGridSquares - clearGridSquares) * 100) / totalGridSquares;
+        return (totalFilledGridSquares * 100) / totalGridSquares;
     }
 
     public float getWidth() {
@@ -136,12 +143,12 @@ public class Grid implements Parcelable {
                 }
             }
         }
-        collisionRects.get(playerId).add(rect);
+        perPlayer.get(playerId).collisionRects.add(rect);
     }
 
     public RectF collide(RectF rect) {
-        for (List<RectF> crlist : collisionRects) {
-            for (RectF collisionRect : crlist) {
+        for (GridPerPlayer gp : perPlayer) {
+            for (RectF collisionRect : gp.collisionRects) {
                 if (RectF.intersects(rect, collisionRect)) {
                     return collisionRect;
                 }
@@ -151,14 +158,12 @@ public class Grid implements Parcelable {
     }
 
     // collapse clear areas if they do not contain a ball
-    // and update the clearGridSquares count
     // the newly filled squares are accounted to player playerid
     public void checkEmptyAreas(List<Ball> balls, int playerid) {
 
         Utilities.arrayCopy(gridSquares, tempGridSquares);
-        clearGridSquares = 0;
 
-        //mark the squares containing the balls clear
+        //mark the squares containing the balls safely clear
         for (int i = 0; i < balls.size(); ++i) {
             Ball ball = balls.get(i);
             tempGridSquares[getGridX(ball.getX1())][getGridY(ball.getY1())] = GRID_SQUARE_SAFELY_CLEAR;
@@ -211,10 +216,6 @@ public class Grid implements Parcelable {
                 // fill all squares which are not safely clear
                 if (tempGridSquares[x][y] == GRID_SQUARE_CLEAR)
                     gridSquares[x][y] = GRID_SQUARE_FILLED + playerid;
-
-                // and count the clear squares
-                if (gridSquares[x][y] == GRID_SQUARE_CLEAR)
-                    clearGridSquares = clearGridSquares + 1;
             }
         }
 
@@ -225,17 +226,28 @@ public class Grid implements Parcelable {
     // aggregate all filled squares to lager rectangles (per player)
     // and update collisionRects
     private void compressCollisionAreas() {
-        for (int playerid = 0; playerid < maxPlayerId; playerid++) {
-            collisionRects.get(playerid).clear();
+        totalFilledGridSquares = 0;
+        for (int playerId = 0; playerId < maxPlayerId; playerId++) {
+            GridPerPlayer p = perPlayer.get(playerId);
+            p.collisionRects.clear();
+            int filledSq = 0;
+
             Utilities.arrayCopy(gridSquares, tempGridSquares);
 
             for (int x = 0; x < maxX; ++x) {
                 for (int y = 0; y < maxY; ++y) {
-                    if (tempGridSquares[x][y] == GRID_SQUARE_FILLED + playerid) {
-                        findLargestContiguousFilledArea(x, y, playerid);
+                    if (tempGridSquares[x][y] == GRID_SQUARE_FILLED + playerId) {
+                        findLargestContiguousFilledArea(x, y, playerId);
                     }
+
+                    // and count the filled squares
+                    if (gridSquares[x][y] == GRID_SQUARE_FILLED + playerId)
+                        filledSq++;
                 }
             }
+            p.filledGridSquares = filledSq;
+            if (playerId>0) // player 0 is the background
+                totalFilledGridSquares += filledSq;
         }
     }
 
@@ -293,7 +305,7 @@ public class Grid implements Parcelable {
             }
         }
 
-        collisionRects.get(playerid).add(new RectF(currentMinX, currentMinY, (currentMaxX + 1), (currentMaxY + 1)));
+        perPlayer.get(playerid).collisionRects.add(new RectF(currentMinX, currentMinY, (currentMaxX + 1), (currentMaxY + 1)));
     }
 
     //implement parcelable
@@ -307,8 +319,7 @@ public class Grid implements Parcelable {
         maxX = in.readInt();
         maxY = in.readInt();
 
-        totalGridSquares = in.readInt();
-        clearGridSquares = in.readInt();
+        totalGridSquares = (maxX - 2) * (maxY - 2);
         maxPlayerId = in.readInt();
 
         gridSquares = new int[maxX][maxY];
@@ -318,9 +329,9 @@ public class Grid implements Parcelable {
             in.readIntArray(gridSquares[xind]);
         }
 
-        this.collisionRects = new ArrayList<>();
+        this.perPlayer = new ArrayList<>();
         for (int i = 0; i < maxPlayerId; i++)
-            collisionRects.add(new ArrayList<RectF>());
+            perPlayer.add(new GridPerPlayer());
 
         compressCollisionAreas();
     }
@@ -328,9 +339,6 @@ public class Grid implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(maxX);
         dest.writeInt(maxY);
-
-        dest.writeInt(totalGridSquares);
-        dest.writeInt(clearGridSquares);
         dest.writeInt(maxPlayerId);
 
         for (int xind = 0; xind < maxX; xind++) {

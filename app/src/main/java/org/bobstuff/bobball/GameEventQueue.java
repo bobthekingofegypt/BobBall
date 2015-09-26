@@ -6,7 +6,6 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -193,7 +192,7 @@ class GameEventNewGame extends GameEvent {
     @Override
     public void apply(GameState gs) {
         List<Player> players = gs.getPlayers();
-        gs.setGrid(new Grid(rows, cols, players.size() + 1));
+        gs.setGrid(new Grid(rows, cols, players.size()));
         for (Player player : players) {
             player.bar = new Bar(barspeed);
             player.setLives(level + 1);
@@ -207,7 +206,7 @@ class GameEventNewGame extends GameEvent {
         Grid grid = gs.getGrid();
         List<Ball> balls = gs.getBalls();
 
-        Random randomGenerator = new Random(seed);
+        Random randomGenerator = new Random(seed+level);
 
         boolean collision = false;
         do {

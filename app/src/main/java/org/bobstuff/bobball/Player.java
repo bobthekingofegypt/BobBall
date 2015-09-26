@@ -5,11 +5,9 @@
 
 package org.bobstuff.bobball;
 
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Player implements Parcelable {
 
@@ -61,6 +59,11 @@ public class Player implements Parcelable {
 
     public int describeContents() {
         return 0;
+    }
+
+    public int getColor() {
+        float hue = playerId * 36;
+        return Color.HSVToColor(new float[]{hue, 1, 1});
     }
 
 

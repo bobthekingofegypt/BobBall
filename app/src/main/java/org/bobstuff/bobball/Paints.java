@@ -24,11 +24,7 @@ public class Paints {
 
     static {
         backgroundPaint.setARGB(255, 0, 0, 0);
-        playerOnePaint.setARGB(255, 0, 128, 0);
-        playerTwoPaint.setARGB(255, 0, 128, 128);
-
         gridPaint.setARGB(255, 255, 255, 255);
-
 
         circlePaint.setARGB(255, 255, 0, 0);
         circlePaint.setAntiAlias(true);

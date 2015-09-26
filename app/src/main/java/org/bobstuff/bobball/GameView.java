@@ -36,8 +36,8 @@ public class GameView {
         this.canvasHeight = canvasHeight;
 
         if (gameState.getGrid() == null) {
-            this.maxX = 10;
-            this.maxY = 20;
+            this.maxX = 1;
+            this.maxY = 1;
         } else {
             this.maxX = (int) gameState.getGrid().getWidth();
             this.maxY = (int) gameState.getGrid().getHeight();
@@ -62,17 +62,15 @@ public class GameView {
 
         canvas.drawBitmap(backgroundBitmap, identityMatrix, null);
 
+        for (Player player : gameState.getPlayers()) {
+            int playerId = player.getPlayerId();
 
-        List<List<RectF>> collisionRectsList = gameState.getGrid().getCollisionRects();
-        for (Player player: gameState.getPlayers()) {
-            int playerId=player.getPlayerId();
+            Paint paint = new Paint(Paints.backgroundPaint);
+            if (playerId > 0)
+                paint.setColor(player.getColor());
 
-            List<RectF> collisionRects = collisionRectsList.get(playerId);
+            List<RectF> collisionRects = gameState.getGrid().getCollisionRects(playerId);
             for (RectF rect : collisionRects) {
-
-                Paint paint = Paints.backgroundPaint;
-                if (playerId == 1) paint = Paints.playerOnePaint;
-                if (playerId == 2) paint = Paints.playerTwoPaint;
 
                 canvas.drawRect(xOffset + rect.left * gridSquareSize, yOffset + rect.top * gridSquareSize, xOffset + rect.right * gridSquareSize, yOffset + rect.bottom * gridSquareSize, paint);
             }

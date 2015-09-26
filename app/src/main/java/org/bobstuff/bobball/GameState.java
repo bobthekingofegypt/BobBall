@@ -92,8 +92,7 @@ public class GameState implements Comparable<GameState>, Parcelable {
     }
 
     protected GameState(Parcel in) {
-        this(3); //FIXME
-
+        this();
         ClassLoader classLoader = getClass().getClassLoader();
         grid = in.readParcelable(classLoader);
         in.readTypedList(balls, Ball.CREATOR);

@@ -5,16 +5,14 @@
 
 package org.bobstuff.bobball;
 
-import android.app.usage.UsageEvents;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class GameManager implements Parcelable {
@@ -27,6 +25,7 @@ public class GameManager implements Parcelable {
     public static final float BAR_SPEED = INITIAL_BALL_SPEED;
     public static final int RETAINED_CHECKPOINTS = 16;
     public static final int CHECKPOINT_FREQ = 32;
+    public static final int PERCENT_COMPLETED = 75;
 
 
     public GameState getCurrGameState() {
@@ -62,9 +61,6 @@ public class GameManager implements Parcelable {
         return getCurrGameState().getPlayer(currPlayerId);
     }
 
-    public int getLives() {
-        return getCurrentPlayer().getLives();
-    }
 
     // clear the even queues
     // emit a new game event
@@ -77,9 +73,9 @@ public class GameManager implements Parcelable {
         runGameLoop();
     }
 
-    public void newGame() {
+    public void newGame(int numberPlayers) {
         gameStates.clear();
-        gameStates.addFirst(new GameState(3));//FIXME
+        gameStates.addFirst(new GameState(numberPlayers + 1));
         getCurrGameState().level = 1;
         reset();
     }
@@ -89,12 +85,11 @@ public class GameManager implements Parcelable {
         int level = gs.level;
 
         //update scores
-        {
-            Player player = gs.getPlayer(1);//FIXME iterate over all players
-
+        for (Player player : gs.getPlayers()) {
             if (player.level < gs.level) // update score
-                player.setScore(player.getScore() +
-                        ((gs.getGrid().getPercentComplete() * (GameManager.timeLeft(gs) / 100)) * gs.level));
+                if (player.getLives() > 0)
+                    player.setScore(player.getScore() +
+                            (int) ((gs.getGrid().getPercentComplete(player.getPlayerId()) * (GameManager.timeLeft(gs) / 1000.0)) * gs.level));
         }
 
         gs = new GameState(gs.getPlayers());
@@ -114,7 +109,8 @@ public class GameManager implements Parcelable {
             List<Ball> balls = gameState.getBalls();
 
             bar.move();
-            for (List<RectF> collisionRectsList : grid.getCollisionRects()) {
+            for (int otherplayerid = 0; otherplayerid < players.size(); otherplayerid++) {
+            List<RectF> collisionRectsList = grid.getCollisionRects(otherplayerid);
                 List<RectF> sectionCollisionRects = bar.collide(collisionRectsList);
                 if (sectionCollisionRects != null) {
                     for (RectF rect : sectionCollisionRects) {
@@ -133,11 +129,27 @@ public class GameManager implements Parcelable {
         GameEvent ev = new GameEventStartBar(gameTime, origin, dir, currPlayerId);
         pendingGameEv.addEvent(ev);
 
-        //just a test for a dumb AI
-        PointF origin2 = new PointF(origin.x + 2, origin.y + 2);
-        GameEvent ev2 = new GameEventStartBar(gameTime - 64, origin2, dir, 2);
-        pendingGameEv.addEvent(ev2);
 
+        //just a test for a dumb AI TODO: build a separate class of actors
+        Random randomGenerator = new Random(gameTime);
+        Grid grid = getGrid();
+
+        for (Player p : getCurrGameState().getPlayers()) {
+            if (currPlayerId == p.getPlayerId() || 0 == p.getPlayerId())
+                continue;
+
+            float xPoint;
+            float yPoint;
+            int tries = 5;
+            do {
+                xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
+                yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
+                tries--;
+            }
+            while ((grid.collide((new RectF(xPoint - 0.5f, yPoint - 0.5f, xPoint + 0.5f, yPoint + 0.5f))) != null) && (tries > 0));
+            GameEvent ev2 = new GameEventStartBar(gameTime - 32, new PointF(xPoint, yPoint), dir, p.getPlayerId());
+            pendingGameEv.addEvent(ev2);
+        }
     }
 
     private static GameState revertGameStateTo(int time, Deque<GameState> gameStates) {
@@ -209,7 +221,7 @@ public class GameManager implements Parcelable {
 
         if ((GameManager.timeLeft(gameState) < 0) || (player.getLives() < 1))
             return -1;//lost
-        if (gameState.getGrid().getPercentComplete() >= 75)
+        if (gameState.getGrid().getPercentComplete() >= PERCENT_COMPLETED)
             return 1;//won
         return 0;//still running
     }
@@ -252,12 +264,9 @@ public class GameManager implements Parcelable {
             ball.move();
 
             for (Player player : gameState.getPlayers()) {
-
-
                 if (player.bar.collide(ball)) {
-                    player.setLives(player.getLives() - 1);//FIXME per player
+                    player.setLives(player.getLives() - 1);
                 }
-
             }
 
             RectF collisionRect = grid.collide(ball.getFrame());

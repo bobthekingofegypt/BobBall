@@ -199,23 +199,27 @@ class GameEventNewGame extends GameEvent {
         }
         makeBalls(gs, level + 1);
         gs.time = 0;
-        gs.level=level;
+        gs.level = level;
     }
 
     private void makeBalls(GameState gs, final int numberOfBalls) {
         Grid grid = gs.getGrid();
         List<Ball> balls = gs.getBalls();
 
-        Random randomGenerator = new Random(seed+level);
+        Random randomGenerator = new Random(seed + level);
 
         boolean collision = false;
         do {
             collision = false;
             float xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
             float yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
-            float verticalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            float horizontalSpeed = randomGenerator.nextBoolean() ? -1 : 1;
-            Ball ball = new Ball(xPoint, yPoint, verticalSpeed, horizontalSpeed, ballspeed, 1.0f);
+            double verticalSpeed = randomGenerator.nextGaussian();
+            double horizontalSpeed = randomGenerator.nextGaussian();
+            double speed = Math.hypot(verticalSpeed, horizontalSpeed);
+            verticalSpeed = verticalSpeed /speed * ballspeed;
+            horizontalSpeed = horizontalSpeed / speed * ballspeed;
+
+            Ball ball = new Ball(xPoint, yPoint, (float) verticalSpeed, (float) horizontalSpeed, 1.0f);
             for (int i = 0; i < balls.size() && !collision; i++) {
                 if (balls.get(i).collide(ball)) {
                     collision = true;

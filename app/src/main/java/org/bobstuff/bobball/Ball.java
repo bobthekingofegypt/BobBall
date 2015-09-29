@@ -19,7 +19,6 @@ public class Ball implements Parcelable {
 
     private RectF frame = new RectF();
 
-    private float speed;
     private float size;
 
     private float horizontalVelocity;
@@ -32,7 +31,6 @@ public class Ball implements Parcelable {
                 final float y,
                 final float horizontalVelocity,
                 final float verticalVelocity,
-                final float speed,
                 final float size) {
         this.size = size;
 
@@ -40,7 +38,6 @@ public class Ball implements Parcelable {
 
         this.horizontalVelocity = horizontalVelocity;
         this.verticalVelocity = verticalVelocity;
-        this.speed = speed;
     }
 
     public Ball(final Ball ball) {
@@ -49,7 +46,6 @@ public class Ball implements Parcelable {
 
         this.horizontalVelocity = ball.getHorizontalVelocity();
         this.verticalVelocity = ball.getVerticalVelocity();
-        this.speed = ball.getSpeed();
     }
 
     public float getX1() {
@@ -70,10 +66,6 @@ public class Ball implements Parcelable {
 
     public float getSize() {
         return size;
-    }
-
-    public float getSpeed() {
-        return speed;
     }
 
     public float getHorizontalVelocity() {
@@ -105,8 +97,8 @@ public class Ball implements Parcelable {
 
         float distanceSquared = 0;
         do {
-            float x = (frame.left + (horizontalVelocity * speed));
-            float y = (frame.top + (verticalVelocity * speed));
+            float x = (frame.left + (horizontalVelocity));
+            float y = (frame.top + (verticalVelocity));
             frame.set(x, y, x + size, y + size);
             pointOne.set(frame.left + radius, frame.top + radius);
             distanceSquared = ((pointOne.x - pointTwo.x) * (pointOne.x - pointTwo.x)) + ((pointOne.y - pointTwo.y) * (pointOne.y - pointTwo.y));
@@ -180,8 +172,8 @@ public class Ball implements Parcelable {
     }
 
     public void move() {
-        float x = (frame.left + (horizontalVelocity * speed));
-        float y = (frame.top + (verticalVelocity * speed));
+        float x = (frame.left + (horizontalVelocity));
+        float y = (frame.top + (verticalVelocity));
         frame.set(x, y, x + size, y + size);
     }
 
@@ -196,7 +188,6 @@ public class Ball implements Parcelable {
         dest.writeFloat(frame.left);
         dest.writeFloat(frame.top);
 
-        dest.writeFloat(speed);
         dest.writeFloat(size);
 
         dest.writeFloat(horizontalVelocity);
@@ -210,12 +201,11 @@ public class Ball implements Parcelable {
 
             float left = in.readFloat();
             float top = in.readFloat();
-            float speed = in.readFloat();
             float size = in.readFloat();
             float horizontalVelocity = in.readFloat();
             float verticalVelocity = in.readFloat();
 
-            return new Ball(left, top, horizontalVelocity, verticalVelocity, speed, size);
+            return new Ball(left, top, horizontalVelocity, verticalVelocity, size);
         }
 
         public Ball[] newArray(int size) {

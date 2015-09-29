@@ -174,7 +174,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             gameView.draw(canvas, currGameState);
             if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
 
-                SpannableString timeLeftStr = SpannableString.valueOf(getString(R.string.timeLeftLabel) + gameManager.timeLeft() / 10);
+                SpannableString timeLeftStr = SpannableString.valueOf(getString(R.string.timeLeftLabel), gameManager.timeLeft() / 10);
                 SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
                     @Override
                     public int call(Player p) {
@@ -250,7 +250,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showWonScreen() {
-        messageView.setText(getString(R.string.levelCompleted) + gameManager.getLevel());
+        messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel());
         button.setText("NEXT LEVEL");
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEWON;

@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -172,9 +173,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         if (gameView != null) {
 
             gameView.draw(canvas, currGameState);
-            if (gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE == 0) {
+            if ((gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE) == 0) {
 
-                SpannableString timeLeftStr = SpannableString.valueOf(getString(R.string.timeLeftLabel), gameManager.timeLeft() / 10);
+                SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
+
                 SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
                     @Override
                     public int call(Player p) {
@@ -194,6 +196,20 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                         return gameManager.getCurrGameState().getGrid().getPercentComplete(p.getPlayerId());
                     }
                 });
+
+                //display fps
+                if (secretHandshake == 3) {
+                    long currTime = System.nanoTime();
+                    float fps = (float)ITERATIONS_PER_STATUSUPDATE / (currTime - gameLoop.fpsStats ) * 1e9f;
+                    gameLoop.fpsStats = currTime;
+
+                    int color = ( fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+                    SpannableString s = new SpannableString(String.format(" FPS: %2.1f" ,fps));
+
+                    s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    timeLeftStr.append(s);
+                }
+
                 statusTopleft.setText(timeLeftStr);
                 statusTopright.setText(livesStr);
                 statusBotleft.setText(scoreStr);
@@ -250,7 +266,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showWonScreen() {
-        messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel());
+        messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
         button.setText("NEXT LEVEL");
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEWON;
@@ -408,6 +424,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private class GameLoop implements Runnable {
         public int iteration = 0;
+        public long fpsStats = 0;
 
         @Override
         public void run() {

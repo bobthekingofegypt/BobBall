@@ -6,10 +6,10 @@
     <string name="pausedText">Pausiert</string>
     <string name="bttnTextResume">Spiel fortsetzen</string>
     <string name="welcomeText">Willkommen zu BobBall</string>
-    <string name="levelCompleted">"Gut gemacht, Level beendet: "</string>
+    <string name="levelCompleted">"Gut gemacht, du hast Level %d beendet"</string>
     <string name="dead">Du bist gestorben</string>
     <string name="namePrompt">Gib deinen Namen ein:</string>
-    <string name="timeLeftLabel">"Übrige Zeit: "</string>
+    <string name="timeLeftLabel">"Übrige Zeit: %d"</string>
     <string name="livesLabel">"Leben: "</string>
     <string name="scoreLabel">"Punkte: "</string>
     <string name="areaClearedLabel">"% bereinigt: "</string>

@@ -20,6 +20,7 @@ class GridPerPlayer {
 };
 
 public class Grid implements Parcelable {
+    public final static int GRID_SQUARE_NONEXISTANT = 0;
     public final static int GRID_SQUARE_CLEAR = 0;
     public final static int GRID_SQUARE_SAFELY_CLEAR = 1;
     public final static int GRID_SQUARE_SAFELY_CLEAR_FINISHED = 2;
@@ -117,12 +118,18 @@ public class Grid implements Parcelable {
     }
 
 
-    public int getGridX(float x) {
+    public static int getGridX(float x) {
         return (int) Math.floor(x);
     }
 
-    public int getGridY(float y) {
+    public static int getGridY(float y) {
         return (int) Math.floor(y);
+    }
+
+    public int getGridSq(float x, float y) {
+        if (!validPoint(x, y))
+            return GRID_SQUARE_NONEXISTANT;
+        return gridSquares[getGridX(x)][getGridY(y)];
     }
 
     public boolean validPoint(float x, float y) {
@@ -166,7 +173,11 @@ public class Grid implements Parcelable {
         //mark the squares containing the balls safely clear
         for (int i = 0; i < balls.size(); ++i) {
             Ball ball = balls.get(i);
-            tempGridSquares[getGridX(ball.getX1())][getGridY(ball.getY1())] = GRID_SQUARE_SAFELY_CLEAR;
+            try {
+                tempGridSquares[getGridX(ball.getX1())][getGridY(ball.getY1())] = GRID_SQUARE_SAFELY_CLEAR;
+            } catch (ArrayIndexOutOfBoundsException e) {
+            }
+
         }
 
         // repeatedly increase the safely clear area around the balls
@@ -246,7 +257,7 @@ public class Grid implements Parcelable {
                 }
             }
             p.filledGridSquares = filledSq;
-            if (playerId>0) // player 0 is the background
+            if (playerId > 0) // player 0 is the background
                 totalFilledGridSquares += filledSq;
         }
     }

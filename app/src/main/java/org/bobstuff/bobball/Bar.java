@@ -11,29 +11,28 @@ import java.util.List;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 
 public class Bar implements Parcelable {
     private BarDirection barDirection;
-
+    private float speed;
+    private boolean active;
     private BarSection sectionOne;
     private BarSection sectionTwo;
-    private float speed;
-
-    private boolean active;
 
     public Bar(float speed) {
         this.speed = speed;
     }
 
     public Bar(Bar other) {
-        this.speed = other.speed;
         this.barDirection = other.barDirection;
+        this.speed = other.speed;
+        this.active = other.active;
         if (other.sectionOne != null)
             this.sectionOne = new BarSection(other.sectionOne);
         if (other.sectionTwo != null)
             this.sectionTwo = new BarSection(other.sectionTwo);
-        this.active=other.active;
     }
 
     public BarSection getSectionOne() {

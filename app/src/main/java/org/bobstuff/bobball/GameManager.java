@@ -5,14 +5,13 @@
 
 package org.bobstuff.bobball;
 
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.Deque;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class GameManager implements Parcelable {
@@ -27,60 +26,69 @@ public class GameManager implements Parcelable {
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
 
+    private int seed;
+    private StupidAI stupidAI;
 
-    public GameState getCurrGameState() {
+
+    public synchronized GameState getCurrGameState() {
         return gameStates.peekFirst();
     }
 
     private Deque<GameState> gameStates;
-    private int gameTime;
+    public int gameTime;
     private GameEventQueue processedGameEv;
     private GameEventQueue pendingGameEv;
-
-    private int currPlayerId = 1;
-    private int seed = 42;
 
     public GameManager() {
         processedGameEv = new GameEventQueue();
         pendingGameEv = new GameEventQueue();
         gameStates = new LinkedBlockingDeque<>();
+        seed = (int) System.nanoTime();
     }
 
 
-    public int getLevel() {
+    public synchronized int getLevel() {
         return getCurrGameState().level;
     }
 
 
-    public Grid getGrid() {
+    public synchronized Grid getGrid() {
         return getCurrGameState().getGrid();
-    }
-
-
-    public Player getCurrentPlayer() {
-        return getCurrGameState().getPlayer(currPlayerId);
     }
 
 
     // clear the even queues
     // emit a new game event
-    public void reset() {
+    public synchronized void reset() {
         gameTime = 0;
         GameEvent ev = new GameEventNewGame(gameTime, getCurrGameState().level, seed, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, BAR_SPEED, INITIAL_BALL_SPEED);
         processedGameEv.clear();
         pendingGameEv.clear();
         pendingGameEv.addEvent(ev);
         runGameLoop();
+        if (stupidAI != null)
+            stupidAI.reset();
     }
 
-    public void newGame(int numberPlayers) {
+    public synchronized void newGame(int numberPlayers) {
         gameStates.clear();
         gameStates.addFirst(new GameState(numberPlayers + 1));
         getCurrGameState().level = 1;
         reset();
+        if (stupidAI != null)
+            stupidAI.interrupt();
+
+        if (numberPlayers > 1) {//fixme
+            int[] playerIds = new int[numberPlayers-1];
+            for (int i=0; i< numberPlayers-1; i++)
+                playerIds[i]=i+2;
+
+            stupidAI = new StupidAI(this, playerIds);
+            stupidAI.start();
+        }
     }
 
-    public void nextLevel() {
+    public synchronized void nextLevel() {
         GameState gs = getCurrGameState();
         int level = gs.level;
 
@@ -110,7 +118,7 @@ public class GameManager implements Parcelable {
 
             bar.move();
             for (int otherplayerid = 0; otherplayerid < players.size(); otherplayerid++) {
-            List<RectF> collisionRectsList = grid.getCollisionRects(otherplayerid);
+                List<RectF> collisionRectsList = grid.getCollisionRects(otherplayerid);
                 List<RectF> sectionCollisionRects = bar.collide(collisionRectsList);
                 if (sectionCollisionRects != null) {
                     for (RectF rect : sectionCollisionRects) {
@@ -123,33 +131,9 @@ public class GameManager implements Parcelable {
     }
 
 
-    public void startBar(final PointF origin,
-                         final TouchDirection dir) { // start the bar now
-
-        GameEvent ev = new GameEventStartBar(gameTime, origin, dir, currPlayerId);
+    public synchronized void addEvent(GameEvent ev) {
         pendingGameEv.addEvent(ev);
-
-
-        //just a test for a dumb AI TODO: build a separate class of actors
-        Random randomGenerator = new Random(gameTime);
-        Grid grid = getGrid();
-
-        for (Player p : getCurrGameState().getPlayers()) {
-            if (currPlayerId == p.getPlayerId() || 0 == p.getPlayerId())
-                continue;
-
-            float xPoint;
-            float yPoint;
-            int tries = 5;
-            do {
-                xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
-                yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
-                tries--;
-            }
-            while ((grid.collide((new RectF(xPoint - 0.5f, yPoint - 0.5f, xPoint + 0.5f, yPoint + 0.5f))) != null) && (tries > 0));
-            GameEvent ev2 = new GameEventStartBar(gameTime - 32, new PointF(xPoint, yPoint), dir, p.getPlayerId());
-            pendingGameEv.addEvent(ev2);
-        }
+        Log.d(TAG, "@" + gameTime + "added event, pending: " + pendingGameEv);
     }
 
     private static GameState revertGameStateTo(int time, Deque<GameState> gameStates) {
@@ -178,7 +162,7 @@ public class GameManager implements Parcelable {
             gameStates.removeLast();
     }
 
-    public void runGameLoop() {
+    public synchronized void runGameLoop() {
 
         GameState gs = getCurrGameState();
 
@@ -192,20 +176,28 @@ public class GameManager implements Parcelable {
 
             //move already processed events back to the pending list
             while (true) {
-                GameEvent ev = processedGameEv.popOldestEvent(firstEvTime);
+                GameEvent ev = processedGameEv.popOldestEventNewerThan(gs.time);
                 if (ev == null)
                     break;
                 pendingGameEv.addEvent(ev);
             }
+            Log.d(TAG, "Rollback from " + gameTime + " to " + firstEvTime + " pending:" + pendingGameEv);
         }
         while (gs.time <= gameTime) {
             advanceGameState(gs, pendingGameEv, processedGameEv);
 
             //save checkpoint
-            if (gs.time % CHECKPOINT_FREQ == 0)
+            if (gs.time % CHECKPOINT_FREQ == 0) {
                 addCheckpoint(gameStates);
+            }
         }
         gameTime++;
+
+
+        /*if (gs.time % 200 == 0) {
+            Log.d(TAG, "pending now=" + gameTime + "  " + pendingGameEv);
+            Log.d(TAG, "processed " + processedGameEv);
+        }*/
 
         // purge  events older than the oldest checkpoint
         pendingGameEv.purgeOlderThan(gameStates.getLast().time);
@@ -230,15 +222,15 @@ public class GameManager implements Parcelable {
         return LEVEL_DURATION_TICKS - gameState.time;
     }
 
-    public int timeLeft() {
+    public synchronized int timeLeft() {
         return timeLeft(getCurrGameState());
     }
 
-    public boolean isGameLost() {
+    public synchronized boolean isGameLost() {
         return GameManager.gameGetOutcome(getCurrGameState()) < 0;
     }
 
-    public boolean hasWonLevel() {
+    public synchronized boolean hasWonLevel() {
         return GameManager.gameGetOutcome(getCurrGameState()) > 0;
     }
 
@@ -254,7 +246,6 @@ public class GameManager implements Parcelable {
             processed.addEvent(ev);
         }
 
-
         moveBars(gameState);
 
         Grid grid = gameState.getGrid();
@@ -263,18 +254,23 @@ public class GameManager implements Parcelable {
         for (Ball ball : balls) {
             ball.move();
 
+            // ball hits bar?
             for (Player player : gameState.getPlayers()) {
                 if (player.bar.collide(ball)) {
+                    //Log.d(TAG, "@" + gameState.time + " bar finished (wall) for player " + player.getPlayerId() + " bar active:" + player.bar.isActive() + player.bar.getSectionOne() + player.bar.getSectionTwo());
+
                     player.setLives(player.getLives() - 1);
                 }
             }
 
+            //ball hits wall?
             RectF collisionRect = grid.collide(ball.getFrame());
             if (collisionRect != null) {
                 ball.collision(collisionRect);
             }
         }
 
+        //inter-ball collisions
         for (int firstIndex = 0; firstIndex < balls.size(); ++firstIndex) {
             Ball first = balls.get(firstIndex);
             for (int secondIndex = 0; secondIndex < balls.size(); ++secondIndex) {
@@ -299,7 +295,7 @@ public class GameManager implements Parcelable {
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    public synchronized void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedArray(gameStates.toArray(new GameState[0]), flags);
         dest.writeParcelable(processedGameEv, 0);
         dest.writeParcelable(pendingGameEv, 0);

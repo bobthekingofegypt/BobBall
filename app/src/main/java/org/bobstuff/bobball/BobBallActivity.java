@@ -47,6 +47,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     static final String STATE_GAME_MANAGER = "state_game_manager";
     static final String STATE_ACTIVITY = "state_activity_state";
 
+    static final int playerId = 1; //fixme
+
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
 
@@ -159,8 +161,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             gameManager.runGameLoop();
         }
 
-        Player currPlayer = gameManager.getCurrentPlayer();
         GameState currGameState = gameManager.getCurrGameState();
+        Player currPlayer = currGameState.getPlayer(playerId);
 
         //vibrate if we lost a live
         int livesLost = lastLives - currPlayer.getLives();
@@ -200,11 +202,11 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 //display fps
                 if (secretHandshake == 3) {
                     long currTime = System.nanoTime();
-                    float fps = (float)ITERATIONS_PER_STATUSUPDATE / (currTime - gameLoop.fpsStats ) * 1e9f;
+                    float fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - gameLoop.fpsStats) * 1e9f;
                     gameLoop.fpsStats = currTime;
 
-                    int color = ( fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
-                    SpannableString s = new SpannableString(String.format(" FPS: %2.1f" ,fps));
+                    int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+                    SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
 
                     s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     timeLeftStr.append(s);
@@ -240,7 +242,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                         if (valueString.isEmpty()) {
                             valueString = "Unknown";
                         }
-                        scores.addScore(valueString, gameManager.getCurrentPlayer().getScore());
+                        scores.addScore(valueString, gameManager.getCurrGameState().getPlayer(playerId).getScore());
                         showTopScores();
                     }
                 }).show();
@@ -296,14 +298,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             initialTouchPoint = null;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             if (initialTouchPoint != null && gameManager.getGrid().validPoint(initialTouchPoint.x, initialTouchPoint.y)) {
-                if (evPoint.x > (initialTouchPoint.x + TOUCH_DETECT_SQUARES) || evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES) {
-                    gameManager.startBar(initialTouchPoint, TouchDirection.HORIZONTAL);
-                    initialTouchPoint = null;
-                } else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES) || evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES) {
-                    gameManager.startBar(initialTouchPoint, TouchDirection.VERTICAL);
+                TouchDirection dir = null;
+                if (evPoint.x > (initialTouchPoint.x + TOUCH_DETECT_SQUARES) || evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES)
+                    dir = TouchDirection.HORIZONTAL;
+                else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES) || evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
+                    dir = TouchDirection.VERTICAL;
+                if (dir != null) {
+                    gameManager.addEvent(new GameEventStartBar(gameManager.gameTime, initialTouchPoint, dir, playerId));
                     initialTouchPoint = null;
                 }
-
             }
         }
 

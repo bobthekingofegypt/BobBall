@@ -3,6 +3,7 @@ package org.bobstuff.bobball;
 import android.graphics.PointF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public class GameEventQueue implements Parcelable {
     }
 
     //get the oldest element newer than cutoff and remove it from the queue
-    public GameEvent popOldestEvent(int cutoff) {
+    public GameEvent popOldestEventNewerThan(int cutoff) {
         GameEvent ret = null;
         Integer oldestTime = queue.ceilingKey(cutoff);
 
@@ -109,10 +110,27 @@ public class GameEventQueue implements Parcelable {
         dest.writeList(l);
     }
 
+    @Override public String toString() {
+        StringBuilder result = new StringBuilder();
+
+        result.append(this.getClass().getName() + ":\n" );
+        for (int time :queue.navigableKeySet()) {
+            result.append("    [t=" + time + "] { ");
+            for (GameEvent ev : queue.get(time))
+                result.append("    " + ev.toString() + "; ");
+            result.append("} \n");
+        }
+        result.append("}");
+
+        return result.toString();
+    }
+
 }
 
 
 abstract class GameEvent implements Comparable<GameEvent>, Parcelable {
+    protected static final String TAG = "GameEvent";
+
     public boolean transmitted;
     private int time;
 
@@ -298,4 +316,8 @@ class GameEventStartBar extends GameEvent {
         dest.writeInt(playerId);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName() + " t=" + getTime() + " playerId="+playerId + " origin=" + origin;
+    }
 }

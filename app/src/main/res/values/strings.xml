@@ -2,7 +2,7 @@
 <resources>
     <string name="appName">BobBall</string>
     <string name="continueString">click to continue</string>
-    <string name="highScoreAchieved">Congratulations you have achieved a high score</string>
+    <string name="highScoreAchieved">Congratulations, you have achieved a high score</string>
     <string name="pausedText">paused</string>
     <string name="bttnTextResume">resume playing</string>
     <string name="welcomeText">Welcome to BobBall</string>

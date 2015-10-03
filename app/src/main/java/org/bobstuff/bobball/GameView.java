@@ -30,14 +30,18 @@ public class GameView {
     private Bitmap circleBitmap;
     private Matrix identityMatrix = new Matrix();
 
-    public GameView(int canvasWidth, int canvasHeight, GameState gameState) {
+    public GameView(int canvasWidth, int canvasHeight) {
 
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
+    }
+
+    public void reset(GameState gameState) {
 
         if (gameState.getGrid() == null) {
             this.maxX = 1;
             this.maxY = 1;
+            throw new Error("!!!");
         } else {
             this.maxX = (int) gameState.getGrid().getWidth();
             this.maxY = (int) gameState.getGrid().getHeight();
@@ -49,9 +53,7 @@ public class GameView {
 
         xOffset = (canvasWidth - boardWidth) / 2;
         yOffset = (canvasHeight - boardHeight) / 2;
-    }
 
-    public void reset() {
         backgroundBitmap = null;
     }
 

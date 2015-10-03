@@ -18,12 +18,12 @@ public class GameState implements Comparable<GameState>, Parcelable {
     private GameState()
     {
         balls = new ArrayList<>();
+        players = new ArrayList<>();
         time = 0;
     }
 
     public GameState(int maxPlayer) {
         this();
-        players = new ArrayList<>();
         for (int i = 0; i < maxPlayer; i++) {
             Player p = new Player(i);
             players.add(p);

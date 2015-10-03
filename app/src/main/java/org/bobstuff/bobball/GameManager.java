@@ -133,7 +133,7 @@ public class GameManager implements Parcelable {
 
     public synchronized void addEvent(GameEvent ev) {
         pendingGameEv.addEvent(ev);
-        Log.d(TAG, "@" + gameTime + "added event, pending: " + pendingGameEv);
+        Log.d(TAG, "@" + gameTime + " added event, pending: " + pendingGameEv);
     }
 
     private static GameState revertGameStateTo(int time, Deque<GameState> gameStates) {

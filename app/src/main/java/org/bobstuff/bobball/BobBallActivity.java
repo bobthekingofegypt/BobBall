@@ -16,11 +16,14 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,9 +32,14 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 enum ActivityStateEnum {
@@ -47,7 +55,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     static final String STATE_GAME_MANAGER = "state_game_manager";
     static final String STATE_ACTIVITY = "state_activity_state";
 
-    static final int playerId = 1; //fixme
+    static final int playerId = 1; //fixme hardcoded playerid
+    int numPlayers = 1;
 
     private Handler handler = new Handler();
     private GameLoop gameLoop = new GameLoop();
@@ -55,7 +64,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private SurfaceHolder surfaceHolder;
     private Scores scores;
 
-    private int numberPlayers = 1;
     private int secretHandshake = 0;
 
     private PointF initialTouchPoint = null;
@@ -65,7 +73,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private GameView gameView;
     private ActivityStateEnum activityState = ActivityStateEnum.GAMERUNNING;
 
+    private DrawerLayout drawerLayout;
     private View transparentView;
+    private Spinner numPlayersSelector;
     private TextView messageView;
     private TextView statusTopleft;
     private TextView statusBotleft;
@@ -89,38 +99,38 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         surfaceHolder.addCallback(this);
 
         messageView = (TextView) findViewById(R.id.message_label);
-        messageView.setVisibility(View.INVISIBLE);
+        messageView.bringToFront();
 
         transparentView = findViewById(R.id.transparent_view);
-        transparentView.setBackgroundColor(0x00000000);
+        numPlayersSelector = (Spinner) findViewById(R.id.num_players);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.playerNumber, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        numPlayersSelector.setAdapter(adapter);
 
         button = (Button) findViewById(R.id.continue_button);
         button.setOnClickListener(this);
-        button.setVisibility(View.INVISIBLE);
 
         statusTopleft = (TextView) findViewById(R.id.status_topleft);
         statusTopright = (TextView) findViewById(R.id.status_topright);
         statusBotleft = (TextView) findViewById(R.id.status_botleft);
         statusBotright = (TextView) findViewById(R.id.status_botright);
 
-        statusBotright.setOnLongClickListener(new View.OnLongClickListener() {
-            public boolean onLongClick(View v) {
-                TextView tv = (TextView) v;
-                if (secretHandshake == 3) {
-                    numberPlayers += 1;
-                    tv.setTextColor(0xffCCCCFF);
-                    gameManager.newGame(numberPlayers);
-                    secretHandshake = 0;
-                    return true;
-                } else {
-                    numberPlayers = 1;
-                    secretHandshake = 0;
-                    statusTopright.setTextColor(0xffFFFFFF);
-                    statusBotright.setTextColor(0xffFFFFFF);
-                    return false;
-                }
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                onClick(drawerView);
             }
 
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                if (activityState == ActivityStateEnum.GAMERUNNING)
+                    showPauseScreen();
+            }
         });
 
         statusTopright.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +144,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         scores.loadScores();
 
         if (savedInstanceState == null) {
-            resetGame();
             showIntroScreen();
         }
     }
@@ -200,7 +209,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 });
 
                 //display fps
-                if (secretHandshake == 3) {
+                if (secretHandshake >= 3) {
                     long currTime = System.nanoTime();
                     float fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - gameLoop.fpsStats) * 1e9f;
                     gameLoop.fpsStats = currTime;
@@ -221,7 +230,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             if (gameManager.hasWonLevel()) {
                 showWonScreen();
             } else if (gameManager.isGameLost()) {
-                if (scores.isTopScore(currPlayer.getScore())) {
+                if (numPlayers ==1 && scores.isTopScore(currPlayer.getScore())) {
                     promptUsername();
                 }
                 showDeadScreen();
@@ -264,6 +273,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         activityState = ActivityStateEnum.GAMEPAUSED;
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
+        numPlayersSelector.setVisibility(View.INVISIBLE);
         setMessageViewsVisible(true);
     }
 
@@ -271,6 +281,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
         button.setText("NEXT LEVEL");
         setMessageViewsVisible(true);
+        numPlayersSelector.setVisibility(View.INVISIBLE);
         activityState = ActivityStateEnum.GAMEWON;
     }
 
@@ -278,11 +289,13 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView.setText(R.string.dead);
         button.setText("Retry");
         setMessageViewsVisible(true);
+        numPlayersSelector.setVisibility(View.INVISIBLE);
         activityState = ActivityStateEnum.GAMELOST;
     }
 
     private void showIntroScreen() {
         messageView.setText(R.string.welcomeText);
+        numPlayersSelector.setVisibility(View.VISIBLE);
         button.setText("Start");
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEINTRO;
@@ -290,6 +303,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (gameView == null)
+            return true;
+
         PointF evPoint = gameView.transformPix2Coords(new PointF(event.getX(), event.getY()));
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -315,11 +331,11 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void reinitGame() {
         gameLoop.iteration = 0;
-        if (gameView != null)
-            gameView.reset();
+        if (gameView != null && gameManager != null)
+            gameView.reset(gameManager.getCurrGameState());
     }
 
-    private void resetGame() {
+    private void resetGame(int numberPlayers) {
         handler.removeCallbacks(gameLoop);
         gameManager = new GameManager();
         gameManager.newGame(numberPlayers);
@@ -328,9 +344,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
-        if (gameManager != null)
-            gameView = new GameView(width, height,
-                    gameManager.getCurrGameState());
+        gameView = new GameView(width, height);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -392,15 +406,18 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     @Override
-    public void onClick(View v) { // called when the message button is clicked
+    public void onClick(View v) { // called when the message button is clicked or the drawer closed
         setMessageViewsVisible(false);
 
         if (activityState == ActivityStateEnum.GAMEWON) {
             reinitGame();
             gameManager.nextLevel();
             startGame();
-        } else if ((activityState == ActivityStateEnum.GAMELOST) || (activityState == ActivityStateEnum.GAMEINTRO)) {
-            resetGame();
+        } else if ((activityState == ActivityStateEnum.GAMELOST)) {
+            showIntroScreen();
+        } else if (activityState == ActivityStateEnum.GAMEINTRO) {
+            numPlayers = numPlayersSelector.getSelectedItemPosition() + 1;
+            resetGame(numPlayers);
             startGame();
         } else if (activityState == ActivityStateEnum.GAMEPAUSED) {
             startGame();
@@ -413,15 +430,11 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     public void setMessageViewsVisible(boolean visible) {
+
         if (visible) {
-            transparentView.setBackgroundColor(0x88000000);
-            button.setVisibility(View.VISIBLE);
-            messageView.setVisibility(View.VISIBLE);
-            messageView.bringToFront();
+            drawerLayout.openDrawer(GravityCompat.START);
         } else {
-            transparentView.setBackgroundColor(0x00000000);
-            button.setVisibility(View.INVISIBLE);
-            messageView.setVisibility(View.INVISIBLE);
+            drawerLayout.closeDrawer(GravityCompat.START);
         }
     }
 

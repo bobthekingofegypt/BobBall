@@ -24,7 +24,7 @@ public class GameView {
     private int maxX;
     private int maxY;
 
-    private float gridSquareSize;
+    private int gridSquareSize=0;
 
     private Bitmap backgroundBitmap;
     private Bitmap circleBitmap;
@@ -46,7 +46,7 @@ public class GameView {
             this.maxX = (int) gameState.getGrid().getWidth();
             this.maxY = (int) gameState.getGrid().getHeight();
         }
-        this.gridSquareSize = (float) Math.floor(Math.min(canvasWidth / maxX, canvasHeight / maxY));
+        this.gridSquareSize = (int) Math.floor(Math.min(canvasWidth / maxX, canvasHeight / maxY));
 
         int boardWidth = (int) (maxX * gridSquareSize);
         int boardHeight = (int) (maxY * gridSquareSize);
@@ -58,6 +58,8 @@ public class GameView {
     }
 
     public void draw(final Canvas canvas, GameState gameState) {
+        if (gridSquareSize <= 0.0f)
+            return;
         if (backgroundBitmap == null) {
             preCacheBackground(canvas, gameState);
         }

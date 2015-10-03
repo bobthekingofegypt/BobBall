@@ -303,7 +303,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (gameView == null)
+        if (gameView == null || gameManager == null)
             return true;
 
         PointF evPoint = gameView.transformPix2Coords(new PointF(event.getX(), event.getY()));
@@ -345,6 +345,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
         gameView = new GameView(width, height);
+        reinitGame();
     }
 
     public void surfaceCreated(SurfaceHolder holder) {

@@ -23,7 +23,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -37,9 +36,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 enum ActivityStateEnum {
@@ -59,7 +55,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     int numPlayers = 1;
 
     private Handler handler = new Handler();
-    private GameLoop gameLoop = new GameLoop();
+    private DisplayLoop displayLoop = new DisplayLoop();
 
     private SurfaceHolder surfaceHolder;
     private Scores scores;
@@ -166,12 +162,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     protected void update(final Canvas canvas) {
-        for (int x = 0; x < 4; ++x) {
-            gameManager.runGameLoop();
-        }
 
-        GameState currGameState = gameManager.getCurrGameState();
-        Player currPlayer = currGameState.getPlayer(playerId);
+        final GameState currGameState = new GameState(gameManager.getCurrGameState()); //make a copy of the state so its immutable
+        final Player currPlayer = currGameState.getPlayer(playerId);
 
         //vibrate if we lost a live
         int livesLost = lastLives - currPlayer.getLives();
@@ -184,7 +177,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         if (gameView != null) {
 
             gameView.draw(canvas, currGameState);
-            if ((gameLoop.iteration % ITERATIONS_PER_STATUSUPDATE) == 0) {
+            if ((displayLoop.iteration % ITERATIONS_PER_STATUSUPDATE) == 0) {
 
                 SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
 
@@ -204,18 +197,28 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
                     @Override
                     public int call(Player p) {
-                        return gameManager.getCurrGameState().getGrid().getPercentComplete(p.getPlayerId());
+                        Grid grid = currGameState.getGrid();
+                        if (grid != null)
+                            return currGameState.getGrid().getPercentComplete(p.getPlayerId());
+                        else
+                            return 0;
                     }
                 });
 
                 //display fps
                 if (secretHandshake >= 3) {
                     long currTime = System.nanoTime();
-                    float fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - gameLoop.fpsStats) * 1e9f;
-                    gameLoop.fpsStats = currTime;
+                    float fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - displayLoop.fpsStats) * 1e9f;
+                    displayLoop.fpsStats = currTime;
 
                     int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
                     SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
+
+                    s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    timeLeftStr.append(s);
+
+                    color = (gameManager.getUPS() < gameManager.NUMBER_OF_UPDATES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+                    s = new SpannableString(String.format(" UPS: %3.1f", gameManager.getUPS()));
 
                     s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     timeLeftStr.append(s);
@@ -230,7 +233,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             if (gameManager.hasWonLevel()) {
                 showWonScreen();
             } else if (gameManager.isGameLost()) {
-                if (numPlayers ==1 && scores.isTopScore(currPlayer.getScore())) {
+                if ((numPlayers == 1) && scores.isTopScore(currPlayer.getScore())) {
                     promptUsername();
                 }
                 showDeadScreen();
@@ -330,13 +333,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void reinitGame() {
-        gameLoop.iteration = 0;
+        displayLoop.reset();
         if (gameView != null && gameManager != null)
             gameView.reset(gameManager.getCurrGameState());
     }
 
     private void resetGame(int numberPlayers) {
-        handler.removeCallbacks(gameLoop);
+        handler.removeCallbacks(displayLoop);
+        if (gameManager != null)
+            gameManager.stopGameLoop();
         gameManager = new GameManager();
         gameManager.newGame(numberPlayers);
         reinitGame();
@@ -353,7 +358,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-        handler.removeCallbacks(gameLoop);
+        handler.removeCallbacks(displayLoop);
+        if (gameManager != null)
+            gameManager.stopGameLoop();
         gameView = null;
     }
 
@@ -427,7 +434,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void startGame() {
         activityState = ActivityStateEnum.GAMERUNNING;
-        handler.post(gameLoop);
+        handler.post(displayLoop);
+        if (gameManager != null)
+            gameManager.startGameLoop();
+        displayLoop.reset();
     }
 
     public void setMessageViewsVisible(boolean visible) {
@@ -439,18 +449,27 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
 
-    private class GameLoop implements Runnable {
+    private class DisplayLoop implements Runnable {
         public int iteration = 0;
         public long fpsStats = 0;
+        public int lastGameTime = 0;
+
+        public void reset(){
+            iteration = 0;
+            lastGameTime = 0;
+            fpsStats = 0;
+        }
 
         @Override
         public void run() {
             long startTime = System.nanoTime();
 
-            Canvas canvas = surfaceHolder.lockCanvas();
-            update(canvas);
-            surfaceHolder.unlockCanvasAndPost(canvas);
-
+            if (gameManager.gameTime > lastGameTime) {
+                Canvas canvas = surfaceHolder.lockCanvas();
+                update(canvas);
+                surfaceHolder.unlockCanvasAndPost(canvas);
+                lastGameTime = gameManager.gameTime;
+            }
             long updateTime = System.nanoTime() - startTime;
             long timeLeft = (long) ((1000L / NUMBER_OF_FRAMES_PER_SECOND) - (updateTime / 1000000.0));
             if (timeLeft < 5) timeLeft = 5;

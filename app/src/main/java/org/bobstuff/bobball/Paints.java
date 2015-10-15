@@ -19,9 +19,6 @@ public class Paints {
     public static final Paint bluePaint = new Paint();
     public static final Paint blackPaint = new Paint();
 
-    public static final Paint playerOnePaint = new Paint();
-    public static final Paint playerTwoPaint = new Paint();
-
     static {
         backgroundPaint.setARGB(255, 0, 0, 0);
         gridPaint.setARGB(255, 255, 255, 255);

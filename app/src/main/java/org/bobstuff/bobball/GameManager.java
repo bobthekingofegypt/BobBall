@@ -13,31 +13,36 @@ import android.util.Log;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-public class GameManager implements Parcelable {
+public class GameManager implements Parcelable, Runnable {
     private static final String TAG = "GameManager";
 
     public static final int NUMBER_OF_ROWS = 28;
     public static final int NUMBER_OF_COLUMNS = 20;
     public static final int LEVEL_DURATION_TICKS = 20000;
+    public static final int UPS_UPDATE_FREQ = 128;
     public static final float INITIAL_BALL_SPEED = 0.025f;
     public static final float BAR_SPEED = INITIAL_BALL_SPEED;
     public static final int RETAINED_CHECKPOINTS = 16;
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
 
+    static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
+
     private int seed;
-    private StupidAI stupidAI;
-
-
-    public synchronized GameState getCurrGameState() {
-        return gameStates.peekFirst();
-    }
 
     private Deque<GameState> gameStates;
     public int gameTime;
     private GameEventQueue processedGameEv;
     private GameEventQueue pendingGameEv;
+
+    // not part of a parcel
+    private ScheduledThreadPoolExecutor threadpool;
+    private long upsLastNanotime;
+    private float ups=0;
+    private StupidAI stupidAI;
 
     public GameManager() {
         processedGameEv = new GameEventQueue();
@@ -46,6 +51,9 @@ public class GameManager implements Parcelable {
         seed = (int) System.nanoTime();
     }
 
+    public synchronized GameState getCurrGameState() {
+        return gameStates.peekFirst();
+    }
 
     public synchronized int getLevel() {
         return getCurrGameState().level;
@@ -65,7 +73,7 @@ public class GameManager implements Parcelable {
         processedGameEv.clear();
         pendingGameEv.clear();
         pendingGameEv.addEvent(ev);
-        runGameLoop();
+        singleStepGameLoop();
         if (stupidAI != null)
             stupidAI.reset();
     }
@@ -79,14 +87,14 @@ public class GameManager implements Parcelable {
             stupidAI.interrupt();
 
         if (numberPlayers > 1) {//fixme
-            int[] playerIds = new int[numberPlayers-1];
-            for (int i=0; i< numberPlayers-1; i++)
-                playerIds[i]=i+2;
+            int[] playerIds = new int[numberPlayers - 1];
+            for (int i = 0; i < numberPlayers - 1; i++)
+                playerIds[i] = i + 2;
 
             stupidAI = new StupidAI(this, playerIds);
-            stupidAI.start();
         }
     }
+
 
     public synchronized void nextLevel() {
         GameState gs = getCurrGameState();
@@ -162,7 +170,33 @@ public class GameManager implements Parcelable {
             gameStates.removeLast();
     }
 
-    public synchronized void runGameLoop() {
+
+    public synchronized void startGameLoop() {
+        stopGameLoop();
+
+        if (stupidAI != null)
+            try {
+                stupidAI.start();
+            } catch (IllegalThreadStateException e) {
+            }
+
+        threadpool = new ScheduledThreadPoolExecutor(1);
+        threadpool.scheduleAtFixedRate(this, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void stopGameLoop() {
+        if (stupidAI != null)
+            stupidAI.interrupt();
+        if (threadpool != null)
+            threadpool.shutdown();
+    }
+
+    @Override
+    public void run() {
+        singleStepGameLoop();
+    }
+
+    public synchronized void singleStepGameLoop() {
 
         GameState gs = getCurrGameState();
 
@@ -202,6 +236,19 @@ public class GameManager implements Parcelable {
         // purge  events older than the oldest checkpoint
         pendingGameEv.purgeOlderThan(gameStates.getLast().time);
 
+
+        //update UPS
+        if (gameTime % UPS_UPDATE_FREQ ==0)
+        {
+            long currTime = System.nanoTime();
+            ups=(float) UPS_UPDATE_FREQ /  (currTime-upsLastNanotime)  * 1e9f;
+            upsLastNanotime=currTime;
+        }
+    }
+
+
+    public float getUPS() {
+        return ups;
     }
 
     // contains the won/lost logic

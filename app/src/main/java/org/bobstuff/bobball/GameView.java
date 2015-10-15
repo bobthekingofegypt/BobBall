@@ -24,7 +24,7 @@ public class GameView {
     private int maxX;
     private int maxY;
 
-    private int gridSquareSize=0;
+    private int gridSquareSize = 0;
 
     private Bitmap backgroundBitmap;
     private Bitmap circleBitmap;
@@ -38,18 +38,15 @@ public class GameView {
 
     public void reset(GameState gameState) {
 
-        if (gameState.getGrid() == null) {
-            this.maxX = 1;
-            this.maxY = 1;
-            throw new Error("!!!");
-        } else {
+        if (gameState.getGrid() != null) {
             this.maxX = (int) gameState.getGrid().getWidth();
             this.maxY = (int) gameState.getGrid().getHeight();
-        }
+        } else
+            return;
         this.gridSquareSize = (int) Math.floor(Math.min(canvasWidth / maxX, canvasHeight / maxY));
 
-        int boardWidth = (int) (maxX * gridSquareSize);
-        int boardHeight = (int) (maxY * gridSquareSize);
+        int boardWidth = maxX * gridSquareSize;
+        int boardHeight = maxY * gridSquareSize;
 
         xOffset = (canvasWidth - boardWidth) / 2;
         yOffset = (canvasHeight - boardHeight) / 2;
@@ -58,8 +55,10 @@ public class GameView {
     }
 
     public void draw(final Canvas canvas, GameState gameState) {
-        if (gridSquareSize <= 0.0f)
+        if (gridSquareSize <= 0.0f){
+            reset(gameState);
             return;
+        }
         if (backgroundBitmap == null) {
             preCacheBackground(canvas, gameState);
         }
@@ -75,7 +74,6 @@ public class GameView {
 
             List<RectF> collisionRects = gameState.getGrid().getCollisionRects(playerId);
             for (RectF rect : collisionRects) {
-
                 canvas.drawRect(xOffset + rect.left * gridSquareSize, yOffset + rect.top * gridSquareSize, xOffset + rect.right * gridSquareSize, yOffset + rect.bottom * gridSquareSize, paint);
             }
 
@@ -98,21 +96,14 @@ public class GameView {
                         xOffset + sectionTwoRect.right * gridSquareSize,
                         yOffset + sectionTwoRect.bottom * gridSquareSize,
                         Paints.redPaint);
-
             }
-
         }
 
         List<Ball> balls = gameState.getBalls();
-        for (
-                int i = 0;
-                i < balls.size(); ++i)
-
-        {
+        for (int i = 0; i < balls.size(); ++i) {
             Ball ball = balls.get(i);
             canvas.drawBitmap(circleBitmap, xOffset + ball.getX1() * gridSquareSize, yOffset + ball.getY1() * gridSquareSize, null);
         }
-
     }
 
 
@@ -135,7 +126,6 @@ public class GameView {
         Canvas circleBitmapCanvas = new Canvas(circleBitmap);
         float radius = gridSquareSize / 2.0f;
         circleBitmapCanvas.drawCircle(radius, radius, radius, Paints.circlePaint);
-
     }
 
     public PointF transformPix2Coords(PointF pix) {

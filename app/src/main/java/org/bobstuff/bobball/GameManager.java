@@ -34,7 +34,7 @@ public class GameManager implements Parcelable, Runnable {
     private int seed;
 
     private Deque<GameState> gameStates;
-    public int gameTime;
+    private int gameTime;
     private GameEventQueue processedGameEv;
     private GameEventQueue pendingGameEv;
 
@@ -68,8 +68,8 @@ public class GameManager implements Parcelable, Runnable {
     // clear the even queues
     // emit a new game event
     public synchronized void reset() {
-        gameTime = 0;
-        GameEvent ev = new GameEventNewGame(gameTime, getCurrGameState().level, seed, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, BAR_SPEED, INITIAL_BALL_SPEED);
+        setGameTime(0);
+        GameEvent ev = new GameEventNewGame(getGameTime(), getCurrGameState().level, seed, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS, BAR_SPEED, INITIAL_BALL_SPEED);
         processedGameEv.clear();
         pendingGameEv.clear();
         pendingGameEv.addEvent(ev);
@@ -141,7 +141,7 @@ public class GameManager implements Parcelable, Runnable {
 
     public synchronized void addEvent(GameEvent ev) {
         pendingGameEv.addEvent(ev);
-        Log.d(TAG, "@" + gameTime + " added event, pending: " + pendingGameEv);
+        Log.d(TAG, "@" + getGameTime() + " added event, pending: " + pendingGameEv);
     }
 
     private static GameState revertGameStateTo(int time, Deque<GameState> gameStates) {
@@ -205,7 +205,7 @@ public class GameManager implements Parcelable, Runnable {
 
         //rollback necessary?
         int firstEvTime = pendingGameEv.getEarliestEvTime();
-        if (firstEvTime < gameTime) {
+        if (firstEvTime < getGameTime()) {
             gs = revertGameStateTo(firstEvTime, gameStates);
 
             //move already processed events back to the pending list
@@ -215,9 +215,9 @@ public class GameManager implements Parcelable, Runnable {
                     break;
                 pendingGameEv.addEvent(ev);
             }
-            Log.d(TAG, "Rollback from " + gameTime + " to " + firstEvTime + " pending:" + pendingGameEv);
+            Log.d(TAG, "Rollback from " + getGameTime() + " to " + firstEvTime + " pending:" + pendingGameEv);
         }
-        while (gs.time <= gameTime) {
+        while (gs.time <= getGameTime()) {
             advanceGameState(gs, pendingGameEv, processedGameEv);
 
             //save checkpoint
@@ -225,7 +225,7 @@ public class GameManager implements Parcelable, Runnable {
                 addCheckpoint(gameStates);
             }
         }
-        gameTime++;
+        setGameTime(getGameTime() + 1);
 
 
         /*if (gs.time % 200 == 0) {
@@ -238,7 +238,7 @@ public class GameManager implements Parcelable, Runnable {
 
 
         //update UPS
-        if (gameTime % UPS_UPDATE_FREQ ==0)
+        if (getGameTime() % UPS_UPDATE_FREQ ==0)
         {
             long currTime = System.nanoTime();
             ups=(float) UPS_UPDATE_FREQ /  (currTime-upsLastNanotime)  * 1e9f;
@@ -346,7 +346,7 @@ public class GameManager implements Parcelable, Runnable {
         dest.writeTypedArray(gameStates.toArray(new GameState[0]), flags);
         dest.writeParcelable(processedGameEv, 0);
         dest.writeParcelable(pendingGameEv, 0);
-        dest.writeInt(gameTime);
+        dest.writeInt(getGameTime());
     }
 
 
@@ -359,7 +359,7 @@ public class GameManager implements Parcelable, Runnable {
             gameStates.addFirst(gs);
         processedGameEv = in.readParcelable(classLoader);
         pendingGameEv = in.readParcelable(classLoader);
-        gameTime = in.readInt();
+        setGameTime(in.readInt());
     }
 
 
@@ -375,5 +375,11 @@ public class GameManager implements Parcelable, Runnable {
 
     };
 
+    public synchronized int  getGameTime() {
+        return gameTime;
+    }
 
+    public synchronized void setGameTime(int gameTime) {
+        this.gameTime = gameTime;
+    }
 }

@@ -44,7 +44,6 @@ enum ActivityStateEnum {
 
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
     static final int NUMBER_OF_FRAMES_PER_SECOND = 60;
-    static final int ITERATIONS_PER_STATUSUPDATE = 10;
     static final double TOUCH_DETECT_SQUARES = 2.5;
     static final int VIBRATE_LIVE_LOST_MS = 40;
 
@@ -65,7 +64,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private PointF initialTouchPoint = null;
 
     private GameManager gameManager;
-    private int lastLives;
     private GameView gameView;
     private ActivityStateEnum activityState = ActivityStateEnum.GAMERUNNING;
 
@@ -161,84 +159,72 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         return sps;
     }
 
-    protected void update(final Canvas canvas) {
+    protected void update(final Canvas canvas, final GameState currGameState) {
 
-        final GameState currGameState = new GameState(gameManager.getCurrGameState()); //make a copy of the state so its immutable
         final Player currPlayer = currGameState.getPlayer(playerId);
 
-        //vibrate if we lost a live
-        int livesLost = lastLives - currPlayer.getLives();
-        if (livesLost > 0) {
-            Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            vibs.vibrate(VIBRATE_LIVE_LOST_MS);
-        }
-        lastLives = currPlayer.getLives();
-
-        if (gameView != null) {
+        if ((gameView != null)) {
 
             gameView.draw(canvas, currGameState);
-            if ((displayLoop.iteration % ITERATIONS_PER_STATUSUPDATE) == 0) {
 
-                SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
+            SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
 
-                SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
-                    @Override
-                    public int call(Player p) {
-                        return p.getLives();
-                    }
-                });
-                SpannableStringBuilder scoreStr = formatPerPlayer(getString(R.string.scoreLabel), new playstat() {
-                    @Override
-                    public int call(Player p) {
-                        return p.getScore();
-                    }
-                });
-
-                SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
-                    @Override
-                    public int call(Player p) {
-                        Grid grid = currGameState.getGrid();
-                        if (grid != null)
-                            return currGameState.getGrid().getPercentComplete(p.getPlayerId());
-                        else
-                            return 0;
-                    }
-                });
-
-                //display fps
-                if (secretHandshake >= 3) {
-                    long currTime = System.nanoTime();
-                    float fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - displayLoop.fpsStats) * 1e9f;
-                    displayLoop.fpsStats = currTime;
-
-                    int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
-                    SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
-
-                    s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    timeLeftStr.append(s);
-
-                    color = (gameManager.getUPS() < gameManager.NUMBER_OF_UPDATES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
-                    s = new SpannableString(String.format(" UPS: %3.1f", gameManager.getUPS()));
-
-                    s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    timeLeftStr.append(s);
+            SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
+                @Override
+                public int call(Player p) {
+                    return p.getLives();
                 }
-
-                statusTopleft.setText(timeLeftStr);
-                statusTopright.setText(livesStr);
-                statusBotleft.setText(scoreStr);
-                statusBotright.setText(clearedStr);
-
-            }
-            if (gameManager.hasWonLevel()) {
-                showWonScreen();
-            } else if (gameManager.isGameLost()) {
-                if ((numPlayers == 1) && scores.isTopScore(currPlayer.getScore())) {
-                    promptUsername();
+            });
+            SpannableStringBuilder scoreStr = formatPerPlayer(getString(R.string.scoreLabel), new playstat() {
+                @Override
+                public int call(Player p) {
+                    return p.getScore();
                 }
-                showDeadScreen();
+            });
+
+            SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
+                @Override
+                public int call(Player p) {
+                    Grid grid = currGameState.getGrid();
+                    if (grid != null)
+                        return currGameState.getGrid().getPercentComplete(p.getPlayerId());
+                    else
+                        return 0;
+                }
+            });
+
+            //display fps
+            if (secretHandshake >= 3) {
+
+                float fps = displayLoop.getFPS();
+                int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+                SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
+
+                s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                timeLeftStr.append(s);
+
+                color = (gameManager.getUPS() < gameManager.NUMBER_OF_UPDATES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+                s = new SpannableString(String.format(" UPS: %3.1f", gameManager.getUPS()));
+
+                s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                timeLeftStr.append(s);
             }
+
+            statusTopleft.setText(timeLeftStr);
+            statusTopright.setText(livesStr);
+            statusBotleft.setText(scoreStr);
+            statusBotright.setText(clearedStr);
+
         }
+        if (gameManager.hasWonLevel()) {
+            showWonScreen();
+        } else if (gameManager.isGameLost()) {
+            if ((numPlayers == 1) && scores.isTopScore(currPlayer.getScore())) {
+                promptUsername();
+            }
+            showDeadScreen();
+        }
+
     }
 
     private void promptUsername() {
@@ -323,7 +309,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES) || evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
                     dir = TouchDirection.VERTICAL;
                 if (dir != null) {
-                    gameManager.addEvent(new GameEventStartBar(gameManager.gameTime, initialTouchPoint, dir, playerId));
+                    gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime(), initialTouchPoint, dir, playerId));
                     initialTouchPoint = null;
                 }
             }
@@ -450,31 +436,57 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private class DisplayLoop implements Runnable {
-        public int iteration = 0;
-        public long fpsStats = 0;
-        public int lastGameTime = 0;
+        static final int ITERATIONS_PER_STATUSUPDATE = 10;
 
-        public void reset(){
-            iteration = 0;
-            lastGameTime = 0;
-            fpsStats = 0;
+        private long fpsStatsLastTS = 0;
+        private long frameCounter = 0;
+        private int lastLives = 0;
+        private int lastGameTime = -1;
+        private float fps = 0;
+
+        public float getFPS() {
+            return fps;
+        }
+
+        public void reset() {
+            fpsStatsLastTS = 0;
+            lastGameTime = -1;
+            frameCounter = 0;
         }
 
         @Override
         public void run() {
             long startTime = System.nanoTime();
 
-            if (gameManager.gameTime > lastGameTime) {
-                Canvas canvas = surfaceHolder.lockCanvas();
-                update(canvas);
-                surfaceHolder.unlockCanvasAndPost(canvas);
-                lastGameTime = gameManager.gameTime;
+            final GameState currGameState = new GameState(gameManager.getCurrGameState()); //make a copy of the state so its immutable
+            final Player currPlayer = currGameState.getPlayer(playerId);
+            //vibrate if we lost a live
+
+            int livesLost = lastLives - currPlayer.getLives();
+            if (livesLost > 0) {
+                Vibrator vibs = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibs.vibrate(VIBRATE_LIVE_LOST_MS);
             }
+            lastLives = currPlayer.getLives();
+
+            if (gameManager.getGameTime() > lastGameTime) {
+                lastGameTime = gameManager.getGameTime();
+                Canvas canvas = surfaceHolder.lockCanvas();
+                update(canvas, currGameState);
+                surfaceHolder.unlockCanvasAndPost(canvas);
+
+                //update FPS
+                frameCounter++;
+                if (frameCounter % ITERATIONS_PER_STATUSUPDATE == 0) {
+                    long currTime = System.nanoTime();
+                    fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - displayLoop.fpsStatsLastTS) * 1e9f;
+                    displayLoop.fpsStatsLastTS = currTime;
+                }
+            }
+
             long updateTime = System.nanoTime() - startTime;
             long timeLeft = (long) ((1000L / NUMBER_OF_FRAMES_PER_SECOND) - (updateTime / 1000000.0));
             if (timeLeft < 5) timeLeft = 5;
-
-            iteration += 1;
 
             if (activityState == ActivityStateEnum.GAMERUNNING) {
                 handler.postDelayed(this, timeLeft);

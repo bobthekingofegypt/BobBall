@@ -1,7 +1,6 @@
 package org.bobstuff.bobball;
 
 import android.graphics.PointF;
-import android.util.Log;
 
 import java.util.Random;
 
@@ -23,13 +22,13 @@ public class StupidAI extends Actor {
     @Override
     public void run() {
         while (true) {
-            if (gameManager.gameTime <= lastAction + ACTION_INTERVALL) {
+            if (gameManager.getGameTime() <= lastAction + ACTION_INTERVALL) {
                 yield();
                 continue;
             }
-            lastAction = gameManager.gameTime;
+            lastAction = gameManager.getGameTime();
 
-            Random randomGenerator = new Random(gameManager.gameTime);
+            Random randomGenerator = new Random(gameManager.getGameTime());
             Grid grid = gameManager.getGrid();
 
             for (int pid : playerIds) {
@@ -43,7 +42,7 @@ public class StupidAI extends Actor {
                     tries--;
                 }
                 while ((grid.getGridSq(xPoint, yPoint) != Grid.GRID_SQUARE_CLEAR) && (tries > 0));
-                gameManager.addEvent(new GameEventStartBar(gameManager.gameTime+1, new PointF(xPoint, yPoint), dir, pid));
+                gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime() +1, new PointF(xPoint, yPoint), dir, pid));
             }
         }
     }

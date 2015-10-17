@@ -1,8 +1,8 @@
 package org.bobstuff.bobball;
 
 // an actor is someone that controls one or multiple players
-// an actor runs in its own thread/asynchronously
-public abstract class Actor extends Thread {
+// an actors run method is called *roughly* on every gamestep
+public abstract class Actor implements Runnable {
     protected GameManager gameManager;
     protected int[] playerIds;
 

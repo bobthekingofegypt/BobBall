@@ -83,8 +83,6 @@ public class GameManager implements Parcelable, Runnable {
         gameStates.addFirst(new GameState(numberPlayers + 1));
         getCurrGameState().level = 1;
         reset();
-        if (stupidAI != null)
-            stupidAI.interrupt();
 
         if (numberPlayers > 1) {//fixme
             int[] playerIds = new int[numberPlayers - 1];
@@ -173,20 +171,13 @@ public class GameManager implements Parcelable, Runnable {
 
     public synchronized void startGameLoop() {
         stopGameLoop();
-
-        if (stupidAI != null)
-            try {
-                stupidAI.start();
-            } catch (IllegalThreadStateException e) {
-            }
-
-        threadpool = new ScheduledThreadPoolExecutor(1);
+        threadpool = new ScheduledThreadPoolExecutor(2);
         threadpool.scheduleAtFixedRate(this, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
+        if (stupidAI != null)
+            threadpool.scheduleAtFixedRate(stupidAI, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
     }
 
     public synchronized void stopGameLoop() {
-        if (stupidAI != null)
-            stupidAI.interrupt();
         if (threadpool != null)
             threadpool.shutdown();
     }

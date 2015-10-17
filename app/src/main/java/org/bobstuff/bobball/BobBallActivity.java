@@ -452,6 +452,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             fpsStatsLastTS = 0;
             lastGameTime = -1;
             frameCounter = 0;
+            lastLives = 0;
         }
 
         @Override

@@ -21,29 +21,42 @@ public class StupidAI extends Actor {
 
     @Override
     public void run() {
-        while (true) {
-            if (gameManager.getGameTime() <= lastAction + ACTION_INTERVALL) {
-                yield();
-                continue;
-            }
-            lastAction = gameManager.getGameTime();
+        if (gameManager.getGameTime() <= lastAction + ACTION_INTERVALL) {
+            return;
+        }
+        lastAction = gameManager.getGameTime();
+        Random randomGenerator = new Random(lastAction);
 
-            Random randomGenerator = new Random(gameManager.getGameTime());
-            Grid grid = gameManager.getGrid();
+        GameState gameState = gameManager.getCurrGameState();
+        Grid grid = gameState.getGrid();
 
-            for (int pid : playerIds) {
+        for (int pid : playerIds) {
+            PointF p;
+
+            int tries = 20;
+            TouchDirection dir = (randomGenerator.nextBoolean() ? TouchDirection.HORIZONTAL : TouchDirection.VERTICAL);
+            do {
+                tries--;
                 float xPoint;
                 float yPoint;
-                int tries = 20;
-                TouchDirection dir = (randomGenerator.nextBoolean() ? TouchDirection.HORIZONTAL : TouchDirection.VERTICAL);
-                do {
-                    xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
-                    yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
-                    tries--;
+                xPoint = randomGenerator.nextFloat() * (grid.getWidth() * 0.5f) + (grid.getWidth() * 0.25f);
+                yPoint = randomGenerator.nextFloat() * (grid.getHeight() * 0.5f) + (grid.getHeight() * 0.25f);
+                p = new PointF(xPoint, yPoint);
+
+                if (grid.getGridSq(xPoint, yPoint) != Grid.GRID_SQUARE_CLEAR) {
+                    p = null;
+                    continue;
                 }
-                while ((grid.getGridSq(xPoint, yPoint) != Grid.GRID_SQUARE_CLEAR) && (tries > 0));
-                gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime() +1, new PointF(xPoint, yPoint), dir, pid));
+                for (Ball ball : gameState.getBalls()) {
+                    if (ball.collide(grid.getGridSquareFrameContainingPoint(p))) {
+                        p = null;
+                        break;
+                    }
+                }
             }
+            while (tries > 0);
+            if (p != null)
+                gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime() + 1, p, dir, pid));
         }
     }
 }

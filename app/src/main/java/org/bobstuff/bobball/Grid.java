@@ -71,15 +71,39 @@ public class Grid implements Parcelable {
         compressCollisionAreas();
     }
 
-    private static Parcel parcelGrid(Grid other) {
-        Parcel p = Parcel.obtain();
-        other.writeToParcel(p, 0);
-        p.setDataPosition(0);
-        return p;
-    }
 
+    //copy constructor
     public Grid(Grid other) {
-        this(parcelGrid(other));
+
+        this.maxX = other.maxX;
+        this.maxY = other.maxY;
+
+        this.totalGridSquares = other.totalGridSquares;
+        this.totalFilledGridSquares = other.totalFilledGridSquares;
+
+        this.maxPlayerId = other.maxPlayerId;
+
+        this.perPlayer = new ArrayList<>();
+        for (int i = 0; i < maxPlayerId; i++) {
+            GridPerPlayer p = other.perPlayer.get(i);
+            GridPerPlayer pnew = new GridPerPlayer();
+            pnew.collisionRects = new ArrayList<>();
+            for (RectF cr : p.collisionRects)
+                pnew.collisionRects.add(cr);
+            pnew.filledGridSquares = p.filledGridSquares;
+            perPlayer.add(pnew);
+        }
+
+        this.gridSquares = new int[maxX][maxY];
+        this.tempGridSquares = new int[maxX][maxY];
+
+        for (int x = 0; x < maxX; ++x)
+            for (int y = 0; y < maxY; ++y) {
+                gridSquares[x][y] = other.gridSquares[x][y];
+                tempGridSquares[x][y] = other.tempGridSquares[x][y];
+            }
+
+
     }
 
 

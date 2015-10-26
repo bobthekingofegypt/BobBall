@@ -10,6 +10,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -28,7 +29,6 @@ public class GameManager implements Parcelable, Runnable {
     public static final int RETAINED_CHECKPOINTS = 16;
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
-
     static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
 
     private int seed;
@@ -42,7 +42,7 @@ public class GameManager implements Parcelable, Runnable {
     private ScheduledThreadPoolExecutor threadpool;
     private long upsLastNanotime;
     private float ups=0;
-    private StupidAI stupidAI;
+    private List<Actor> actors= new ArrayList<>();
 
     public GameManager() {
         processedGameEv = new GameEventQueue();
@@ -74,8 +74,11 @@ public class GameManager implements Parcelable, Runnable {
         pendingGameEv.clear();
         pendingGameEv.addEvent(ev);
         singleStepGameLoop();
-        if (stupidAI != null)
-            stupidAI.reset();
+
+        actors.clear();
+        //for (Actor a :actors){
+        //    a.reset();
+        //}
     }
 
     public synchronized void newGame(int numberPlayers) {
@@ -89,7 +92,8 @@ public class GameManager implements Parcelable, Runnable {
             for (int i = 0; i < numberPlayers - 1; i++)
                 playerIds[i] = i + 2;
 
-            stupidAI = new StupidAI(this, playerIds);
+            StupidAI stupidAI = new StupidAI(this, playerIds);
+            actors.add(stupidAI);
         }
     }
 
@@ -173,8 +177,13 @@ public class GameManager implements Parcelable, Runnable {
         stopGameLoop();
         threadpool = new ScheduledThreadPoolExecutor(2);
         threadpool.scheduleAtFixedRate(this, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
-        if (stupidAI != null)
-            threadpool.scheduleAtFixedRate(stupidAI, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
+        for (Actor a :actors){
+            float rate= a.getExecFreq();
+            if (rate > 0)
+                threadpool.scheduleAtFixedRate(a, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND/rate), TimeUnit.MILLISECONDS);
+            else
+                threadpool.schedule(a, 0, TimeUnit.MILLISECONDS);
+        }
     }
 
     public synchronized void stopGameLoop() {

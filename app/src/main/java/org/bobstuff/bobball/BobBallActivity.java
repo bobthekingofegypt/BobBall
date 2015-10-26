@@ -15,6 +15,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
 import android.os.Vibrator;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,6 +24,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -36,6 +38,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ThreadFactory;
 
 
 enum ActivityStateEnum {
@@ -134,6 +142,62 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             }
         });
 
+
+        statusBotright.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (secretHandshake > 4) {
+                    statusBotright.setTextColor(0xffCCCCFF);
+                    final Network n = new Network();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Parcel p = Parcel.obtain();
+                                GameEvent ev = new GameEventChat(999999, "BLA", 0);
+                                p.writeParcelable(ev,0);
+                                byte[] msg = p.marshall();
+                                for (byte b : msg)
+                                    Log.d("srv", "sending " + b);
+                                n.serverListenBlocking().getOutputStream().write(msg);
+                                Log.d("srv", "srvdone");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Log.d("xx", "client ---");
+                                byte buf[] = new byte[1000];
+                                InputStream in = n.clientListenBlocking().getInputStream();
+                                while (in.available() < 2) ;
+                                Parcel p = Parcel.obtain();
+                                int len = in.read(buf);
+                                for (byte b : buf)
+                                    Log.d("cli", "rx " + b);
+                                p.unmarshall(buf, 0, len);
+                                p.setDataPosition(0);
+                                ClassLoader classLoader = getClass().getClassLoader();
+                                GameEvent ev = p.readParcelable(classLoader);
+                                Log.d("cli", "Received ev: " + ev + " len:" + len);
+                                p.recycle();
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+
+                }
+            }
+        });
+
+
         scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
         scores.loadScores();
 
@@ -159,13 +223,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         return sps;
     }
 
-    protected void update(final Canvas canvas, final GameState currGameState) {
+    protected void update(final Canvas canvas, final GameState currGameState, long frameCounter) {
 
         final Player currPlayer = currGameState.getPlayer(playerId);
 
         if ((gameView != null)) {
-
             gameView.draw(canvas, currGameState);
+        }
+
+        if (frameCounter % displayLoop.ITERATIONS_PER_STATUSUPDATE == 0) {
 
             SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
 
@@ -471,13 +537,13 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             lastLives = currPlayer.getLives();
 
             if (gameManager.getGameTime() > lastGameTime) {
+                frameCounter++;
                 lastGameTime = gameManager.getGameTime();
                 Canvas canvas = surfaceHolder.lockCanvas();
-                update(canvas, currGameState);
+                update(canvas, currGameState, frameCounter);
                 surfaceHolder.unlockCanvasAndPost(canvas);
 
                 //update FPS
-                frameCounter++;
                 if (frameCounter % ITERATIONS_PER_STATUSUPDATE == 0) {
                     long currTime = System.nanoTime();
                     fps = (float) ITERATIONS_PER_STATUSUPDATE / (currTime - displayLoop.fpsStatsLastTS) * 1e9f;

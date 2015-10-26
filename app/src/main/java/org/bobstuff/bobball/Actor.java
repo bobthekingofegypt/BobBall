@@ -5,11 +5,19 @@ package org.bobstuff.bobball;
 public abstract class Actor implements Runnable {
     protected GameManager gameManager;
     protected int[] playerIds;
+    /**
+     * approx. freq of the calls to the run method  per game cycle
+     * 0 means call only once
+     */
+    protected float getExecFreq(){return 0.0f;};
 
     public Actor(GameManager gameManager, int[] playerIds) {
         this.gameManager = gameManager;
         this.playerIds = playerIds;
     }
 
+    public void newEventCallback(GameEvent ev)
+    {
+    }
     public abstract void reset();
 }

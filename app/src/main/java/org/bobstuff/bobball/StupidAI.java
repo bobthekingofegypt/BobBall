@@ -15,6 +15,11 @@ public class StupidAI extends Actor {
     }
 
     @Override
+    protected float getExecFreq() {
+        return 1.0f;
+    }
+
+    @Override
     public void reset() {
         lastAction = 0;
     }

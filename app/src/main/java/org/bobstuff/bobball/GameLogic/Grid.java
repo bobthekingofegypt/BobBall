@@ -3,7 +3,7 @@
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,8 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import org.bobstuff.bobball.Utilities;
 
 //data is recreated, so no parcelable implementation needed
 class GridPerPlayer {

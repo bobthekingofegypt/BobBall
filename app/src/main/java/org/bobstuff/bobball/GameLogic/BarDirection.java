@@ -3,7 +3,9 @@
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
+
+import org.bobstuff.bobball.TouchDirection;
 
 public enum BarDirection {
     VERTICAL,

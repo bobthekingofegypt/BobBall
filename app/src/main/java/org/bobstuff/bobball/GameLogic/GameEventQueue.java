@@ -1,17 +1,12 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
-import android.graphics.PointF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-
-import static org.bobstuff.bobball.BarDirection.fromTouchDirection;
 
 public class GameEventQueue implements Parcelable {
     public static final Creator<GameEventQueue> CREATOR = new Creator<GameEventQueue>() {

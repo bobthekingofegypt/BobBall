@@ -1,10 +1,10 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 
-abstract class GameEvent implements Parcelable {
+public abstract class GameEvent implements Parcelable {
     protected static final String TAG = "GameEvent";
 
     private int time;

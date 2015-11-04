@@ -1,9 +1,10 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.reflect.Array;
+import org.bobstuff.bobball.Player;
+
 import java.util.ArrayList;
 import java.util.List;
 

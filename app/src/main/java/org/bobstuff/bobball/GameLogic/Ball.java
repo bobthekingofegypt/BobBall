@@ -3,7 +3,7 @@
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.graphics.PointF;
 import android.graphics.RectF;

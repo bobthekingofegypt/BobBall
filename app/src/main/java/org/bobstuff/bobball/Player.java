@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.bobstuff.bobball.GameLogic.Bar;
+
 public class Player implements Parcelable {
 
     private int score;

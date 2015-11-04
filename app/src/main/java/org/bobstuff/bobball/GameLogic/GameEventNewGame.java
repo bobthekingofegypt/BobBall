@@ -1,11 +1,13 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.os.Parcel;
+
+import org.bobstuff.bobball.Player;
 
 import java.util.List;
 import java.util.Random;
 
-class GameEventNewGame extends GameEvent {
+public class GameEventNewGame extends GameEvent {
 
     public static final Creator<GameEventNewGame> CREATOR = new Creator<GameEventNewGame>() {
         @Override

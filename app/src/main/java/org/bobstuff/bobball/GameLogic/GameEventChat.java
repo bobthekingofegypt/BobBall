@@ -1,11 +1,10 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
-import android.graphics.PointF;
 import android.os.Parcel;
 
-import static org.bobstuff.bobball.BarDirection.fromTouchDirection;
+import org.bobstuff.bobball.Player;
 
-class GameEventChat extends GameEvent {
+public class GameEventChat extends GameEvent {
     public static final Creator<GameEventChat> CREATOR = new Creator<GameEventChat>() {
         @Override
         public GameEventChat createFromParcel(Parcel in) {

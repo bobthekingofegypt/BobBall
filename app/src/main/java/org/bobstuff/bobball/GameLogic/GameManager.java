@@ -3,12 +3,16 @@
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import org.bobstuff.bobball.Actors.Actor;
+import org.bobstuff.bobball.Actors.StupidAIActor;
+import org.bobstuff.bobball.Player;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -29,7 +33,7 @@ public class GameManager implements Parcelable, Runnable {
     public static final int RETAINED_CHECKPOINTS = 16;
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
-    static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
+    public static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
 
     private int seed;
 
@@ -92,8 +96,8 @@ public class GameManager implements Parcelable, Runnable {
             for (int i = 0; i < numberPlayers - 1; i++)
                 playerIds[i] = i + 2;
 
-            StupidAI stupidAI = new StupidAI(this, playerIds);
-            actors.add(stupidAI);
+            StupidAIActor stupidAIActor = new StupidAIActor(this, playerIds);
+            actors.add(stupidAIActor);
         }
     }
 

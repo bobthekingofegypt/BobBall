@@ -14,6 +14,12 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import org.bobstuff.bobball.GameLogic.Ball;
+import org.bobstuff.bobball.GameLogic.Bar;
+import org.bobstuff.bobball.GameLogic.BarSection;
+import org.bobstuff.bobball.GameLogic.GameState;
+import org.bobstuff.bobball.GameLogic.Grid;
+
 public class GameView {
 
     private int xOffset;

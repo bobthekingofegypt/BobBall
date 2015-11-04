@@ -3,7 +3,7 @@
   Licensed under the terms of the BSD License, see LICENSE.txt
 */
 
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,6 @@ import java.util.List;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 
 public class Bar implements Parcelable {

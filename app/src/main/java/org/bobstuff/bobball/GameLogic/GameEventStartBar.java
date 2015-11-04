@@ -1,11 +1,14 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.GameLogic;
 
 import android.graphics.PointF;
 import android.os.Parcel;
 
-import static org.bobstuff.bobball.BarDirection.fromTouchDirection;
+import org.bobstuff.bobball.Player;
+import org.bobstuff.bobball.TouchDirection;
 
-class GameEventStartBar extends GameEvent {
+import static org.bobstuff.bobball.GameLogic.BarDirection.fromTouchDirection;
+
+public class GameEventStartBar extends GameEvent {
     public static final Creator<GameEventStartBar> CREATOR = new Creator<GameEventStartBar>() {
         @Override
         public GameEventStartBar createFromParcel(Parcel in) {

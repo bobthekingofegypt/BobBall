@@ -1,21 +1,28 @@
-package org.bobstuff.bobball;
+package org.bobstuff.bobball.Actors;
 
 import android.graphics.PointF;
 
+import org.bobstuff.bobball.GameLogic.Ball;
+import org.bobstuff.bobball.GameLogic.GameEventStartBar;
+import org.bobstuff.bobball.GameLogic.GameManager;
+import org.bobstuff.bobball.GameLogic.GameState;
+import org.bobstuff.bobball.GameLogic.Grid;
+import org.bobstuff.bobball.TouchDirection;
+
 import java.util.Random;
 
-public class StupidAI extends Actor {
+public class StupidAIActor extends Actor {
     private static final int ACTION_INTERVALL = 128;
 
     private int lastAction;
 
-    public StupidAI(GameManager gameManager, int[] playerIds) {
+    public StupidAIActor(GameManager gameManager, int[] playerIds) {
         super(gameManager, playerIds);
         lastAction = 0;
     }
 
     @Override
-    protected float getExecFreq() {
+    public float getExecFreq() {
         return 1.0f;
     }
 

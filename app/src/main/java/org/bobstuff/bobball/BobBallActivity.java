@@ -15,7 +15,6 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
 import android.os.Vibrator;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,7 +23,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -39,11 +37,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.concurrent.ThreadFactory;
+import org.bobstuff.bobball.GameLogic.GameEventStartBar;
+import org.bobstuff.bobball.GameLogic.GameManager;
+import org.bobstuff.bobball.GameLogic.GameState;
+import org.bobstuff.bobball.GameLogic.Grid;
+import org.bobstuff.bobball.Network.NetworkIP;
 
 
 enum ActivityStateEnum {
@@ -147,52 +145,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             public void onClick(View v) {
                 if (secretHandshake > 4) {
                     statusBotright.setTextColor(0xffCCCCFF);
-                    final Network n = new Network();
-
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Parcel p = Parcel.obtain();
-                                GameEvent ev = new GameEventChat(999999, "BLA", 0);
-                                p.writeParcelable(ev,0);
-                                byte[] msg = p.marshall();
-                                for (byte b : msg)
-                                    Log.d("srv", "sending " + b);
-                                n.serverListenBlocking().getOutputStream().write(msg);
-                                Log.d("srv", "srvdone");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
-
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Log.d("xx", "client ---");
-                                byte buf[] = new byte[1000];
-                                InputStream in = n.clientListenBlocking().getInputStream();
-                                while (in.available() < 2) ;
-                                Parcel p = Parcel.obtain();
-                                int len = in.read(buf);
-                                for (byte b : buf)
-                                    Log.d("cli", "rx " + b);
-                                p.unmarshall(buf, 0, len);
-                                p.setDataPosition(0);
-                                ClassLoader classLoader = getClass().getClassLoader();
-                                GameEvent ev = p.readParcelable(classLoader);
-                                Log.d("cli", "Received ev: " + ev + " len:" + len);
-                                p.recycle();
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
-
-
+                    final NetworkIP n = new NetworkIP((int)System.currentTimeMillis());
+                    n.startServer();
+                    n.clientConnect("127.0.0.1",1234);
                 }
             }
         });

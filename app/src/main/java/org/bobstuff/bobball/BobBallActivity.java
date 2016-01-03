@@ -238,7 +238,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                         Editable value = input.getText();
                         String valueString = value.toString().trim();
                         if (valueString.isEmpty()) {
-                            valueString = R.string.defaultName;
+                            valueString = getResources().getString(R.string.defaultName);
                         }
                         scores.addScore(valueString, gameManager.getCurrGameState().getPlayer(playerId).getScore());
                         showTopScores();

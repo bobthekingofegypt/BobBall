@@ -8,10 +8,30 @@
 		notice and this notice are preserved.  This file is offered as-is,
 		without any warrant.
 	-->
-
+	
 	<string name="appName">BobBall</string>
+	<string name="start">Start</string>
 	<string name="continueString">cliquer pour continuer</string>
 	<string name="highScoreAchieved">Félicitation vous avez fait un record</string>
-    <string name="pausedText">pause</string>
-    <string name="bttnTextResume">reprendre la partie</string>
+	<string name="pausedText">pause</string>
+	<string name="bttnTextResume">reprendre la partie</string>
+	<string name="welcomeText">Welcome to BobBall</string>
+	<string name="levelCompleted">"Well done, you have completed level %d"</string>
+	<string name="nextLevel">NEXT LEVEL</string>
+	<string name="dead">You are dead</string>
+	<string name="retry">Retry</string>
+	<string name="namePrompt">Enter your name:</string>
+	<string name="namePromptConfirm">ok</string>
+	<string name="defaultName">Unknown</string>
+	<string name="highscoreTitle">High Scores</string>
+	<string name="highscoreExit">ok</string>
+	<string name="timeLeftLabel">"Time Left: %d"</string>
+	<string name="livesLabel">"Lives: "</string>
+	<string name="scoreLabel">"Score: "</string>
+	<string name="areaClearedLabel">"% Cleared: "</string>
+	<string-array name="playerNumber">
+		<item>1 Player</item>
+		<item>2 Players</item>
+		<item>3 Players</item>
+	</string-array>
 </resources>

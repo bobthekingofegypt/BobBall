@@ -254,12 +254,12 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 .setTitle(R.string.namePrompt)
                 .setMessage(R.string.highScoreAchieved)
                 .setView(input)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.namePromptConfirm, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Editable value = input.getText();
                         String valueString = value.toString().trim();
                         if (valueString.isEmpty()) {
-                            valueString = "Unknown";
+                            valueString = getResources().getString(R.string.defaultName);
                         }
                         scores.addScore(valueString, gameManager.getCurrGameState().getPlayer(playerId).getScore());
                         showTopScores();
@@ -272,8 +272,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         final CharSequence[] items = scores.asCharSequence();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("High Scores");
-        builder.setPositiveButton("OK", null);
+        builder.setTitle(R.string.highscoreTitle);
+        builder.setPositiveButton(R.string.highscoreExit, null);
         builder.setItems(items, null);
         AlertDialog alert = builder.create();
         alert.show();
@@ -289,7 +289,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void showWonScreen() {
         messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
-        button.setText("NEXT LEVEL");
+        button.setText(R.string.nextLevel);
         setMessageViewsVisible(true);
         numPlayersSelector.setVisibility(View.INVISIBLE);
         activityState = ActivityStateEnum.GAMEWON;
@@ -297,7 +297,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void showDeadScreen() {
         messageView.setText(R.string.dead);
-        button.setText("Retry");
+        button.setText(R.string.retry);
         setMessageViewsVisible(true);
         numPlayersSelector.setVisibility(View.INVISIBLE);
         activityState = ActivityStateEnum.GAMELOST;
@@ -306,7 +306,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private void showIntroScreen() {
         messageView.setText(R.string.welcomeText);
         numPlayersSelector.setVisibility(View.VISIBLE);
-        button.setText("Start");
+        button.setText(R.string.start);
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEINTRO;
     }

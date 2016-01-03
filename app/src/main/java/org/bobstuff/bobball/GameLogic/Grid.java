@@ -5,8 +5,8 @@
 
 package org.bobstuff.bobball.GameLogic;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -17,7 +17,7 @@ import org.bobstuff.bobball.Utilities;
 
 //data is recreated, so no parcelable implementation needed
 class GridPerPlayer {
-    public List<RectF> collisionRects = new ArrayList<>();
+    public List<RectF> collisionRects = new CopyOnWriteArrayList<>();
     public int filledGridSquares;
 };
 
@@ -66,7 +66,7 @@ public class Grid implements Parcelable {
             gridSquares[maxX - 1][y] = GRID_SQUARE_FILLED;
         }
 
-        this.perPlayer = new ArrayList<>();
+        this.perPlayer = new CopyOnWriteArrayList<>();
         for (int i = 0; i < maxPlayerId; i++)
             perPlayer.add(new GridPerPlayer());
 
@@ -85,11 +85,11 @@ public class Grid implements Parcelable {
 
         this.maxPlayerId = other.maxPlayerId;
 
-        this.perPlayer = new ArrayList<>();
+        this.perPlayer = new CopyOnWriteArrayList<>();
         for (int i = 0; i < maxPlayerId; i++) {
             GridPerPlayer p = other.perPlayer.get(i);
             GridPerPlayer pnew = new GridPerPlayer();
-            pnew.collisionRects = new ArrayList<>();
+            pnew.collisionRects = new CopyOnWriteArrayList<>();
             for (RectF cr : p.collisionRects)
                 pnew.collisionRects.add(cr);
             pnew.filledGridSquares = p.filledGridSquares;
@@ -366,7 +366,7 @@ public class Grid implements Parcelable {
             in.readIntArray(gridSquares[xind]);
         }
 
-        this.perPlayer = new ArrayList<>();
+        this.perPlayer = new CopyOnWriteArrayList<>();
         for (int i = 0; i < maxPlayerId; i++)
             perPlayer.add(new GridPerPlayer());
 

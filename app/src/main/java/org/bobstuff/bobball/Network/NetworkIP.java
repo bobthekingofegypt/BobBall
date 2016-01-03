@@ -1,16 +1,15 @@
 package org.bobstuff.bobball.Network;
 
-import android.util.Log;
+//import android.util.Log;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class NetworkIP extends NetworkDispatcher {
 
     public static final int BOBBALL_SRV_PORT = 8477;
-    public static final int BOBBALL_CLI_PORT = 8477;
-    public static final String BOBBALL_CLI_HOST = "127.0.0.1";
 
     private ServerSocket srvSock;
 
@@ -26,7 +25,6 @@ public class NetworkIP extends NetworkDispatcher {
         if (this.srvSock != null)
             throw new IllegalArgumentException();
 
-
         this.threadpool.execute(new Runnable() {
             @Override
             public void run() {
@@ -35,7 +33,7 @@ public class NetworkIP extends NetworkDispatcher {
                     srvSock = new ServerSocket(port);
 
                 } catch (IOException e) {
-                    Log.d("xx", "IOException ---");
+                    //Log.d("xx", "IOException ---");
                     e.printStackTrace();
                     return;
                 }
@@ -45,7 +43,7 @@ public class NetworkIP extends NetworkDispatcher {
                         Socket s = srvSock.accept();
                         addConnection(s.getInputStream(), s.getOutputStream());
                     } catch (IOException e) {
-                        Log.d("xx", "IOException --zz-");
+                        //Log.d("xx", "IOException --zz-");
                         e.printStackTrace();
                     }
                 }
@@ -63,7 +61,7 @@ public class NetworkIP extends NetworkDispatcher {
                     addConnection(cliSock.getInputStream(), cliSock.getOutputStream());
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.d("xx", "IOException --cli-");
+                    //Log.d("xx", "IOException --cli-");
                 }
             }
         });

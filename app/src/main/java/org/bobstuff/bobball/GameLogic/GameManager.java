@@ -11,7 +11,9 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import org.bobstuff.bobball.Actors.Actor;
+import org.bobstuff.bobball.Actors.NetworkActor;
 import org.bobstuff.bobball.Actors.StupidAIActor;
+import org.bobstuff.bobball.Network.NetworkIP;
 import org.bobstuff.bobball.Player;
 
 import java.util.ArrayList;
@@ -45,8 +47,8 @@ public class GameManager implements Parcelable, Runnable {
     // not part of a parcel
     private ScheduledThreadPoolExecutor threadpool;
     private long upsLastNanotime;
-    private float ups=0;
-    private List<Actor> actors= new ArrayList<>();
+    private float ups = 0;
+    private List<Actor> actors = new ArrayList<>();
 
     public GameManager() {
         processedGameEv = new GameEventQueue();
@@ -93,11 +95,19 @@ public class GameManager implements Parcelable, Runnable {
 
         if (numberPlayers > 1) {//fixme
             int[] playerIds = new int[numberPlayers - 1];
+            Actor a;
             for (int i = 0; i < numberPlayers - 1; i++)
                 playerIds[i] = i + 2;
 
-            StupidAIActor stupidAIActor = new StupidAIActor(this, playerIds);
-            actors.add(stupidAIActor);
+           /* if (numberPlayers == 2) {
+                final NetworkIP nw = new NetworkIP((int) System.currentTimeMillis());
+                //nw.startServer();
+                nw.clientConnect("127.0.0.1", 1234);
+                a = new NetworkActor(this, playerIds, nw);
+            } else*/
+            a = new StupidAIActor(this, playerIds);
+            actors.add(a);
+
         }
     }
 
@@ -181,10 +191,10 @@ public class GameManager implements Parcelable, Runnable {
         stopGameLoop();
         threadpool = new ScheduledThreadPoolExecutor(2);
         threadpool.scheduleAtFixedRate(this, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND), TimeUnit.MILLISECONDS);
-        for (Actor a :actors){
-            float rate= a.getExecFreq();
+        for (Actor a : actors) {
+            float rate = a.getExecFreq();
             if (rate > 0)
-                threadpool.scheduleAtFixedRate(a, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND/rate), TimeUnit.MILLISECONDS);
+                threadpool.scheduleAtFixedRate(a, 0, (long) (1000.0f / NUMBER_OF_UPDATES_PER_SECOND / rate), TimeUnit.MILLISECONDS);
             else
                 threadpool.schedule(a, 0, TimeUnit.MILLISECONDS);
         }
@@ -242,11 +252,10 @@ public class GameManager implements Parcelable, Runnable {
 
 
         //update UPS
-        if (getGameTime() % UPS_UPDATE_FREQ ==0)
-        {
+        if (getGameTime() % UPS_UPDATE_FREQ == 0) {
             long currTime = System.nanoTime();
-            ups=(float) UPS_UPDATE_FREQ /  (currTime-upsLastNanotime)  * 1e9f;
-            upsLastNanotime=currTime;
+            ups = (float) UPS_UPDATE_FREQ / (currTime - upsLastNanotime) * 1e9f;
+            upsLastNanotime = currTime;
         }
     }
 
@@ -379,7 +388,7 @@ public class GameManager implements Parcelable, Runnable {
 
     };
 
-    public synchronized int  getGameTime() {
+    public synchronized int getGameTime() {
         return gameTime;
     }
 

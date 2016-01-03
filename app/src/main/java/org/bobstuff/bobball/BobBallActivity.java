@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -74,7 +75,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private ActivityStateEnum activityState = ActivityStateEnum.GAMERUNNING;
 
     private DrawerLayout drawerLayout;
-    private View transparentView;
     private Spinner numPlayersSelector;
     private TextView messageView;
     private TextView statusTopleft;
@@ -101,7 +101,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView = (TextView) findViewById(R.id.message_label);
         messageView.bringToFront();
 
-        transparentView = findViewById(R.id.transparent_view);
         numPlayersSelector = (Spinner) findViewById(R.id.num_players);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -145,13 +144,14 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             public void onClick(View v) {
                 if (secretHandshake > 4) {
                     statusBotright.setTextColor(0xffCCCCFF);
-                    final NetworkIP n = new NetworkIP((int)System.currentTimeMillis());
-                    n.startServer();
-                    n.clientConnect("127.0.0.1",1234);
+                    //request a hidden service
+                    Intent intent = new Intent("org.torproject.android.REQUEST_HS_PORT");
+                    intent.setPackage("org.torproject.android");
+                    intent.putExtra("hs_port", 8477);
+                    startActivityForResult(intent, 9999);
                 }
             }
         });
-
 
         scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
         scores.loadScores();

@@ -67,19 +67,19 @@ public abstract class NetworkDispatcher {
         Connection con = new Connection(din, dout);
         this.cons.add(con);
 
-        if (in != null) { //start a listner for incoming messages
-            this.threadpool.execute(new StreamMsgListner(din, con, cons));
+        if (in != null) { //start a listener for incoming messages
+            this.threadpool.execute(new StreamMsgListener(din, con, cons));
         }
 
     }
 
 
-    class StreamMsgListner implements Runnable {
+    class StreamMsgListener implements Runnable {
         private DataInputStream in;
         private Connection mycon;
         private List<Connection> cons;
 
-        public StreamMsgListner(DataInputStream in, Connection mycon, List<Connection> cons) {
+        public StreamMsgListener(DataInputStream in, Connection mycon, List<Connection> cons) {
             this.in = in;
             this.mycon = mycon;
             this.cons = cons;
@@ -91,6 +91,7 @@ public abstract class NetworkDispatcher {
                 try {
                     NetworkMessage m = new NetworkMessage(this.in);
 
+                    System.out.println("Rcv msg " + m +"  on connection " + mycon);
                     // flood fill
                     for (Connection c: cons)
                     {

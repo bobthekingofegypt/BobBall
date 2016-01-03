@@ -13,5 +13,9 @@
     <string name="livesLabel">"Leben: "</string>
     <string name="scoreLabel">"Punkte: "</string>
     <string name="areaClearedLabel">"% bereinigt: "</string>
-
+    <string-array name="playerNumber">
+        <item>1 Spieler</item>
+        <item>2 Spieler</item>
+        <item>3 Spieler</item>
+    </string-array>
 </resources>

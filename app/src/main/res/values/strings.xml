@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="appName">BobBall</string>
+    <string name="start">Start</string>
     <string name="continueString">click to continue</string>
     <string name="highScoreAchieved">Congratulations, you have achieved a high score</string>
     <string name="pausedText">paused</string>
     <string name="bttnTextResume">resume playing</string>
     <string name="welcomeText">Welcome to BobBall</string>
     <string name="levelCompleted">"Well done, you have completed level %d"</string>
+    <string name="nextLevel">NEXT LEVEL</string>
     <string name="dead">You are dead</string>
+    <string name="retry">Retry</string>
     <string name="namePrompt">Enter your name:</string>
+    <string name="namePromptConfirm">ok</string>
+    <string name="defaultName">Unknown</string>
+    <string name="highscoreTitle">High Scores</string>
+    <string name="highscoreExit">ok</string>
     <string name="timeLeftLabel">"Time Left: %d"</string>
     <string name="livesLabel">"Lives: "</string>
     <string name="scoreLabel">"Score: "</string>

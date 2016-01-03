@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">BobBall</string>
-    <string name="continueString">Berühre um fortzusetzen</string>
-    <string name="highScoreAchieved">Glückwunsch, du hast einen neuen High Score erreicht</string>
-    <string name="pausedText">Pausiert</string>
-    <string name="bttnTextResume">Spiel fortsetzen</string>
-    <string name="welcomeText">Willkommen zu BobBall</string>
-    <string name="levelCompleted">"Gut gemacht, du hast Level %d beendet"</string>
-    <string name="dead">Du bist gestorben</string>
-    <string name="namePrompt">Gib deinen Namen ein:</string>
-    <string name="timeLeftLabel">"Übrige Zeit: %d"</string>
-    <string name="livesLabel">"Leben: "</string>
-    <string name="scoreLabel">"Punkte: "</string>
-    <string name="areaClearedLabel">"% bereinigt: "</string>
-    <string-array name="playerNumber">
-        <item>1 Spieler</item>
+	<string name="appName">BobBall</string>
+	<string name="start">Start</string>
+	<string name="continueString">Berühre um fortzusetzen</string>
+	<string name="highScoreAchieved">Glückwunsch, du hast einen neuen High Score erreicht</string>
+	<string name="pausedText">Pausiert</string>
+	<string name="bttnTextResume">Spiel fortsetzen</string>
+	<string name="welcomeText">Willkommen zu BobBall</string>
+	<string name="levelCompleted">"Gut gemacht, du hast Level %d beendet"</string>
+	<string name="nextLevel">NÄCHSTES LEVEL</string>
+	<string name="dead">Du bist gestorben</string>
+	<string name="retry">nochmal versuchen</string>
+	<string name="namePrompt">Gib deinen Namen ein:</string>
+	<string name="namePromptConfirm">ok</string>
+	<string name="defaultName">Unbekannt</string>
+	<string name="highscoreTitle">High Scores</string>
+	<string name="highscoreExit">ok</string>
+	<string name="timeLeftLabel">"Übrige Zeit: %d"</string>
+	<string name="livesLabel">"Leben: "</string>
+	<string name="scoreLabel">"Punkte: "</string>
+	<string name="areaClearedLabel">"% bereinigt: "</string>
+	<string-array name="playerNumber">
+		<item>1 Spieler</item>
         <item>2 Spieler</item>
         <item>3 Spieler</item>
-    </string-array>
+	</string-array>
 </resources>

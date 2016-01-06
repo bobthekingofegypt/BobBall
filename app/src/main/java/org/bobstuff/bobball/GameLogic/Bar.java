@@ -16,7 +16,8 @@ import android.os.Parcelable;
 public class Bar implements Parcelable {
     private BarDirection barDirection;
     private float speed;
-    private boolean active;
+    private boolean sectionOneActive;
+    private boolean sectionTwoActive;
     private BarSection sectionOne;
     private BarSection sectionTwo;
 
@@ -27,7 +28,8 @@ public class Bar implements Parcelable {
     public Bar(Bar other) {
         this.barDirection = other.barDirection;
         this.speed = other.speed;
-        this.active = other.active;
+        this.sectionOneActive = other.sectionOneActive;
+        this.sectionTwoActive = other.sectionTwoActive;
         if (other.sectionOne != null)
             this.sectionOne = new BarSection(other.sectionOne);
         if (other.sectionTwo != null)
@@ -44,81 +46,95 @@ public class Bar implements Parcelable {
 
     public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame) {
 
-        if (active) {
+        if (isActive()) {
             throw new IllegalStateException("Cannot start an already started bar!");
         }
 
-        active = true;
         barDirection = barDirectionIn;
 
         if (barDirection == BarDirection.VERTICAL) {
-            sectionOne = new BarSection(gridSquareFrame.left,
-                    gridSquareFrame.top,
-                    gridSquareFrame.right,
-                    gridSquareFrame.top,
-                    BarSection.MOVE_UP,
-                    speed);
-            sectionTwo = new BarSection(gridSquareFrame.left,
-                    gridSquareFrame.top,
-                    gridSquareFrame.right,
-                    gridSquareFrame.bottom,
-                    BarSection.MOVE_DOWN,
-                    speed);
+
+            if (!sectionOneActive) {
+                sectionOne = new BarSection(gridSquareFrame.left,
+                        gridSquareFrame.top,
+                        gridSquareFrame.right,
+                        gridSquareFrame.top,
+                        BarSection.MOVE_UP,
+                        speed);
+                sectionOneActive = true;
+            }
+
+            if (!sectionTwoActive) {
+                sectionTwo = new BarSection(gridSquareFrame.left,
+                        gridSquareFrame.top,
+                        gridSquareFrame.right,
+                        gridSquareFrame.bottom,
+                        BarSection.MOVE_DOWN,
+                        speed);
+                sectionTwoActive = true;
+            }
         } else {
-            sectionOne = new BarSection(gridSquareFrame.left,
-                    gridSquareFrame.top,
-                    gridSquareFrame.left,
-                    gridSquareFrame.bottom,
-                    BarSection.MOVE_LEFT,
-                    speed);
-            sectionTwo = new BarSection(gridSquareFrame.left,
-                    gridSquareFrame.top,
-                    gridSquareFrame.right,
-                    gridSquareFrame.bottom,
-                    BarSection.MOVE_RIGHT,
-                    speed);
+
+            if (!sectionOneActive) {
+                sectionOne = new BarSection(gridSquareFrame.left,
+                        gridSquareFrame.top,
+                        gridSquareFrame.left,
+                        gridSquareFrame.bottom,
+                        BarSection.MOVE_LEFT,
+                        speed);
+                sectionOneActive = true;
+            }
+
+            if (!sectionTwoActive) {
+                sectionTwo = new BarSection(gridSquareFrame.left,
+                        gridSquareFrame.top,
+                        gridSquareFrame.right,
+                        gridSquareFrame.bottom,
+                        BarSection.MOVE_RIGHT,
+                        speed);
+                sectionTwoActive = true;
+            }
         }
     }
 
     public void move() {
-        if (!active) {
+        if (!sectionOneActive && !sectionTwoActive) {
             return;
-        }
+        } else {
+            if (sectionOne != null) {
+                sectionOne.move();
+            } else {
+                sectionOneActive = false;
+            }
 
-        if (sectionOne != null) {
-            sectionOne.move();
-        }
-        if (sectionTwo != null) {
-            sectionTwo.move();
+            if (sectionTwo != null) {
+                sectionTwo.move();
+            } else {
+                sectionTwoActive = false;
+            }
         }
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isActive()
+    {
+        if (sectionOneActive && sectionTwoActive) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean collide(final Ball ball) {
-        if (!active) {
-            return false;
-        }
 
         if (sectionOne != null && ball.collide(sectionOne.getFrame())) {
             sectionOne = null;
-            if (sectionTwo == null) {
-                active = false;
-            }
+            sectionOneActive = false;
             return true;
         }
         if (sectionTwo != null && ball.collide(sectionTwo.getFrame())) {
             sectionTwo = null;
-            if (sectionOne == null) {
-                active = false;
-            }
+            sectionTwoActive = false;
             return true;
-        }
-
-        if (sectionOne == null && sectionTwo == null) {
-            active = false;
         }
 
         return false;
@@ -165,7 +181,8 @@ public class Bar implements Parcelable {
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(barDirection == BarDirection.VERTICAL ? 0 : 1);
-        dest.writeInt(active ? 1 : 0);
+        dest.writeInt(sectionOneActive ? 1 : 0);
+        dest.writeInt(sectionTwoActive ? 1 : 0);
         dest.writeFloat(speed);
 
         dest.writeParcelable(sectionOne, 0);
@@ -178,7 +195,8 @@ public class Bar implements Parcelable {
             ClassLoader classLoader = getClass().getClassLoader();
 
             int bd = in.readInt();
-            int active = in.readInt();
+            int sectionOneActive = in.readInt();
+            int sectionTwoActive = in.readInt();
             float speed = in.readFloat();
 
 
@@ -186,7 +204,8 @@ public class Bar implements Parcelable {
             bar.sectionOne = in.readParcelable(classLoader);
             bar.sectionTwo = in.readParcelable(classLoader);
             bar.barDirection = (bd == 0) ? BarDirection.VERTICAL : BarDirection.HORIZONTAL;
-            bar.active = active > 0;
+            bar.sectionOneActive = sectionOneActive > 0;
+            bar.sectionTwoActive = sectionTwoActive > 0;
 
             return bar;
         }

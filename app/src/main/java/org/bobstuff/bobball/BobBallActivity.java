@@ -46,7 +46,7 @@ import org.bobstuff.bobball.Network.NetworkIP;
 
 
 enum ActivityStateEnum {
-    GAMEINTRO, GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON
+    GAMEINTRO, GAMERUNNING, GAMEPAUSED, GAMELOST, GAMEWON, GAMELOST_TOPSCORE
 }
 
 public class BobBallActivity extends Activity implements SurfaceHolder.Callback, OnClickListener, OnTouchListener {
@@ -249,6 +249,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void promptUsername() {
+        activityState = ActivityStateEnum.GAMELOST_TOPSCORE;
         final EditText input = new EditText(this);
         new AlertDialog.Builder(this)
                 .setTitle(R.string.namePrompt)
@@ -263,6 +264,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                         }
                         scores.addScore(valueString, gameManager.getCurrGameState().getPlayer(playerId).getScore());
                         showTopScores();
+                        activityState = ActivityStateEnum.GAMELOST;
                     }
                 }).show();
     }
@@ -300,7 +302,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         button.setText(R.string.retry);
         setMessageViewsVisible(true);
         numPlayersSelector.setVisibility(View.INVISIBLE);
-        activityState = ActivityStateEnum.GAMELOST;
+        if (activityState != ActivityStateEnum.GAMELOST_TOPSCORE){ activityState = ActivityStateEnum.GAMELOST; }
     }
 
     private void showIntroScreen() {
@@ -387,6 +389,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             showPauseScreen();
         } else if (activityState == ActivityStateEnum.GAMELOST) {
             showDeadScreen();
+        } else if (activityState == ActivityStateEnum.GAMELOST_TOPSCORE){
+            promptUsername();
         } else if (activityState == ActivityStateEnum.GAMEWON) {
             showWonScreen();
         }

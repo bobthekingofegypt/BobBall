@@ -42,7 +42,6 @@ import org.bobstuff.bobball.GameLogic.GameEventStartBar;
 import org.bobstuff.bobball.GameLogic.GameManager;
 import org.bobstuff.bobball.GameLogic.GameState;
 import org.bobstuff.bobball.GameLogic.Grid;
-import org.bobstuff.bobball.Network.NetworkIP;
 
 
 enum ActivityStateEnum {
@@ -326,11 +325,16 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             initialTouchPoint = null;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             if (initialTouchPoint != null && gameManager.getGrid().validPoint(initialTouchPoint.x, initialTouchPoint.y)) {
-                TouchDirection dir = null;
-                if (evPoint.x > (initialTouchPoint.x + TOUCH_DETECT_SQUARES) || evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES)
-                    dir = TouchDirection.HORIZONTAL;
-                else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES) || evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
-                    dir = TouchDirection.VERTICAL;
+                Direction dir = null;
+                if (evPoint.x > (initialTouchPoint.x + TOUCH_DETECT_SQUARES))
+                    dir = Direction.RIGHT;
+                else if  (evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES)
+                    dir = Direction.LEFT;
+                else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES))
+                    dir = Direction.UP;
+                else if (evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
+                    dir = Direction.DOWN;
+
                 if (dir != null) {
                     gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime(), initialTouchPoint, dir, playerId));
                     initialTouchPoint = null;

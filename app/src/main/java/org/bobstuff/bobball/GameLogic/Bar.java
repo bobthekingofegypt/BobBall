@@ -12,24 +12,20 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.bobstuff.bobball.Direction;
+
 
 public class Bar implements Parcelable {
-    private BarDirection barDirection;
     private float speed;
-    private boolean sectionOneActive;
-    private boolean sectionTwoActive;
-    private BarSection sectionOne;
-    private BarSection sectionTwo;
+    private BarSection sectionOne = null;
+    private BarSection sectionTwo = null;
 
     public Bar(float speed) {
         this.speed = speed;
     }
 
     public Bar(Bar other) {
-        this.barDirection = other.barDirection;
         this.speed = other.speed;
-        this.sectionOneActive = other.sectionOneActive;
-        this.sectionTwoActive = other.sectionTwoActive;
         if (other.sectionOne != null)
             this.sectionOne = new BarSection(other.sectionOne);
         if (other.sectionTwo != null)
@@ -44,96 +40,79 @@ public class Bar implements Parcelable {
         return sectionTwo;
     }
 
-    public void start(final BarDirection barDirectionIn, final RectF gridSquareFrame) {
+    public void tryStartHalfbar(final Direction barDirection, final RectF gridSquareFrame) {
 
-        if (isActive()) {
-            throw new IllegalStateException("Cannot start an already started bar!");
+        if ((sectionOne != null) && (sectionTwo != null))
+            return;
+
+        float x2 = gridSquareFrame.right;
+        float y2 = gridSquareFrame.bottom;
+
+        if (barDirection == Direction.UP)
+            y2 = gridSquareFrame.top;
+        if (barDirection == Direction.LEFT)
+            x2 = gridSquareFrame.left;
+
+        BarSection bs = new BarSection(
+                gridSquareFrame.left,
+                gridSquareFrame.top,
+                x2,
+                y2,
+                barDirection,
+                speed);
+
+        if (sectionOne == null) {
+            sectionOne = bs;
+            return;
         }
 
-        barDirection = barDirectionIn;
+        if (sectionTwo == null) {
+            sectionTwo = bs;
+            return;
+        }
 
-        if (barDirection == BarDirection.VERTICAL) {
+    }
 
-            if (!sectionOneActive) {
-                sectionOne = new BarSection(gridSquareFrame.left,
-                        gridSquareFrame.top,
-                        gridSquareFrame.right,
-                        gridSquareFrame.top,
-                        BarSection.MOVE_UP,
-                        speed);
-                sectionOneActive = true;
-            }
-
-            if (!sectionTwoActive) {
-                sectionTwo = new BarSection(gridSquareFrame.left,
-                        gridSquareFrame.top,
-                        gridSquareFrame.right,
-                        gridSquareFrame.bottom,
-                        BarSection.MOVE_DOWN,
-                        speed);
-                sectionTwoActive = true;
-            }
-        } else {
-
-            if (!sectionOneActive) {
-                sectionOne = new BarSection(gridSquareFrame.left,
-                        gridSquareFrame.top,
-                        gridSquareFrame.left,
-                        gridSquareFrame.bottom,
-                        BarSection.MOVE_LEFT,
-                        speed);
-                sectionOneActive = true;
-            }
-
-            if (!sectionTwoActive) {
-                sectionTwo = new BarSection(gridSquareFrame.left,
-                        gridSquareFrame.top,
-                        gridSquareFrame.right,
-                        gridSquareFrame.bottom,
-                        BarSection.MOVE_RIGHT,
-                        speed);
-                sectionTwoActive = true;
-            }
+    public void start(final Direction barDirection, final RectF gridSquareFrame) {
+        switch (barDirection) {
+            case LEFT:
+                tryStartHalfbar(Direction.LEFT, gridSquareFrame);
+                tryStartHalfbar(Direction.RIGHT, gridSquareFrame);
+                break;
+            case RIGHT:
+                tryStartHalfbar(Direction.RIGHT, gridSquareFrame);
+                tryStartHalfbar(Direction.LEFT, gridSquareFrame);
+                break;
+            case UP:
+                tryStartHalfbar(Direction.UP, gridSquareFrame);
+                tryStartHalfbar(Direction.DOWN, gridSquareFrame);
+                break;
+            case DOWN:
+                tryStartHalfbar(Direction.DOWN, gridSquareFrame);
+                tryStartHalfbar(Direction.UP, gridSquareFrame);
+                break;
         }
     }
 
     public void move() {
-        if (!sectionOneActive && !sectionTwoActive) {
-            return;
-        } else {
-            if (sectionOne != null) {
-                sectionOne.move();
-            } else {
-                sectionOneActive = false;
-            }
-
-            if (sectionTwo != null) {
-                sectionTwo.move();
-            } else {
-                sectionTwoActive = false;
-            }
+        if (sectionOne != null) {
+            sectionOne.move();
         }
-    }
 
-    public boolean isActive()
-    {
-        if (sectionOneActive && sectionTwoActive) {
-            return true;
-        } else {
-            return false;
+        if (sectionTwo != null) {
+            sectionTwo.move();
         }
+
     }
 
     public boolean collide(final Ball ball) {
 
         if (sectionOne != null && ball.collide(sectionOne.getFrame())) {
             sectionOne = null;
-            sectionOneActive = false;
             return true;
         }
         if (sectionTwo != null && ball.collide(sectionTwo.getFrame())) {
             sectionTwo = null;
-            sectionTwoActive = false;
             return true;
         }
 
@@ -180,9 +159,6 @@ public class Bar implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(barDirection == BarDirection.VERTICAL ? 0 : 1);
-        dest.writeInt(sectionOneActive ? 1 : 0);
-        dest.writeInt(sectionTwoActive ? 1 : 0);
         dest.writeFloat(speed);
 
         dest.writeParcelable(sectionOne, 0);
@@ -194,18 +170,11 @@ public class Bar implements Parcelable {
         public Bar createFromParcel(Parcel in) {
             ClassLoader classLoader = getClass().getClassLoader();
 
-            int bd = in.readInt();
-            int sectionOneActive = in.readInt();
-            int sectionTwoActive = in.readInt();
             float speed = in.readFloat();
-
 
             Bar bar = new Bar(speed);
             bar.sectionOne = in.readParcelable(classLoader);
             bar.sectionTwo = in.readParcelable(classLoader);
-            bar.barDirection = (bd == 0) ? BarDirection.VERTICAL : BarDirection.HORIZONTAL;
-            bar.sectionOneActive = sectionOneActive > 0;
-            bar.sectionTwoActive = sectionTwoActive > 0;
 
             return bar;
         }

@@ -107,7 +107,6 @@ public class GameManager implements Parcelable, Runnable {
             } else*/
             a = new StupidAIActor(this, playerIds);
             actors.add(a);
-
         }
     }
 
@@ -317,8 +316,7 @@ public class GameManager implements Parcelable, Runnable {
             // ball hits bar?
             for (Player player : gameState.getPlayers()) {
                 if (player.bar.collide(ball)) {
-                    //Log.d(TAG, "@" + gameState.time + " bar finished (wall) for player " + player.getPlayerId() + " bar active:" + player.bar.isActive() + player.bar.getSectionOne() + player.bar.getSectionTwo());
-
+                    //Log.d(TAG, "@" + gameState.time + " bar finished (wall) for player " + player.getPlayerId() + " bar active:" + player.bar.canStartBar() + player.bar.getSectionOne() + player.bar.getSectionTwo());
                     player.setLives(player.getLives() - 1);
                 }
             }

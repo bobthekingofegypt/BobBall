@@ -5,7 +5,7 @@ import org.bobstuff.bobball.GameLogic.GameManager;
 
 // an actor is someone that controls one or multiple players
 // an actors run method is called *roughly* on every gamestep
-public abstract class Actor implements Runnable {
+public abstract class  Actor implements Runnable {
     protected GameManager gameManager;
     protected int[] playerIds;
     /**

@@ -7,7 +7,7 @@ import org.bobstuff.bobball.GameLogic.GameEventStartBar;
 import org.bobstuff.bobball.GameLogic.GameManager;
 import org.bobstuff.bobball.GameLogic.GameState;
 import org.bobstuff.bobball.GameLogic.Grid;
-import org.bobstuff.bobball.TouchDirection;
+import org.bobstuff.bobball.Direction;
 
 import java.util.Random;
 
@@ -46,7 +46,7 @@ public class StupidAIActor extends Actor {
             PointF p;
 
             int tries = 20;
-            TouchDirection dir = (randomGenerator.nextBoolean() ? TouchDirection.HORIZONTAL : TouchDirection.VERTICAL);
+            Direction dir = Direction.getRandom(randomGenerator);
             do {
                 tries--;
                 float xPoint;

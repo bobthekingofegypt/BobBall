@@ -4,9 +4,8 @@ import android.graphics.PointF;
 import android.os.Parcel;
 
 import org.bobstuff.bobball.Player;
-import org.bobstuff.bobball.TouchDirection;
+import org.bobstuff.bobball.Direction;
 
-import static org.bobstuff.bobball.GameLogic.BarDirection.fromTouchDirection;
 
 public class GameEventStartBar extends GameEvent {
     public static final Creator<GameEventStartBar> CREATOR = new Creator<GameEventStartBar>() {
@@ -21,11 +20,11 @@ public class GameEventStartBar extends GameEvent {
         }
     };
     private final PointF origin;
-    private final TouchDirection dir;
+    private final Direction dir;
     private final int playerId;
 
     public GameEventStartBar(final int time, final PointF origin,
-                             final TouchDirection dir, int playerId) {
+                             final Direction dir, int playerId) {
         super(time);
 
         this.origin = origin;
@@ -39,7 +38,7 @@ public class GameEventStartBar extends GameEvent {
         super(in);
         ClassLoader classLoader = getClass().getClassLoader();
         origin = in.readParcelable(classLoader);
-        dir = TouchDirection.values()[in.readInt()];
+        dir = in.readParcelable(classLoader);
         playerId = in.readInt();
     }
 
@@ -47,15 +46,15 @@ public class GameEventStartBar extends GameEvent {
     public void apply(GameState gs) {
         Player player = gs.getPlayer(playerId);
         Bar bar = player.bar;
-        if (!bar.isActive() && player.getLives() > 0)
-            bar.start(fromTouchDirection(dir), gs.getGrid().getGridSquareFrameContainingPoint(origin));
+        if (player.getLives() > 0)
+            bar.start(dir, gs.getGrid().getGridSquareFrameContainingPoint(origin));
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeParcelable(origin, flags);
-        dest.writeInt(dir.ordinal());
+        dest.writeParcelable(dir, flags);
         dest.writeInt(playerId);
     }
 

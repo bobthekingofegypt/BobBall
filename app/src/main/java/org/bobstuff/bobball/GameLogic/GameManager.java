@@ -81,17 +81,18 @@ public class GameManager implements Parcelable, Runnable {
         pendingGameEv.addEvent(ev);
         singleStepGameLoop();
 
-        actors.clear();
-        //for (Actor a :actors){
-        //    a.reset();
-        //}
+        for (Actor a :actors){
+            a.reset();
+        }
     }
 
     public synchronized void newGame(int numberPlayers) {
         gameStates.clear();
         gameStates.addFirst(new GameState(numberPlayers + 1));
         getCurrGameState().level = 1;
+        actors.clear();
         reset();
+
 
         if (numberPlayers > 1) {//fixme
             int[] playerIds = new int[numberPlayers - 1];

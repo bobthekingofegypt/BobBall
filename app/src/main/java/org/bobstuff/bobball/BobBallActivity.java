@@ -331,9 +331,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 else if  (evPoint.x < initialTouchPoint.x - TOUCH_DETECT_SQUARES)
                     dir = Direction.LEFT;
                 else if (evPoint.y > (initialTouchPoint.y + TOUCH_DETECT_SQUARES))
-                    dir = Direction.UP;
-                else if (evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
                     dir = Direction.DOWN;
+                else if (evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
+                    dir = Direction.UP;
 
                 if (dir != null) {
                     gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime(), initialTouchPoint, dir, playerId));

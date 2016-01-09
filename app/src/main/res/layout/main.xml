@@ -101,13 +101,52 @@
                 android:textColor="#ffffffff"
                 android:gravity="center"/>
 
-            <Spinner
-                android:visibility="invisible"
-                android:id="@+id/num_players"
+            <LinearLayout
+                android:id="@+id/playerSelect"
+                android:layout_height="wrap_content"
                 android:layout_width="fill_parent"
+                android:visibility = "gone">
+
+                <TextView
+                    android:id="@+id/NumPlayersText"
+                    android:layout_height="fill_parent"
+                    android:text="@string/playerNumber"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:gravity="center"
+                    android:layout_gravity="center" />
+
+                <Spinner
+                android:id="@+id/num_players"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"/>
 
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/levelSelect"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:visibility = "gone">
+
+            <TextView
+                android:id="@+id/levelSelectText"
+                android:layout_height="fill_parent"
+                android:text="@string/levelSelect"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:gravity="center"
+                android:layout_gravity="center" />
+
+            <Spinner
+                    android:id="@+id/level_select"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+        </LinearLayout>
             <Button
                 android:id="@+id/continue_button"
                 android:layout_width="wrap_content"

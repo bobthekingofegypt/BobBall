@@ -395,6 +395,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             showDeadScreen();
         } else if (activityState == ActivityStateEnum.GAMELOST_TOPSCORE){
             promptUsername();
+            showDeadScreen();
         } else if (activityState == ActivityStateEnum.GAMEWON) {
             showWonScreen();
         }

@@ -86,10 +86,10 @@ public class GameManager implements Parcelable, Runnable {
         }
     }
 
-    public synchronized void newGame(int numberPlayers) {
+    public synchronized void newGame(int numberPlayers, int level) {
         gameStates.clear();
         gameStates.addFirst(new GameState(numberPlayers + 1));
-        getCurrGameState().level = 1;
+        getCurrGameState().level = level;
         actors.clear();
         reset();
 

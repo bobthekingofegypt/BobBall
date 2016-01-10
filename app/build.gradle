@@ -8,8 +8,8 @@ android {
         applicationId "org.bobstuff.bobball"
         minSdkVersion 10
         targetSdkVersion 23
-        versionCode 21
-        versionName "1.12.1"
+        versionCode 22
+        versionName "1.13"
     }
     buildTypes {
         release {

@@ -29,9 +29,6 @@
 	<string name="livesLabel">"Lives: "</string>
 	<string name="scoreLabel">"Score: "</string>
 	<string name="areaClearedLabel">"% Cleared: "</string>
-	<string-array name="playerNumber">
-		<item>1 Player</item>
-		<item>2 Players</item>
-		<item>3 Players</item>
-	</string-array>
+	<string name="playerNumber">"Players "</string>
+    	<string name="levelSelect">"Level "</string>
 </resources>

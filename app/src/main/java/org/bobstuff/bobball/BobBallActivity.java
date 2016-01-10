@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -35,6 +37,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -42,6 +45,9 @@ import org.bobstuff.bobball.GameLogic.GameEventStartBar;
 import org.bobstuff.bobball.GameLogic.GameManager;
 import org.bobstuff.bobball.GameLogic.GameState;
 import org.bobstuff.bobball.GameLogic.Grid;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 enum ActivityStateEnum {
@@ -58,6 +64,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     static final int playerId = 1; //fixme hardcoded playerid
     int numPlayers = 1;
+    int level = 1;
 
     private Handler handler = new Handler();
     private DisplayLoop displayLoop = new DisplayLoop();
@@ -75,12 +82,17 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private DrawerLayout drawerLayout;
     private Spinner numPlayersSelector;
+    private Spinner levelSelector;
+    private LinearLayout playerSelect;
+    private LinearLayout levelSelect;
     private TextView messageView;
     private TextView statusTopleft;
     private TextView statusBotleft;
     private TextView statusTopright;
     private TextView statusBotright;
     private Button button;
+
+    private SharedPreferences sharedPreferences;
 
 
     @Override
@@ -100,12 +112,14 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView = (TextView) findViewById(R.id.message_label);
         messageView.bringToFront();
 
-        numPlayersSelector = (Spinner) findViewById(R.id.num_players);
+        playerSelect = (LinearLayout) findViewById (R.id.playerSelect);
+        levelSelect = (LinearLayout) findViewById (R.id.levelSelect);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.playerNumber, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        numPlayersSelector.setAdapter(adapter);
+        numPlayersSelector = (Spinner) findViewById(R.id.num_players);
+        levelSelector = (Spinner) findViewById(R.id.level_select);
+
+        numPlayersSelector.setAdapter(createDropdown(3));
+        levelSelector.setAdapter(createDropdown(getHighestLevel()));
 
         button = (Button) findViewById(R.id.continue_button);
         button.setOnClickListener(this);
@@ -242,6 +256,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             if ((numPlayers == 1) && scores.isTopScore(currPlayer.getScore())) {
                 promptUsername();
             }
+
             showDeadScreen();
         }
 
@@ -284,15 +299,18 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         activityState = ActivityStateEnum.GAMEPAUSED;
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
-        numPlayersSelector.setVisibility(View.INVISIBLE);
+        playerSelect.setVisibility(View.GONE);
+        levelSelect.setVisibility(View.GONE);
         setMessageViewsVisible(true);
     }
 
     private void showWonScreen() {
+        saveHighestLevel(gameManager.getLevel() + 1);
         messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
         button.setText(R.string.nextLevel);
         setMessageViewsVisible(true);
-        numPlayersSelector.setVisibility(View.INVISIBLE);
+        playerSelect.setVisibility(View.GONE);
+        levelSelect.setVisibility(View.GONE);
         activityState = ActivityStateEnum.GAMEWON;
     }
 
@@ -300,13 +318,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView.setText(R.string.dead);
         button.setText(R.string.retry);
         setMessageViewsVisible(true);
-        numPlayersSelector.setVisibility(View.INVISIBLE);
+        playerSelect.setVisibility(View.GONE);
+        levelSelect.setVisibility(View.GONE);
         if (activityState != ActivityStateEnum.GAMELOST_TOPSCORE){ activityState = ActivityStateEnum.GAMELOST; }
     }
 
     private void showIntroScreen() {
         messageView.setText(R.string.welcomeText);
-        numPlayersSelector.setVisibility(View.VISIBLE);
+        playerSelect.setVisibility(View.VISIBLE);
+        levelSelect.setVisibility(View.VISIBLE);
         button.setText(R.string.start);
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEINTRO;
@@ -351,12 +371,12 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             gameView.reset(gameManager.getCurrGameState());
     }
 
-    private void resetGame(int numberPlayers) {
+    private void resetGame(int numberPlayers, int level) {
         handler.removeCallbacks(displayLoop);
         if (gameManager != null)
             gameManager.stopGameLoop();
         gameManager = new GameManager();
-        gameManager.newGame(numberPlayers);
+        gameManager.newGame(numberPlayers, level);
         reinitGame();
     }
 
@@ -395,6 +415,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             showDeadScreen();
         } else if (activityState == ActivityStateEnum.GAMELOST_TOPSCORE){
             promptUsername();
+            showDeadScreen();
         } else if (activityState == ActivityStateEnum.GAMEWON) {
             showWonScreen();
         }
@@ -440,7 +461,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             showIntroScreen();
         } else if (activityState == ActivityStateEnum.GAMEINTRO) {
             numPlayers = numPlayersSelector.getSelectedItemPosition() + 1;
-            resetGame(numPlayers);
+            level = levelSelector.getSelectedItemPosition() + 1;
+            resetGame(numPlayers, level);
             startGame();
         } else if (activityState == ActivityStateEnum.GAMEPAUSED) {
             startGame();
@@ -462,6 +484,35 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         } else {
             drawerLayout.closeDrawer(GravityCompat.START);
         }
+    }
+
+    public int getHighestLevel() {
+        SharedPreferences bestLevel = getSharedPreferences("level", MODE_PRIVATE);
+        return bestLevel.getInt("level", 1);
+    }
+
+    public void saveHighestLevel(int levelReached) {
+        int topLevel = getHighestLevel();
+
+        if (topLevel < levelReached) {
+            SharedPreferences bestLevel = getSharedPreferences("level", MODE_PRIVATE);
+            Editor editor = bestLevel.edit();
+            editor.putInt("level", levelReached);
+            editor.commit();
+            levelSelector.setAdapter(createDropdown(levelReached));
+        }
+    }
+
+    protected ArrayAdapter createDropdown (int count) {
+        List<String> dropdownItems = new ArrayList<>();
+
+        for (int i = 1; i <= count; i++) { dropdownItems.add("" + i); }
+
+        ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, dropdownItems);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        return adapter;
     }
 
     private class DisplayLoop implements Runnable {

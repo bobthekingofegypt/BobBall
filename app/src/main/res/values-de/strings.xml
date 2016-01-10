@@ -14,15 +14,12 @@
 	<string name="namePrompt">Gib deinen Namen ein:</string>
 	<string name="namePromptConfirm">ok</string>
 	<string name="defaultName">Unbekannt</string>
-	<string name="highscoreTitle">High Scores</string>
+	<string name="highscoreTitle">Bestenliste</string>
 	<string name="highscoreExit">ok</string>
 	<string name="timeLeftLabel">"Übrige Zeit: %d"</string>
 	<string name="livesLabel">"Leben: "</string>
 	<string name="scoreLabel">"Punkte: "</string>
 	<string name="areaClearedLabel">"% bereinigt: "</string>
-	<string-array name="playerNumber">
-		<item>1 Spieler</item>
-        <item>2 Spieler</item>
-        <item>3 Spieler</item>
-	</string-array>
+	<string name="playerNumber">"Spieler "</string>
+	<string name="levelSelect">"Level "</string>
 </resources>

@@ -22,12 +22,12 @@ BobBall is a simple [free/libre](https://www.gnu.org/philosophy/free-sw.html) an
 
 If you like to improve BobBall feel free to send a pull request, there is plenty to do!
 
-(small/easy tasks)[https://github.com/bobthekingofegypt/BobBall/labels/easy-task]	
+[small/easy tasks](https://github.com/bobthekingofegypt/BobBall/labels/easy-task)	
 
 
-(medium tasks)[https://github.com/bobthekingofegypt/BobBall/labels/medium-task]
+[medium tasks](https://github.com/bobthekingofegypt/BobBall/labels/medium-task)
 
 
-(big/hard tasks)[https://github.com/bobthekingofegypt/BobBall/labels/hard-task]
+[big/hard tasks](https://github.com/bobthekingofegypt/BobBall/labels/hard-task)
 
 

@@ -22,18 +22,12 @@ BobBall is a simple [free/libre](https://www.gnu.org/philosophy/free-sw.html) an
 
 If you like to improve BobBall feel free to send a pull request, there is plenty to do!
 
-### small/easy tasks
+(small/easy tasks)[https://github.com/bobthekingofegypt/BobBall/labels/easy-task]	
 
-* move the remaining hardcoded strings to strings.xml
-* translate strings.xml to some other languages
 
-### medium tasks
+(medium tasks)[https://github.com/bobthekingofegypt/BobBall/labels/medium-task]
 
-* add a nice introduction screen
-* add a menu screen
-* introduce multiple difficulty settings
-* share your high score with a screenshot
 
-### big/hard tasks
+(big/hard tasks)[https://github.com/bobthekingofegypt/BobBall/labels/hard-task]
 
-* add a multiplayer mode, e.g. cooperative play via bluetooth
+

@@ -86,7 +86,7 @@
 
         <LinearLayout
             android:id="@+id/message_layout"
-            android:layout_width="@dimen/abc_search_view_text_min_width"
+            android:layout_width="500dip"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:orientation="vertical"

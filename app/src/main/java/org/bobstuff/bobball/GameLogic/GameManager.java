@@ -28,7 +28,6 @@ public class GameManager implements Parcelable, Runnable {
 
     public static final int NUMBER_OF_ROWS = 28;
     public static final int NUMBER_OF_COLUMNS = 20;
-    public static final int LEVEL_DURATION_TICKS = 20000;
     public static final int UPS_UPDATE_FREQ = 128;
     public static final float INITIAL_BALL_SPEED = 0.025f;
     public static final float BAR_SPEED = INITIAL_BALL_SPEED;
@@ -36,6 +35,8 @@ public class GameManager implements Parcelable, Runnable {
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
     public static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
+
+    public static int LEVEL_DURATION_TICKS = 12500;
 
     private int seed;
 
@@ -87,6 +88,7 @@ public class GameManager implements Parcelable, Runnable {
     }
 
     public synchronized void newGame(int numberPlayers, int level) {
+        LEVEL_DURATION_TICKS = 12500 + level * 2500;
         gameStates.clear();
         gameStates.addFirst(new GameState(numberPlayers + 1));
         getCurrGameState().level = level;
@@ -115,6 +117,8 @@ public class GameManager implements Parcelable, Runnable {
     public synchronized void nextLevel() {
         GameState gs = getCurrGameState();
         int level = gs.level;
+
+        LEVEL_DURATION_TICKS += 2500;
 
         //update scores
         for (Player player : gs.getPlayers()) {

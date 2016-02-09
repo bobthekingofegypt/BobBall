@@ -92,9 +92,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private TextView statusBotright;
     private Button button;
 
-    private SharedPreferences sharedPreferences;
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +99,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.main);
+
+        Preferences.setContext (getApplicationContext());
 
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface_view);
         surfaceView.setOnTouchListener(this);
@@ -119,7 +118,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         levelSelector = (Spinner) findViewById(R.id.level_select);
 
         numPlayersSelector.setAdapter(createDropdown(3));
-        levelSelector.setAdapter(createDropdown(getHighestLevel()));
+        levelSelector.setAdapter(createDropdown(Statistics.getHighestLevel()));
 
         button = (Button) findViewById(R.id.continue_button);
         button.setOnClickListener(this);
@@ -166,7 +165,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             }
         });
 
-        scores = new Scores(getSharedPreferences("scores", Context.MODE_PRIVATE));
+        scores = new Scores();
         scores.loadScores();
 
         if (savedInstanceState == null) {
@@ -305,7 +304,14 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showWonScreen() {
-        saveHighestLevel(gameManager.getLevel() + 1);
+        int previousHighestLevel = Statistics.getHighestLevel();
+        Statistics.setHighestLevel(gameManager.getLevel() + 1);
+        int currentHighestLevel = Statistics.getHighestLevel();
+
+        if (previousHighestLevel != currentHighestLevel) {
+            levelSelector.setAdapter(createDropdown(currentHighestLevel));
+        }
+
         messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
         button.setText(R.string.nextLevel);
         setMessageViewsVisible(true);
@@ -483,23 +489,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             drawerLayout.openDrawer(GravityCompat.START);
         } else {
             drawerLayout.closeDrawer(GravityCompat.START);
-        }
-    }
-
-    public int getHighestLevel() {
-        SharedPreferences bestLevel = getSharedPreferences("level", MODE_PRIVATE);
-        return bestLevel.getInt("level", 1);
-    }
-
-    public void saveHighestLevel(int levelReached) {
-        int topLevel = getHighestLevel();
-
-        if (topLevel < levelReached) {
-            SharedPreferences bestLevel = getSharedPreferences("level", MODE_PRIVATE);
-            Editor editor = bestLevel.edit();
-            editor.putInt("level", levelReached);
-            editor.commit();
-            levelSelector.setAdapter(createDropdown(levelReached));
         }
     }
 

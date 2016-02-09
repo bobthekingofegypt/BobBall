@@ -19,15 +19,13 @@ public class Scores {
 	private static final String SCORE_SEPERATOR = "~~";
 	private static final String ENTRY_SEPERATOR = "::";
 	private List<Score> topScores;
-	private SharedPreferences sharedPreferences;
-	
-	public Scores(SharedPreferences sharedPreferences) {
+
+	public Scores() {
 		this.topScores = new ArrayList<>();
-		this.sharedPreferences = sharedPreferences;
 	}
 	
 	public void loadScores() {
-		String scores = sharedPreferences.getString("scores", "");
+		String scores = Preferences.loadValue("scores", "");
 		StringTokenizer splitEntries = new StringTokenizer(scores, SCORE_SEPERATOR);
 		while (splitEntries.hasMoreElements()) {
 			String scoreString = splitEntries.nextToken();
@@ -50,9 +48,7 @@ public class Scores {
 			}
 		}
 		
-		Editor editor = sharedPreferences.edit();
-		editor.putString("scores", sb.toString());
-		editor.commit();
+		Preferences.saveValue("scores", sb.toString());
 	}
 	
 	public CharSequence[] asCharSequence() {

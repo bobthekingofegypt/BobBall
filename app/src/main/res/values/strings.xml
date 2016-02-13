@@ -1,25 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="appName">BobBall</string>
-    <string name="start">Start</string>
-    <string name="continueString">click to continue</string>
-    <string name="highScoreAchieved">Congratulations, you have achieved a high score</string>
-    <string name="pausedText">paused</string>
-    <string name="bttnTextResume">resume playing</string>
-    <string name="welcomeText">Welcome to BobBall</string>
-    <string name="levelCompleted">"Well done, you have completed level %d"</string>
-    <string name="nextLevel">NEXT LEVEL</string>
-    <string name="dead">You are dead</string>
-    <string name="retry">Retry</string>
-    <string name="namePrompt">Enter your name:</string>
-    <string name="namePromptConfirm">ok</string>
-    <string name="defaultName">Unknown</string>
-    <string name="highscoreTitle">High Scores</string>
-    <string name="highscoreExit">ok</string>
+
+    <!-- screen in game -->
     <string name="timeLeftLabel">"Time Left: %d"</string>
     <string name="livesLabel">"Lives: "</string>
     <string name="scoreLabel">"Score: "</string>
     <string name="areaClearedLabel">"% Cleared: "</string>
+
+    <!-- menus in game -->
+    <string name="confirm">OK</string>
+
+        <!-- name prompt menu -->
+        <string name="highScoreAchieved">Congratulations, you have achieved a high score</string>
+        <string name="namePrompt">Enter your name:</string>
+        <string name="defaultName">Unknown</string>
+
+        <!-- pause menu -->
+        <string name="pausedText">paused</string>
+        <string name="bttnTextResume">resume playing</string>
+        <string name="backToLevelSelect">back to level select</string>
+
+        <!-- won menu -->
+        <string name="levelCompleted">"Well done, you have completed level %d"</string>
+        <string name="nextLevel">NEXT LEVEL</string>
+
+        <!-- lost menu -->
+        <string name="dead">You are dead</string>
+        <string name="retry">Retry</string>
+
+    <!-- Menus -->
+    <string name="menuBackButton">Back to Main Menu</string>
+    <string name="exitApp">Exit</string>
+
+    <!-- Help Menu -->
+    <string name="helpTitle">Help</string>
+    <string name="helpText">How to play the game:
+        \nStart bars
+        \nSwipe over the screen in order to start two bars. You control the direction and starting point of the bars with that swipe.
+        \n
+        \nBars
+        \nIf one bar is touched by a red ball, it will be destroyed and you loose a life. When the other bar hasn\'t finished yet and wasn\'t destroyed you can start a single bar by swiping over the screen again.
+        \n
+        \nClear areas
+        \nIf you completely surround an area with successfully set bars and/or the borders of the field and there is no ball in it, it will be cleared.
+        \n
+        \nTime limit
+        \nThe time limit is displayed in milliseconds * 10. You get more time the higher the levels are. When the remaining time reaches 0 you loose the game.
+        \n
+        \nLives
+        \nYou loose a life whenever one of your bars is destroyed. If you loose all lives, the game will be over.
+        \n
+        \nGoal of the Game:
+        \nThe goal of every level is to clear 75 % of the field.
+        \n
+        \nBots
+        \nIf you select a higher number than 1 for "Players" you will play with bots. Those bots have the same abilities like you. You will only get the points for the areas cleared by your color in this mode.
+        \n
+        \nUnlocking levels
+        \nTo unlock a level you have to win the previous level. The levels are unlocked separately for bot mode and single player mode.
+    </string>
+
+    <!-- High Scores Menu -->
+    <string name="highScoreTitle">High Scores</string>
+    <string name="noRecords">No records found</string>
+
+    <!-- Options Menu -->
+    <string name="optionsTitle">Options</string>
+    <string name="setDefaultName">Default name :</string>
+    <string name="levelSelectSettingsText">Auto level select:</string>
+    <string-array name="levelSelectSettings">
+        <item>level 1</item>
+        <item>last selected level</item>
+        <item>highest available level</item>
+        <item>last level lost</item>
+    </string-array>
+    <string name="retryActionSettingsText">retry button action:</string>
+    <string-array name="retryActionSettings">
+        <item>Go back to level select</item>
+        <item>Restart from lost level</item>
+        <item>Restart from selected level</item>
+        <item>Restart from first level</item>
+    </string-array>
+    <string name="confirmOptions">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Single Player Menu -->
+    <string name="singlePlayerTitle">Single Player</string>
     <string name="playerNumber">"Players "</string>
     <string name="levelSelect">"Level "</string>
+    <string name="startGame">Start</string>
+
+    <!-- Statistics Menu -->
+    <string name="statisticsTitle">Statistics</string>
+    <string name="gamesPlayedText">Games played: %d</string>
+    <string name="highestLevelText">Highest level: %d</string>
+    <string name="levelSeriesText">Best level series: %d</string>
+    <string name="highestLevelScoreText">Highest level score: %d</string>
+    <string name="topScoreText">Highest total score: %d</string>
+    <string name="timeLeftRecordText">Most time left: %d</string>
+    <string name="percentageClearedText">Most cleared: %d</string>
+    <string name="livesLeftRecordText">Most lives left: %d</string>
+    <string name="leastTimeLeftText">Least time left: %d</string>
+
 </resources>

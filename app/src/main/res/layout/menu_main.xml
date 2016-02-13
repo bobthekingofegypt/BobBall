@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    android:padding="16dp"
+    tools:context="Menus.menuMain" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/appName"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/singlePlayerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/singlePlayerTitle"
+            android:layout_below="@+id/title"
+            android:layout_centerHorizontal="true"
+            android:onClick="openSinglePlayerMenu"/>
+
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/optionsTitle"
+            android:layout_below="@+id/singlePlayerButton"
+            android:layout_centerHorizontal="true"
+            android:onClick="openSettingsMenu" />
+
+        <Button
+            android:id="@+id/highScoresButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/highScoreTitle"
+            android:layout_below="@+id/settingsButton"
+            android:layout_centerHorizontal="true"
+            android:onClick="openHighScoresMenu"/>
+
+        <Button
+            android:id="@+id/statsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/statisticsTitle"
+            android:layout_below="@+id/highScoresButton"
+            android:layout_centerHorizontal="true"
+            android:onClick="openStatsMenu"/>
+
+        <Button
+            android:id="@+id/helpButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/helpTitle"
+            android:layout_below="@+id/statsButton"
+            android:layout_centerHorizontal="true"
+            android:onClick="openHelpMenu"/>
+
+        <Button
+            android:id="@+id/exitButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/exitApp"
+            android:layout_below="@+id/helpButton"
+            android:layout_centerHorizontal="true"
+            android:onClick="exitApp"/>
+
+    </RelativeLayout>
+
+</ScrollView>

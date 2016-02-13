@@ -47,7 +47,7 @@ public class menuSinglePlayer extends Activity {
         levelSelector.setAdapter(Utilities.createDropdown(this, topLevel));
         numPlayersSelector.setAdapter(Utilities.createDropdown(this, 3));
 
-        numPlayersSelector.setSelection(Settings.getNumPlayers());
+        numPlayersSelector.setSelection(Settings.getNumPlayers() - 1);
         levelSelectPreSelect();
 
         final Context context = this;

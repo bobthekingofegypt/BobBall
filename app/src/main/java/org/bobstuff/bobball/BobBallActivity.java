@@ -83,7 +83,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     private TextView statusBotright;
     private Button button;
     private Button retryButton;
-    private Button backToLevelSelectButon;
+    private Button backToLevelSelectButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,7 +105,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         button.setOnClickListener(this);
 
         retryButton = (Button) findViewById(R.id.retryButton);
-        backToLevelSelectButon = (Button) findViewById(R.id.backToLevelSelectButton);
+        backToLevelSelectButton = (Button) findViewById(R.id.backToLevelSelectButton);
 
         statusTopleft = (TextView) findViewById(R.id.status_topleft);
         statusTopright = (TextView) findViewById(R.id.status_topright);
@@ -117,6 +117,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                if (activityState == ActivityStateEnum.GAMELOST){
+                    retryAction();
+                }
                 onClick(drawerView);
             }
 
@@ -162,12 +165,12 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         super.onStart();
         if (activityState == ActivityStateEnum.GAMEINIT)
         {
-            resetGame (numPlayers, level);
+            resetGame(numPlayers, level);
             startGame();
         }
     }
 
-    public void retry (View view){
+    public void retryAction () {
         int retryAction = Settings.getRetryAction();
 
         if (retryAction == 0){  // Go back to level select
@@ -188,7 +191,16 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
 
+    public void retry (View view){
+        retryAction();
+    }
+
     public void exit (View view){
+        boolean paused = gameManager.getPauseStatus();
+        if (paused){
+            gameManager.togglePauseGameLoop();
+        }
+
         finish();
     }
 
@@ -274,9 +286,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             Settings.setLastLevelFailed(gameManager.getLevel());
             if (scores.isTopScore(currPlayer.getScore())) {
                 promptUsername();
+            } else {
+                showDeadScreen();
             }
-
-            showDeadScreen();
         }
 
     }
@@ -314,12 +326,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     }
 
     private void showPauseScreen() {
+        if (! gameManager.getPauseStatus()) {
+            gameManager.togglePauseGameLoop();
+        }
         activityState = ActivityStateEnum.GAMEPAUSED;
         messageView.setText(R.string.pausedText);
         button.setText(R.string.bttnTextResume);
         retryButton.setVisibility(View.GONE);
         button.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.VISIBLE);
+        backToLevelSelectButton.setVisibility(View.VISIBLE);
         setMessageViewsVisible(true);
     }
 
@@ -331,7 +346,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         button.setText(R.string.nextLevel);
         retryButton.setVisibility(View.GONE);
         button.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.GONE);
+        backToLevelSelectButton.setVisibility(View.GONE);
         setMessageViewsVisible(true);
         activityState = ActivityStateEnum.GAMEWON;
     }
@@ -341,7 +356,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         messageView.setText(R.string.dead);
         button.setVisibility(View.GONE);
         retryButton.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.VISIBLE);
+        backToLevelSelectButton.setVisibility(View.VISIBLE);
         setMessageViewsVisible(true);
         if (activityState != ActivityStateEnum.GAMELOST_TOPSCORE){ activityState = ActivityStateEnum.GAMELOST; }
     }
@@ -471,9 +486,8 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
             messageView.setText(R.string.pausedText);
             button.setText(R.string.bttnTextResume);
-        } else if ((activityState == ActivityStateEnum.GAMELOST)) {
-            finish();
         } else if (activityState == ActivityStateEnum.GAMEPAUSED) {
+            gameManager.togglePauseGameLoop();
             startGame();
         }
     }

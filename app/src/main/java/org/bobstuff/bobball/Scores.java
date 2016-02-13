@@ -12,20 +12,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-
 public class Scores {
 	private static final String SCORE_SEPERATOR = "~~";
 	private static final String ENTRY_SEPERATOR = "::";
 	private List<Score> topScores;
+	private String valueName = "scores";
 
-	public Scores() {
+	public Scores(int numPlayers) {
 		this.topScores = new ArrayList<>();
+
+		if (numPlayers > 1) {
+			valueName = "scores" + numPlayers;
+		}
 	}
 	
 	public void loadScores() {
-		String scores = Preferences.loadValue("scores", "");
+
+		String scores = Preferences.loadValue(valueName, "");
 		StringTokenizer splitEntries = new StringTokenizer(scores, SCORE_SEPERATOR);
 		while (splitEntries.hasMoreElements()) {
 			String scoreString = splitEntries.nextToken();
@@ -47,29 +50,49 @@ public class Scores {
 				sb.append(SCORE_SEPERATOR);
 			}
 		}
-		
-		Preferences.saveValue("scores", sb.toString());
+
+		Preferences.saveValue(valueName,sb.toString());
 	}
 	
 	public CharSequence[] asCharSequence() {
 		CharSequence[] scoresArray = new CharSequence[topScores.size()];
 		for (int i=0; i<topScores.size(); ++i) {
 			Score score = topScores.get(i);
-			scoresArray[i] = score.getScore() + " " + score.getName(); 
+			scoresArray[i] = score.getName() + " " + score.getScore();
 		}
 		
 		return scoresArray;
+	}
+
+	public int getBestScore () {
+		if (topScores.size() != 0) {
+			Score bestScore = topScores.get(0);
+			return bestScore.getScore();
+		}
+
+		return 0;
 	}
 	
 	public boolean isTopScore(final int score) {
 		if (score == 0) {
 			return false;
 		}
-		if (topScores.size() < 5) {
+
+		if (topScores.size() < 10) {
 			return true;
 		}
 		
 		return (topScores.get(topScores.size()-1).getScore() < score);
+	}
+
+	public int getRank (int currentScore) {
+		for (int i=1; i<=topScores.size(); ++i) {
+			Score score = topScores.get(i-1);
+			if (score.getScore() == currentScore){
+				return i;
+			}
+		}
+		return 0;
 	}
 	
 	public void addScore(final String name, final int score) {
@@ -91,7 +114,7 @@ public class Scores {
 					return -1;
 				}
 			});
-			if (topScores.size() > 5) {
+			if (topScores.size() > 10) {
 				topScores.remove(topScores.size()-1);
 			}
 		}

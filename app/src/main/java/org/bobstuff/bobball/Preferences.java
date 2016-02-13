@@ -5,27 +5,32 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /*
-* simple global load and save using shared preferences
-* you have to use setContext before using load or save
-*/
+* simple load and save using shared preferences
+* you have to use setContext before using load or save in an activity
+* you should use setContext in onCreate()
+ */
 
-public class Preferences extends Application{
+public class Preferences extends Application {
 
-    private static Context context;
+    private static SharedPreferences sharedPreferences;
+    private static Context appContext;
 
-    public static void setContext (Context ctxt)
+    public static void setContext (Context context)
     {
-        context = ctxt;
+        appContext = context;
+        sharedPreferences = context.getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE);
+    }
+
+    public static Context getContext () {
+        return appContext;
     }
 
     public static String loadValue (String filename, String defaultValue) {
-        SharedPreferences sharedPref = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
-        return sharedPref.getString (filename, defaultValue);
+        return sharedPreferences.getString (filename, defaultValue);
     }
 
     public static void saveValue (String filename, String value) {
-        SharedPreferences sharedPref = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(filename, value);
         editor.commit();
     }

@@ -36,9 +36,9 @@ public class GameManager implements Parcelable, Runnable {
     public static final int CHECKPOINT_FREQ = 32;
     public static final int PERCENT_COMPLETED = 75;
     public static final float NUMBER_OF_UPDATES_PER_SECOND = 240;
-
     public static int LEVEL_DURATION_TICKS = 12500;
 
+    private boolean paused = false;
     private int seed;
 
     private Deque<GameState> gameStates;
@@ -72,6 +72,13 @@ public class GameManager implements Parcelable, Runnable {
         return getCurrGameState().getGrid();
     }
 
+    public void togglePauseGameLoop (){
+        paused = ! paused;
+    }
+
+    public boolean getPauseStatus (){
+        return paused;
+    }
 
     // clear the even queues
     // emit a new game event
@@ -228,7 +235,9 @@ public class GameManager implements Parcelable, Runnable {
 
     @Override
     public void run() {
-        singleStepGameLoop();
+        if (! paused) {
+            singleStepGameLoop();
+        }
     }
 
     public synchronized void singleStepGameLoop() {

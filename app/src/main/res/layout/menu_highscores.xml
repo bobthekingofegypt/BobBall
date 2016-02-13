@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_vertical_margin"
+    android:background="#000"
+    tools:context=".Menus.menuHighScores">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/highScoreTitle"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/playerSelect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title">
+
+        <TextView
+            android:id="@+id/NumPlayersText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/playerNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:gravity="center"
+            android:layout_gravity="center" />
+
+        <Spinner
+            android:id="@+id/num_players"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/playerSelect"
+        android:layout_above="@+id/backToMainButton">
+
+        <LinearLayout
+            android:id="@+id/highScores"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/noRecords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/noRecords"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/playerSelect"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/backToMainButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/menuBackButton"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        android:onClick="goBack" />
+
+    <Button
+        android:id="@+id/retryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/retry"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:onClick="retry" />
+
+</RelativeLayout>

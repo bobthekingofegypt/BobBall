@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,11 +31,12 @@
                 android:gravity="right"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 tools:ignore="RtlHardcoded" />
+
         </LinearLayout>
 
         <SurfaceView
             android:id="@+id/surface_view"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
 
@@ -73,89 +73,61 @@
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/message_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="start"
         android:gravity="start">
 
         <View
             android:id="@+id/transparent_view"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:background="#88000000" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_drawer"/>
 
         <LinearLayout
             android:id="@+id/message_layout"
-            android:layout_width="500dip"
+            android:layout_width="200dip"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:orientation="vertical"
-            android:background="@android:color/background_dark">
+            android:layout_centerInParent="true">
 
             <TextView
                 android:id="@+id/message_label"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="20dip"
+                android:text="@string/pausedText"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#ffffffff"
-                android:gravity="center"/>
-
-            <LinearLayout
-                android:id="@+id/playerSelect"
-                android:layout_height="wrap_content"
-                android:layout_width="fill_parent"
-                android:visibility = "gone">
-
-                <TextView
-                    android:id="@+id/NumPlayersText"
-                    android:layout_height="fill_parent"
-                    android:text="@string/playerNumber"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:gravity="center"
-                    android:layout_gravity="center" />
-
-                <Spinner
-                android:id="@+id/num_players"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
-
-            </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/levelSelect"
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:visibility = "gone">
-
-            <TextView
-                android:id="@+id/levelSelectText"
-                android:layout_height="fill_parent"
-                android:text="@string/levelSelect"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:layout_weight="1"
-                android:layout_width="0dp"
+                android:textColor="#fff"
+                android:textStyle="bold"
                 android:gravity="center"
-                android:layout_gravity="center" />
+                android:layout_marginBottom="10sp"/>
 
-            <Spinner
-                    android:id="@+id/level_select"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"/>
-        </LinearLayout>
             <Button
                 android:id="@+id/continue_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/continueString"
+                android:text="@string/bttnTextResume"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
+            <Button
+                android:id="@+id/retryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/retry"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:visibility="gone"
+                android:onClick="retry" />
+
+            <Button
+                android:id="@+id/backToLevelSelectButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/backToLevelSelect"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:onClick="exit"/>
+
         </LinearLayout>
+
     </RelativeLayout>
 
 </android.support.v4.widget.DrawerLayout>

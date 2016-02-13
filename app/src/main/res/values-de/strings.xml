@@ -1,25 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="appName">BobBall</string>
-	<string name="start">Start</string>
-	<string name="continueString">Berühre um fortzusetzen</string>
-	<string name="highScoreAchieved">Glückwunsch, du hast einen neuen High Score erreicht</string>
-	<string name="pausedText">Pausiert</string>
-	<string name="bttnTextResume">Spiel fortsetzen</string>
-	<string name="welcomeText">Willkommen zu BobBall</string>
-	<string name="levelCompleted">"Gut gemacht, du hast Level %d beendet"</string>
-	<string name="nextLevel">NÄCHSTES LEVEL</string>
-	<string name="dead">Du bist gestorben</string>
-	<string name="retry">nochmal versuchen</string>
-	<string name="namePrompt">Gib deinen Namen ein:</string>
-	<string name="namePromptConfirm">ok</string>
-	<string name="defaultName">Unbekannt</string>
-	<string name="highscoreTitle">Bestenliste</string>
-	<string name="highscoreExit">ok</string>
+
+	<!-- screen in game -->
 	<string name="timeLeftLabel">"Übrige Zeit: %d"</string>
 	<string name="livesLabel">"Leben: "</string>
 	<string name="scoreLabel">"Punkte: "</string>
 	<string name="areaClearedLabel">"% bereinigt: "</string>
+
+	<!-- menus in game -->
+	<string name="confirm">OK</string>
+
+		<!-- name prompt menu -->
+		<string name="highScoreAchieved">Glückwunsch, du hast einen neuen High Score erreicht</string>
+		<string name="namePrompt">Gib deinen Namen ein:</string>
+		<string name="defaultName">Unbekannt</string>
+
+		<!-- pause menu -->
+		<string name="pausedText">Pausiert</string>
+		<string name="bttnTextResume">Spiel fortsetzen</string>
+		<string name="backToLevelSelect">Zurück zur Levelauswahl</string>
+
+		<!-- won menu -->
+		<string name="levelCompleted">"Gut gemacht, du hast Level %d beendet"</string>
+		<string name="nextLevel">NÄCHSTES LEVEL</string>
+
+		<!-- lost menu -->
+		<string name="dead">Du bist gestorben</string>
+		<string name="retry">Neuer Versuch</string>
+
+	<!-- Menus -->
+	<string name="menuBackButton">Zurück zum Hauptmenü</string>
+	<string name="exitApp">Verlassen</string>
+
+	<!-- Help Menu -->
+	<string name="helpTitle">Hilfe</string>
+	<string name="helpText">
+		Spiel Anleitung:
+		\nBalken starten
+		\nStreiche über den Bildschirm um zwei Balken zu starten. Du bestimmst die Richtung und den Startpunkt der Balken mit dem Streichen.
+		\n
+		\nBalken
+		\nWenn ein Balken von einem roten Ball berührt wird, wird er zerstört und du verlierst ein Leben. Wenn der andere Balken noch nicht beendet oder zerstört wurde kannst du einen einzelnen Balken starten, indem du über den Bildschirm streichst.
+		\n
+		\nBereiche bereinigen
+		\nWenn du einen Bereich mit erfolgreich gesetzten Balken und/oder den Rändern des Spielfelds komplett umgibst und sich kein Ball darin befindet, wird dieser Bereich automatisch komplett bereinigt.
+		\n
+		\nZeit Begrenzung
+		\nDie Zeit Begrenzung wird in Millisekunden * 10 dargestellt. Je höher das Level ist, desto mehr Zeit bekommst du. Wenn die übrige Zeit 0 erreicht, verlierst du das Spiel.
+		\n
+		\nLeben
+		\nDu verlierst immer dann ein Leben, wenn einer deiner Balken von einem roten Ball berührt und damit zerstört wird. Wenn du alle Leben verlierst, verlierst du das Spiel.
+		\n
+		\nZiel des Spiels
+		\nDas Ziel jedes Levels ist es, 75% des Spielfelds zu bereinigen.
+		\n
+		\nComputer Gegner
+		\nWenn du eine Spieleranzahl von mehr als einem Spieler auswählst, wirst du mit Computer Gegnern spielen. Diese haben dieselben Fähigkeiten wie du. In diesem Modus bekommst du am Ende eines Levels nur die Punkte für bereinigte Bereiche gutgeschrieben, die in deiner Farbe eingefärbt sind.
+		\n
+		\nLevel freischalten
+		\nUm ein Level freizuschalten, musst du das vorherige Level schaffen. Die Level für Einzel- und Computer Gegner Modus werden separat freigeschaltet.
+	</string>
+
+	<!-- High Scores Menu -->
+	<string name="highScoreTitle">Bestenliste</string>
+	<string name="noRecords">Keine Rekorde gefunden</string>
+
+	<!-- Options Menu -->
+	<string name="optionsTitle">Optionen</string>
+	<string name="setDefaultName">Standardname :</string>
+	<string name="levelSelectSettingsText">Auto Level Auswahl:</string>
+	<string-array name="levelSelectSettings">
+		<item>Level 1</item>
+		<item>zuletzt gewähltes Level</item>
+		<item>höchstes freigeschaltetes Level</item>
+		<item>letztes verlorenes Level</item>
+	</string-array>
+	<string name="retryActionSettingsText">Neuer Versuch Aktion:</string>
+	<string-array name="retryActionSettings">
+		<item>Zurück zur Levelauswahl</item>
+		<item>Neustart im verlorenen Level</item>
+		<item>Neustart im ausgewählten Level</item>
+		<item>Neustart im ersten Level</item>
+	</string-array>
+	<string name="confirmOptions">Bestätigen</string>
+	<string name="cancel">Abbrechen</string>
+
+	<!-- Single Player Menu -->
+	<string name="singlePlayerTitle">Einzelspieler</string>
 	<string name="playerNumber">"Spieler "</string>
 	<string name="levelSelect">"Level "</string>
+	<string name="startGame">Start</string>
+
+	<!-- Statistics Menu -->
+	<string name="statisticsTitle">Statistik</string>
+	<string name="gamesPlayedText">Gespielte Spiele: %d</string>
+	<string name="highestLevelText">Höchstes Level: %d</string>
+	<string name="levelSeriesText">Meiste Level in Folge: %d</string>
+	<string name="highestLevelScoreText">Höchste Level Punktzahl: %d</string>
+	<string name="topScoreText">Höchste Gesamtpunktzahl: %d</string>
+	<string name="timeLeftRecordText">Meiste übrige Zeit: %d</string>
+	<string name="percentageClearedText">Meistes bereinigt: %d</string>
+	<string name="livesLeftRecordText">Meiste übrige Leben: %d</string>
+	<string name="leastTimeLeftText">Wenigste übrige Zeit: %d</string>
+
 </resources>

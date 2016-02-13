@@ -15,6 +15,7 @@ import org.bobstuff.bobball.Actors.NetworkActor;
 import org.bobstuff.bobball.Actors.StupidAIActor;
 import org.bobstuff.bobball.Network.NetworkIP;
 import org.bobstuff.bobball.Player;
+import org.bobstuff.bobball.Statistics;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -123,9 +124,25 @@ public class GameManager implements Parcelable, Runnable {
         //update scores
         for (Player player : gs.getPlayers()) {
             if (player.level < gs.level) // update score
-                if (player.getLives() > 0)
-                    player.setScore(player.getScore() +
-                            (int) ((gs.getGrid().getPercentComplete(player.getPlayerId()) * (GameManager.timeLeft(gs) / 1000.0)) * gs.level));
+                if (player.getLives() > 0) {
+                    int playerId = player.getPlayerId();
+                    int timeLeft = GameManager.timeLeft(gs);
+                    int percentComplete = gs.getGrid().getPercentComplete(player.getPlayerId());
+                    int levelFinished = gs.level;
+                    int remainingLifes = player.getLives();
+                    int lostLifes = levelFinished + 1 - remainingLifes;
+                    int score = (percentComplete * (timeLeft / 1000)) * levelFinished;
+
+                    if (playerId == 1){
+                        Statistics.saveHighestLevelScore(score);
+                        Statistics.saveTimeLeftRecord(timeLeft / 10);
+                        Statistics.saveLeastTimeLeft(timeLeft / 10);
+                        Statistics.savePercentageClearedRecord(percentComplete);
+                        Statistics.saveLivesLeftRecord(remainingLifes);
+                    }
+
+                    player.setScore(player.getScore() + score);
+                }
         }
 
         gs = new GameState(gs.getPlayers());
@@ -322,7 +339,11 @@ public class GameManager implements Parcelable, Runnable {
             for (Player player : gameState.getPlayers()) {
                 if (player.bar.collide(ball)) {
                     //Log.d(TAG, "@" + gameState.time + " bar finished (wall) for player " + player.getPlayerId() + " bar active:" + player.bar.canStartBar() + player.bar.getSectionOne() + player.bar.getSectionTwo());
-                    player.setLives(player.getLives() - 1);
+
+                    int remainingLifes = player.getLives();
+                    if (remainingLifes > 0) {
+                        player.setLives(remainingLifes - 1);
+                    }
                 }
             }
 

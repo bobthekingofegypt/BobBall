@@ -124,7 +124,7 @@ public class menuHighScores extends Activity {
     public void retry (View view){
         int retryAction = Settings.getRetryAction();
         Intent intent = new Intent(this, BobBallActivity.class);
-        int numPlayers = Settings.getNumPlayers() + 1;
+        int numPlayers = Settings.getNumPlayers();
         finish();   // finish in any case, finish only for retryAction 0 (Go back to level select)
 
         if (retryAction == 1){  // restart last level lost, same numPlayers

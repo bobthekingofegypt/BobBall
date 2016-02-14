@@ -121,39 +121,42 @@ public class GameManager implements Parcelable, Runnable {
         }
     }
 
+    public synchronized int getBonusPoints (GameState gs, Player player){
+        int playerId = player.getPlayerId();
+        int timeLeft = timeLeft(gs);
+        int percentComplete = gs.getGrid().getPercentComplete(player.getPlayerId());
+        int remainingLifes = player.getLives();
+        int lostLifes = gs.level + 1 - remainingLifes;
+
+        return (percentComplete * (timeLeft / 1000)) * gs.level;
+    }
 
     public synchronized void nextLevel() {
         GameState gs = getCurrGameState();
         int level = gs.level;
 
-        LEVEL_DURATION_TICKS += 2500;
-
         //update scores
         for (Player player : gs.getPlayers()) {
             if (player.level < gs.level) // update score
                 if (player.getLives() > 0) {
-                    int playerId = player.getPlayerId();
-                    int timeLeft = GameManager.timeLeft(gs);
-                    int percentComplete = gs.getGrid().getPercentComplete(player.getPlayerId());
-                    int levelFinished = gs.level;
-                    int remainingLifes = player.getLives();
-                    int lostLifes = levelFinished + 1 - remainingLifes;
-                    int score = (percentComplete * (timeLeft / 1000)) * levelFinished;
 
-                    if (playerId == 1){
-                        Statistics.saveHighestLevelScore(score);
-                        Statistics.saveTimeLeftRecord(timeLeft / 10);
-                        Statistics.saveLeastTimeLeft(timeLeft / 10);
-                        Statistics.savePercentageClearedRecord(percentComplete);
-                        Statistics.saveLivesLeftRecord(remainingLifes);
+                    int bonus = getBonusPoints (gs, player);
+
+                    if (player.getPlayerId() == 1){
+                        Statistics.saveHighestLevelScore(bonus);
+                        Statistics.saveTimeLeftRecord(timeLeft(gs) / 10);
+                        Statistics.saveLeastTimeLeft(timeLeft(gs) / 10);
+                        Statistics.savePercentageClearedRecord(gs.getGrid().getPercentComplete(player.getPlayerId()));
+                        Statistics.saveLivesLeftRecord(player.getLives());
                     }
 
-                    player.setScore(player.getScore() + score);
+                    player.setScore(player.getScore() + bonus);
                 }
         }
 
         gs = new GameState(gs.getPlayers());
         gs.level = level + 1;
+        LEVEL_DURATION_TICKS += 2500;
 
         gameStates.clear();
         gameStates.addFirst(gs); // fresh gamestate with old players
@@ -281,8 +284,8 @@ public class GameManager implements Parcelable, Runnable {
                 addCheckpoint(gameStates);
             }
         }
-        setGameTime(getGameTime() + 1);
 
+        setGameTime(getGameTime() + 1);
 
         /*if (gs.time % 200 == 0) {
             Log.d(TAG, "pending now=" + gameTime + "  " + pendingGameEv);

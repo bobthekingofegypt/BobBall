@@ -86,7 +86,7 @@
 
         <LinearLayout
             android:id="@+id/message_layout"
-            android:layout_width="200dip"
+            android:layout_width="205dip"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_centerInParent="true">

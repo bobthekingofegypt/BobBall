@@ -102,6 +102,26 @@
                 android:gravity="center"
                 android:layout_marginBottom="10sp"/>
 
+            <TextView
+                android:id="@+id/percentageCleared"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:layout_marginBottom="10sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/bonusPoints"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:layout_marginBottom="10sp"
+                android:visibility="gone"/>
+
             <Button
                 android:id="@+id/continue_button"
                 android:layout_width="match_parent"

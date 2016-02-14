@@ -182,6 +182,18 @@ public class GameManager implements Parcelable, Runnable {
         }
     }
 
+    public boolean allBarsFinished (GameState gameState){
+        List<Player> players = gameState.getPlayers();
+        for (int playerId = 0; playerId < players.size(); playerId++){
+            Player player = players.get(playerId);
+
+            if (player.bar.getSectionOne() != null || player.bar.getSectionTwo() != null){
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public synchronized void addEvent(GameEvent ev) {
         pendingGameEv.addEvent(ev);
@@ -244,7 +256,7 @@ public class GameManager implements Parcelable, Runnable {
 
         GameState gs = getCurrGameState();
 
-        if (gameGetOutcome(gs) != 0) //won or lost
+        if (gameGetOutcome(gs) != 0 && allBarsFinished(gs)) //won or lost
             return;
 
         //rollback necessary?

@@ -24,6 +24,8 @@
         <!-- won menu -->
         <string name="levelCompleted">"Well done, you have completed level %d"</string>
         <string name="nextLevel">NEXT LEVEL</string>
+        <string name="percentageCleared">Cleared:</string>
+        <string name="bonusPoints">Bonus: %d</string>
 
         <!-- lost menu -->
         <string name="dead">You are dead</string>

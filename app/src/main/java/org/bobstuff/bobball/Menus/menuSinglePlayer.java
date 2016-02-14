@@ -58,7 +58,7 @@ public class menuSinglePlayer extends Activity {
 
                 int numPlayers = position + 1;
 
-                Settings.setNumPlayers(numPlayers - 1);
+                Settings.setNumPlayers(numPlayers);
 
                 int highestLevel = Statistics.getHighestLevel(numPlayers);
 

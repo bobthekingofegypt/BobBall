@@ -125,6 +125,14 @@ public class Grid implements Parcelable {
         return (totalFilledGridSquares * 100) / totalGridSquares;
     }
 
+    public float getPercentCompleteFloat (int playerId) {
+        return (float) Math.round(((perPlayer.get(playerId).filledGridSquares) * 100 * 100) / totalGridSquares) / 100;
+    }
+
+    public float getPercentCompleteFloat () {
+        return (float) Math.round((totalFilledGridSquares * 100 * 100) / totalGridSquares) / 100;
+    }
+
     public float getWidth() {
         return (maxX - 1);
     }

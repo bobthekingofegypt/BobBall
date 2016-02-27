@@ -58,7 +58,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private int numPlayers = 1;
     private int level = 1;
-
     private int levelSeries = 0;
 
     private Handler handler = new Handler();
@@ -77,17 +76,21 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private DrawerLayout drawerLayout;
     private TextView messageView;
+    private TextView percentageCleared;
+    private TextView totalPercentageCleared;
+    private TextView bonusPoints;
     private TextView statusTopleft;
     private TextView statusBotleft;
     private TextView statusTopright;
     private TextView statusBotright;
     private Button button;
     private Button retryButton;
-    private Button backToLevelSelectButon;
+    private Button backToLevelSelectButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -100,12 +103,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         surfaceHolder.addCallback(this);
 
         messageView = (TextView) findViewById(R.id.message_label);
+        percentageCleared = (TextView) findViewById(R.id.percentageCleared);
+        totalPercentageCleared = (TextView) findViewById(R.id.totalPercentageCleared);
+        bonusPoints = (TextView) findViewById(R.id.bonusPoints);
 
         button = (Button) findViewById(R.id.continue_button);
         button.setOnClickListener(this);
 
         retryButton = (Button) findViewById(R.id.retryButton);
-        backToLevelSelectButon = (Button) findViewById(R.id.backToLevelSelectButton);
+        backToLevelSelectButton = (Button) findViewById(R.id.backToLevelSelectButton);
 
         statusTopleft = (TextView) findViewById(R.id.status_topleft);
         statusTopright = (TextView) findViewById(R.id.status_topright);
@@ -114,9 +120,11 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                changeToPauseScreen();
                 onClick(drawerView);
             }
 
@@ -126,7 +134,10 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 if (activityState == ActivityStateEnum.GAMERUNNING)
                     showPauseScreen();
             }
+
         });
+
+        drawerLayout.setFocusableInTouchMode(false);    // if set to false, the drawer doesn't react to pressing the back key by default
 
         statusTopright.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -162,12 +173,12 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         super.onStart();
         if (activityState == ActivityStateEnum.GAMEINIT)
         {
-            resetGame (numPlayers, level);
+            resetGame(numPlayers, level);
             startGame();
         }
     }
 
-    public void retry (View view){
+    public void retryAction () {
         int retryAction = Settings.getRetryAction();
 
         if (retryAction == 0){  // Go back to level select
@@ -188,7 +199,15 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
     }
 
+    public void retry (View view){
+        retryAction();
+    }
+
     public void exit (View view){
+        if (gameManager.isPaused()){
+            gameManager.togglePauseGameLoop();
+        }
+
         finish();
     }
 
@@ -218,67 +237,76 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         }
 
         if (frameCounter % displayLoop.ITERATIONS_PER_STATUSUPDATE == 0) {
-
-            SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
-
-            SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
-                @Override
-                public int call(Player p) {
-                    return p.getLives();
-                }
-            });
-            SpannableStringBuilder scoreStr = formatPerPlayer(getString(R.string.scoreLabel), new playstat() {
-                @Override
-                public int call(Player p) {
-                    return p.getScore();
-                }
-            });
-
-            SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
-                @Override
-                public int call(Player p) {
-                    Grid grid = currGameState.getGrid();
-                    if (grid != null)
-                        return currGameState.getGrid().getPercentComplete(p.getPlayerId());
-                    else
-                        return 0;
-                }
-            });
-
-            //display fps
-            if (secretHandshake >= 3) {
-
-                float fps = displayLoop.getFPS();
-                int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
-                SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
-
-                s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                timeLeftStr.append(s);
-
-                color = (gameManager.getUPS() < gameManager.NUMBER_OF_UPDATES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
-                s = new SpannableString(String.format(" UPS: %3.1f", gameManager.getUPS()));
-
-                s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                timeLeftStr.append(s);
-            }
-
-            statusTopleft.setText(timeLeftStr);
-            statusTopright.setText(livesStr);
-            statusBotleft.setText(scoreStr);
-            statusBotright.setText(clearedStr);
-
+            updateStatus(currGameState);
         }
-        if (gameManager.hasWonLevel()) {
-            showWonScreen();
+
+        if (gameManager.hasWonLevel() && gameManager.allBarsFinished(currGameState)) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showWonScreen();
+                }
+            }, 100);
         } else if (gameManager.isGameLost()) {
             Settings.setLastLevelFailed(gameManager.getLevel());
             if (scores.isTopScore(currPlayer.getScore())) {
                 promptUsername();
+            } else {
+                showDeadScreen();
             }
-
-            showDeadScreen();
         }
 
+    }
+
+    private void updateStatus (final GameState currGameState){
+
+        SpannableStringBuilder timeLeftStr = SpannableStringBuilder.valueOf(getString(R.string.timeLeftLabel, gameManager.timeLeft() / 10));
+
+        SpannableStringBuilder livesStr = formatPerPlayer(getString(R.string.livesLabel), new playstat() {
+            @Override
+            public int call(Player p) {
+                return p.getLives();
+            }
+        });
+        SpannableStringBuilder scoreStr = formatPerPlayer(getString(R.string.scoreLabel), new playstat() {
+            @Override
+            public int call(Player p) {
+                return p.getScore();
+            }
+        });
+
+        SpannableStringBuilder clearedStr = formatPerPlayer(getString(R.string.areaClearedLabel), new playstat() {
+            @Override
+            public int call(Player p) {
+                Grid grid = currGameState.getGrid();
+                if (grid != null)
+                    return currGameState.getGrid().getPercentComplete(p.getPlayerId());
+                else
+                    return 0;
+            }
+        });
+
+        //display fps
+        if (secretHandshake >= 3) {
+
+            float fps = displayLoop.getFPS();
+            int color = (fps < NUMBER_OF_FRAMES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+            SpannableString s = new SpannableString(String.format(" FPS: %2.1f", fps));
+
+            s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            timeLeftStr.append(s);
+
+            color = (gameManager.getUPS() < gameManager.NUMBER_OF_UPDATES_PER_SECOND * 0.98f ? Color.RED : Color.GREEN);
+            s = new SpannableString(String.format(" UPS: %3.1f", gameManager.getUPS()));
+
+            s.setSpan(new ForegroundColorSpan(color), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            timeLeftStr.append(s);
+        }
+
+        statusTopleft.setText(timeLeftStr);
+        statusTopright.setText(livesStr);
+        statusBotleft.setText(scoreStr);
+        statusBotright.setText(clearedStr);
     }
 
     private void promptUsername() {
@@ -299,7 +327,6 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                         }
                         scores.addScore(valueString, gameManager.getCurrGameState().getPlayer(playerId).getScore());
                         showTopScores();
-                        activityState = ActivityStateEnum.GAMELOST;
                     }
                 }).show();
     }
@@ -315,36 +342,83 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
 
     private void showPauseScreen() {
         activityState = ActivityStateEnum.GAMEPAUSED;
-        messageView.setText(R.string.pausedText);
-        button.setText(R.string.bttnTextResume);
-        retryButton.setVisibility(View.GONE);
-        button.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.VISIBLE);
+
         setMessageViewsVisible(true);
     }
 
+    private void changeToPauseScreen() { // change drawer layout to pause screen
+        messageView.setText(R.string.pausedText);
+        button.setText(R.string.bttnTextResume);
+
+        retryButton.setVisibility(View.GONE);
+        button.setVisibility(View.VISIBLE);
+        backToLevelSelectButton.setVisibility(View.VISIBLE);
+        percentageCleared.setVisibility(View.GONE);
+        totalPercentageCleared.setVisibility(View.GONE);
+        bonusPoints.setVisibility(View.GONE);
+    }
+
     private void showWonScreen() {
+        activityState = ActivityStateEnum.GAMEWON;
+
         Statistics.saveHighestLevel(numPlayers, gameManager.getLevel() + 1);
-        levelSeries ++;
-        Statistics.saveLongestSeries (levelSeries);
+        levelSeries++;
+        Statistics.saveLongestSeries(levelSeries);
+
+        GameState gs = gameManager.getCurrGameState();
+        Grid currGrid = gs.getGrid();
+
+        SpannableStringBuilder percentageCleared = new SpannableStringBuilder();
+
+        String percentageString = currGrid.getPercentCompleteFloat(1) + "%";
+
+        String totalPercentageString = getString(R.string.percentageCleared, percentageString);
+
+        int player1Color = gs.getPlayer(1).getColor();
+
+        SpannableString percentage = new SpannableString (totalPercentageString);
+        int percentageStart = totalPercentageString.length() - percentageString.length();
+        int percentageEnd = totalPercentageString.length();
+
+        percentage.setSpan(new ForegroundColorSpan(player1Color), percentageStart, percentageEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        percentageCleared.append(percentage);
+
         messageView.setText(getString(R.string.levelCompleted, gameManager.getLevel()));
         button.setText(R.string.nextLevel);
         retryButton.setVisibility(View.GONE);
         button.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.GONE);
+        backToLevelSelectButton.setVisibility(View.GONE);
+        this.percentageCleared.setText(percentageCleared);
+        this.percentageCleared.setVisibility(View.VISIBLE);
+
+        if (numPlayers > 1){
+            totalPercentageCleared.setText(getString(R.string.totalPercentageCleared, currGrid.getPercentCompleteFloat() + "%"));
+            totalPercentageCleared.setVisibility(View.VISIBLE);
+        }
+
+
+        bonusPoints.setText(getString(R.string.bonusPoints, gameManager.getBonusPoints(gs, gs.getPlayer(1))));
+        bonusPoints.setVisibility(View.VISIBLE);
+
         setMessageViewsVisible(true);
-        activityState = ActivityStateEnum.GAMEWON;
     }
 
     private void showDeadScreen() {
+        activityState = ActivityStateEnum.GAMELOST;
         levelSeries = 0;
         messageView.setText(R.string.dead);
+
         button.setVisibility(View.GONE);
         retryButton.setVisibility(View.VISIBLE);
-        backToLevelSelectButon.setVisibility(View.VISIBLE);
+        backToLevelSelectButton.setVisibility(View.VISIBLE);
+        percentageCleared.setVisibility(View.GONE);
+        totalPercentageCleared.setVisibility(View.GONE);
+        bonusPoints.setVisibility(View.GONE);
+
         setMessageViewsVisible(true);
-        if (activityState != ActivityStateEnum.GAMELOST_TOPSCORE){ activityState = ActivityStateEnum.GAMELOST; }
     }
+
+
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -369,7 +443,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
                 else if (evPoint.y < initialTouchPoint.y - TOUCH_DETECT_SQUARES)
                     dir = Direction.UP;
 
-                if (dir != null) {
+                if (dir != null && ! gameManager.hasWonLevel()) {
                     gameManager.addEvent(new GameEventStartBar(gameManager.getGameTime(), initialTouchPoint, dir, playerId));
                     initialTouchPoint = null;
                 }
@@ -421,6 +495,7 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onResume() {
         super.onResume();
+        drawGamePaused();
         if (activityState == ActivityStateEnum.GAMEPAUSED) {
             showPauseScreen();
         } else if (activityState == ActivityStateEnum.GAMELOST) {
@@ -430,15 +505,35 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
         } else if (activityState == ActivityStateEnum.GAMEWON) {
             showWonScreen();
         }
+    }
 
+    private void drawGamePaused (){
+        final GameState currGameState = new GameState(gameManager.getCurrGameState());
+
+        Canvas canvas = surfaceHolder.lockCanvas();
+
+        if (canvas != null) {
+            update(canvas, currGameState, 0);
+            surfaceHolder.unlockCanvasAndPost(canvas);
+        }
+
+        else {
+            handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawGamePaused();
+                        }
+                    }, 100);
+        }
     }
 
     @Override
     public void onBackPressed() {
         if (activityState == ActivityStateEnum.GAMERUNNING)
             showPauseScreen();
-        else
-            moveTaskToBack(true);
+        else { // finish when pressed on won, lost - or pause screen
+            finish();
+        }
     }
 
     @Override
@@ -468,22 +563,16 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             reinitGame();
             gameManager.nextLevel();
             startGame();
-
-            messageView.setText(R.string.pausedText);
-            button.setText(R.string.bttnTextResume);
-        } else if ((activityState == ActivityStateEnum.GAMELOST)) {
-            finish();
         } else if (activityState == ActivityStateEnum.GAMEPAUSED) {
             startGame();
+        } else if (activityState == ActivityStateEnum.GAMELOST){
+            retryAction();
         }
     }
 
     private void startGame() {
         if (activityState == ActivityStateEnum.GAMELOST || activityState == ActivityStateEnum.GAMEINIT){
             Statistics.increasePlayedGames();
-        }
-        else if (activityState == ActivityStateEnum.GAMEWON){
-
         }
 
         activityState = ActivityStateEnum.GAMERUNNING;

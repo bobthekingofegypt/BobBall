@@ -25,7 +25,7 @@ public class menuStatistics extends Activity {
         String highestLevelScoreText = getString(R.string.highestLevelScoreText, Statistics.getHighestLevelScore());
         String topScoreText = getString(R.string.topScoreText, Statistics.getTopScore());
         String timeLeftRecordText = getString(R.string.timeLeftRecordText, Statistics.getTimeLeftRecord());
-        String percentageClearedRecordText = getString(R.string.percentageClearedText, Statistics.getPercentageClearedRecord());
+        String percentageClearedRecordText = getString(R.string.percentageClearedText, Statistics.getPercentageClearedRecord() + "%");
         String livesLeftRecordText = getString(R.string.livesLeftRecordText, Statistics.getLivesLeftRecord());
         String leastTimeLeftText = getString(R.string.leastTimeLeftText, Statistics.getLeastTimeLeft());
 

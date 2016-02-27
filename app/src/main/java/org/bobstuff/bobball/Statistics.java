@@ -128,16 +128,16 @@ public class Statistics {
 
     // highest percentage cleared for one level
 
-    public static void setPercentageClearedRecord(int percentageCleared){
+    public static void setPercentageClearedRecord(float percentageCleared){
         Preferences.saveValue("percentageCleared","" + percentageCleared);
     }
 
-    public static int getPercentageClearedRecord(){
-        return Integer.parseInt(Preferences.loadValue("percentageCleared","0"));
+    public static float getPercentageClearedRecord(){
+        return Float.parseFloat(Preferences.loadValue("percentageCleared","0"));
     }
 
-    public static void savePercentageClearedRecord (int percentageCleared){
-        int currentRecord = getPercentageClearedRecord();
+    public static void savePercentageClearedRecord (float percentageCleared){
+        float currentRecord = getPercentageClearedRecord();
 
         if (currentRecord < percentageCleared){
             setPercentageClearedRecord(percentageCleared);

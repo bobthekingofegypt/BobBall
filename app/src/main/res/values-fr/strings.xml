@@ -33,6 +33,8 @@
 		<!-- won menu -->
 		<string name="levelCompleted">"Well done, you have completed level %d"</string>
 		<string name="nextLevel">NEXT LEVEL</string>
+		<string name="percentageCleared">Cleared: %s</string>
+		<string name="bonusPoints">Bonus: %d</string>
 
 		<!-- lost menu -->
 		<string name="dead">You are dead</string>
@@ -108,7 +110,7 @@
 	<string name="highestLevelScoreText">Highest level score: %d</string>
 	<string name="topScoreText">Highest total score: %d</string>
 	<string name="timeLeftRecordText">Most time left: %d</string>
-	<string name="percentageClearedText">Most cleared: %d</string>
+	<string name="percentageClearedText">Most cleared: %s</string>
 	<string name="livesLeftRecordText">Most lives left: %d</string>
 	<string name="leastTimeLeftText">Least time left: %d</string>
 

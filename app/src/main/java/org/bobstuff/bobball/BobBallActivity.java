@@ -124,6 +124,9 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                if (gameManager.isPaused()) {
+                    gameManager.togglePauseGameLoop();
+                }
                 changeToPauseScreen();
                 onClick(drawerView);
             }
@@ -131,10 +134,13 @@ public class BobBallActivity extends Activity implements SurfaceHolder.Callback,
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                if (activityState == ActivityStateEnum.GAMERUNNING)
+                if (activityState == ActivityStateEnum.GAMERUNNING) {
+                    if (! gameManager.isPaused()) {
+                        gameManager.togglePauseGameLoop();
+                    }
                     showPauseScreen();
+                }
             }
-
         });
 
         drawerLayout.setFocusableInTouchMode(false);    // if set to false, the drawer doesn't react to pressing the back key by default

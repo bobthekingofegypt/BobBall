@@ -52,7 +52,7 @@
         \nLimit czasu jest wyświetlany w centysekundach. Im wyższy poziom, tym wyższy jest limit czasowy. Przegrasz, gdy pozostały czas dojdzie do 0.
         \n
         \nŻycia
-        \nStracisz życie kiedy jeden budowany mur zostanie zniszczony. Jeżeli stracisz wszystkie życia, gra będzie skończona.
+        \nStracisz życie kiedy jeden budowany mur zostanie zniszczony. Gra zakończy się gdy stracisz wszystkie życia.
         \n
         \nCel gry:
         \nCelem każdego poziomu jest wyczyszczenie 75 % planszy.

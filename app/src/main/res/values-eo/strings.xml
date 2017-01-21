@@ -1,1 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">BobBall</string>
 
+    <!-- screen in game -->
+    <string name="timeLeftLabel">"Restonta tempo: %d"</string>
+    <string name="livesLabel">"Vivoj: "</string>
+    <string name="scoreLabel">"Poentoj: "</string>
+    <string name="areaClearedLabel">"% vakigita: "</string>
+
+    <!-- menus in game -->
+    <string name="confirm">Bone</string>
+
+        <!-- name prompt menu -->
+        <string name="highScoreAchieved">Gratulon, vi enlistiĝis je listo de plejbonuloj</string>
+        <string name="namePrompt">Entajpu vian nomon:</string>
+        <string name="defaultName">Sennomulo</string>
+
+        <!-- pause menu -->
+        <string name="pausedText">paŭzigita</string>
+        <string name="bttnTextResume">pluigi ludi</string>
+        <string name="backToLevelSelect">reveni al nivel-elekto</string>
+
+        <!-- won menu -->
+        <string name="levelCompleted">"Bonege, vi plenumis nivelon %d"</string>
+        <string name="nextLevel">SEKVA NIVELO</string>
+        <string name="percentageCleared">Vakigita: %s</string>
+        <string name="totalPercentageCleared">Entute: %s</string>
+        <string name="bonusPoints">Premio: %d</string>
+
+        <!-- lost menu -->
+        <string name="dead">Vi mortiĝis</string>
+        <string name="retry">Reprovi</string>
+
+    <!-- Menus -->
+    <string name="menuBackButton">Reveni al ĉefmenuo</string>
+    <string name="exitApp">Eliri</string>
+
+    <!-- Help Menu -->
+    <string name="helpTitle">Helpo</string>
+    <string name="helpText">Kiel ludi:
+        \nEkigi barojn
+        \nŜovu per fingro sur ekrano por komenci du barojn. Vi kontrolos direkton kaj komenc-punkton per tiu ĉi ŝovo.
+        \n
+        \nBaroj
+        \nSe unu baro tuŝos ruĝan globeton, ĝi detruiĝos kaj vi perdos vivon. Kiam la alia baro ankoraŭ ne finiĝos kaj ne detruiĝos, vi povos ekigi unuoblan baron ŝovante sur ekrano denove.
+        \n
+        \nVakigi areojn
+        \nSe vi tute ĉirkaŭos areon per baroj aŭ limoj de ludkampo, kaj neniu globeto troviĝos enem ĝi estos vakigita.
+        \n
+        \nTempolimo
+        \nTempolimo estas montrata en centisekundoj. Ju pli alta la nivelo estas, des pli da tempo vi havos. Kiam la restonta tempo atingos 0, vi malvenkos.
+        \n
+        \nVivoj
+        \nVi perdos vivon kiam unu de viaj baroj detruiĝos. Se vi perdos ĉiujn vivojn, la ludo finiĝos.
+        \n
+        \nCelo de la ludo:
+        \nLa celo de ĉiu nivelo estas vakigi 75 % da ludkampo.
+        \n
+        \nRobotoj
+        \nSe vi elektos pli ol unu ludanto, vi ludos kun robotoj. Tiuj robotoj havos samajn eblojn kiel vi. Vi gajnos poentojn nur por areojn vakigitajn per via koloro en tiu ĉi lud-reĝimo.
+        \n
+        \nMalŝlosi nivelojn
+        \nPor malŝlosi nivelon, vi devos venki antaŭan nivelon. Niveloj estas malŝlosataj aparte por robota lud-reĝimo kaj unuobl-ludanta reĝimo.
+    </string>
+
+    <!-- High Scores Menu -->
+    <string name="highScoreTitle">Listo de plejbonuloj</string>
+    <string name="noRecords">Trovis neniujn rekordojn</string>
+
+    <!-- Options Menu -->
+    <string name="optionsTitle">Agordoj</string>
+    <string name="setDefaultName">Implicita nomo:</string>
+    <string name="levelSelectSettingsText">Implicita nivelo:</string>
+    <string-array name="levelSelectSettings">
+        <item>nivelo 1</item>
+        <item>antaŭe elektita nivelo</item>
+        <item>plej alta disponebla nivelo</item>
+        <item>antaŭe malvenkita nivelo</item>
+    </string-array>
+    <string name="retryActionSettingsText">Ago de reprovi-butono:</string>
+    <string-array name="retryActionSettings">
+        <item>reveni al nivel-elekto</item>
+        <item>restarti ekde malvenkita nivelo</item>
+        <item>restarti ekde elektita nivelo</item>
+        <item>restarti ekde unua nivelo</item>
+    </string-array>
+    <string name="confirmOptions">Konfirmi</string>
+    <string name="cancel">Nuligi</string>
+
+    <!-- Single Player Menu -->
+    <string name="singlePlayerTitle">Unuobla ludanto</string>
+    <string name="playerNumber">"Ludantoj "</string>
+    <string name="levelSelect">"Nivelo "</string>
+    <string name="startGame">Ekigi</string>
+
+    <!-- Statistics Menu -->
+    <string name="statisticsTitle">Statistikoj</string>
+    <string name="gamesPlayedText">Ludoj luditaj: %d</string>
+    <string name="highestLevelText">Plej alta nivelo: %d</string>
+    <string name="levelSeriesText">Plej bona nivel-sekvenco: %d</string>
+    <string name="highestLevelScoreText">Plej multe da poentoj nivele: %d</string>
+    <string name="topScoreText">Plej multe da poentoj entute: %d</string>
+    <string name="timeLeftRecordText">Plej multe da restonta tempo: %d</string>
+    <string name="percentageClearedText">Plej multe vakigita: %s</string>
+    <string name="livesLeftRecordText">Plej multe da restontaj vivoj: %d</string>
+    <string name="leastTimeLeftText">Malplej multe da restonta tempo: %d</string>
+
+</resources>

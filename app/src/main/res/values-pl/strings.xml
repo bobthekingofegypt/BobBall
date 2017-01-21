@@ -1,1 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">BobBall</string>
 
+    <!-- screen in game -->
+    <string name="timeLeftLabel">"Pozostały czas: %d"</string>
+    <string name="livesLabel">"Życia: "</string>
+    <string name="scoreLabel">"Punkty: "</string>
+    <string name="areaClearedLabel">"% wyczyszczono: "</string>
+
+    <!-- menus in game -->
+    <string name="confirm">OK</string>
+
+        <!-- name prompt menu -->
+        <string name="highScoreAchieved">Gratulacje, trafiłeś na listę najlepszych</string>
+        <string name="namePrompt">Wpisz swoje imię:</string>
+        <string name="defaultName">Ktoś</string>
+
+        <!-- pause menu -->
+        <string name="pausedText">wstrzymano</string>
+        <string name="bttnTextResume">kontynuuj grę</string>
+        <string name="backToLevelSelect">powrót do wyboru poziomu</string>
+
+        <!-- won menu -->
+        <string name="levelCompleted">"Dobra robota, ukończyłeś poziom %d"</string>
+        <string name="nextLevel">NASTĘPNY POZIOM</string>
+        <string name="percentageCleared">Wyczyszczono: %s</string>
+        <string name="totalPercentageCleared">W sumie: %s</string>
+        <string name="bonusPoints">Bonus: %d</string>
+
+        <!-- lost menu -->
+        <string name="dead">Jesteś martwy</string>
+        <string name="retry">Spróbuj ponownie</string>
+
+    <!-- Menus -->
+    <string name="menuBackButton">Powrót do menu głównego</string>
+    <string name="exitApp">Wyjście</string>
+
+    <!-- Help Menu -->
+    <string name="helpTitle">Pomoc</string>
+    <string name="helpText">Jak grać:
+        \nPoczątek budowy
+        \nMachnij po ekranie, aby rozpocząć budowę dwóch murów. Tym machnięciem masz wpływ na punkt początkowy i kierunek.
+        \n
+        \nMury
+        \nJeżeli jeden zostanie dotknięty przez czerwoną kulkę, zostanie zniszczony i stracisz życie. Kiedy drugi mur nie został jeszcze ukończony bądź zniszczony, możesz rozpocząć budowę pojedynczego muru ponownie przesuwając palcem po ekranie.
+        \n
+        \nCzyszczenie obszarów
+        \nJeżeli całkowicie otoczysz obszar murami lub ścianami planszy i w środku nie znajdzie się kulka, zostanie on wyczyszczony.
+        \n
+        \nLimit czasu
+        \nLimit czasu jest wyświetlany w centysekundach. Im wyższy poziom, tym wyższy jest limit czasowy. Przegrasz, gdy pozostały czas dojdzie do 0.
+        \n
+        \nŻycia
+        \nStracisz życie kiedy jeden budowany mur zostanie zniszczony. Jeżeli stracisz wszystkie życia, gra będzie skończona.
+        \n
+        \nCel gry:
+        \nCelem każdego poziomu jest wyczyszczenie 75 % planszy.
+        \n
+        \nBoty
+        \nJeżeli wybierzesz większą liczbę graczy niż 1, będziesz grał z botami. Boty mają te same zdolności co ty. Zdobędziesz punkty tylko za obszary wyczyszczone twoim kolorem w tym trybie.
+        \n
+        \nOdblokowywanie poziomów
+        \nAby odblokować poziom, musisz wygrać poziom poprzedni. Poziomy są odblokowywane oddzielnie dla trybu pojedynczego gracza i trybu gry z botami.
+    </string>
+
+    <!-- High Scores Menu -->
+    <string name="highScoreTitle">Najlepsze wyniki</string>
+    <string name="noRecords">Brak rekordów</string>
+
+    <!-- Options Menu -->
+    <string name="optionsTitle">Opcje</string>
+    <string name="setDefaultName">Domyślne imię:</string>
+    <string name="levelSelectSettingsText">Domyślny poziom:</string>
+    <string-array name="levelSelectSettings">
+        <item>poziom 1</item>
+        <item>ostatnio wybrany opziom</item>
+        <item>najwyższy dostępny poziom</item>
+        <item>ostatnio przegrany poziom</item>
+    </string-array>
+    <string name="retryActionSettingsText">Czynność przycisku ponów:</string>
+    <string-array name="retryActionSettings">
+        <item>powrót do wyboru poziomu</item>
+        <item>restart od przegranego poziomu</item>
+        <item>restart od wybranego poziomu</item>
+        <item>restart od pierwszego poziomu</item>
+    </string-array>
+    <string name="confirmOptions">Potwierdź</string>
+    <string name="cancel">Anuluj</string>
+
+    <!-- Single Player Menu -->
+    <string name="singlePlayerTitle">Pojedynczy gracz</string>
+    <string name="playerNumber">"Graczy "</string>
+    <string name="levelSelect">"Poziom "</string>
+    <string name="startGame">Start</string>
+
+    <!-- Statistics Menu -->
+    <string name="statisticsTitle">Statystyki</string>
+    <string name="gamesPlayedText">Gier rozegranych: %d</string>
+    <string name="highestLevelText">Najwyższy poziom: %d</string>
+    <string name="levelSeriesText">Najlepsza seria poziomów: %d</string>
+    <string name="highestLevelScoreText">Najwięcej punktów na poziom: %d</string>
+    <string name="topScoreText">Najwięcej punktów ogółem: %d</string>
+    <string name="timeLeftRecordText">Najwięcej pozostałego czasu: %d</string>
+    <string name="percentageClearedText">Najwięcej wyczyszczono: %s</string>
+    <string name="livesLeftRecordText">Najwięcej pozostałych żyć: %d</string>
+    <string name="leastTimeLeftText">Najmniej pozostałego czasu: %d</string>
+
+</resources>

@@ -43,16 +43,16 @@
         \nSwipe over the screen in order to start two bars. You control the direction and starting point of the bars with that swipe.
         \n
         \nBars
-        \nIf one bar is touched by a red ball, it will be destroyed and you loose a life. When the other bar hasn\'t finished yet and wasn\'t destroyed you can start a single bar by swiping over the screen again.
+        \nIf one bar is touched by a red ball, it will be destroyed and you lose a life. When the other bar hasn\'t finished yet and wasn\'t destroyed you can start a single bar by swiping over the screen again.
         \n
         \nClear areas
         \nIf you completely surround an area with successfully set bars and/or the borders of the field and there is no ball in it, it will be cleared.
         \n
         \nTime limit
-        \nThe time limit is displayed in milliseconds * 10. You get more time the higher the levels are. When the remaining time reaches 0 you loose the game.
+        \nThe time limit is displayed in milliseconds * 10. You get more time the higher the levels are. When the remaining time reaches 0 you lose the game.
         \n
         \nLives
-        \nYou loose a life whenever one of your bars is destroyed. If you loose all lives, the game will be over.
+        \nYou lose a life whenever one of your bars is destroyed. If you lose all lives, the game will be over.
         \n
         \nGoal of the Game:
         \nThe goal of every level is to clear 75 % of the field.

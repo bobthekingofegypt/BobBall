@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 23
+    namespace "org.bobstuff.bobball"
 
     defaultConfig {
         applicationId "org.bobstuff.bobball"

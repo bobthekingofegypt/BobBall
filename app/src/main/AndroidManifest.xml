@@ -14,6 +14,7 @@
         android:theme="@android:style/Theme.NoTitleBar">
         <activity
             android:name=".Menus.menuMain"
+            android:exported="true"
             tools:ignore="InnerclassSeparator">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +41,7 @@
             android:name=".BobBallActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/appName" />
+            />
 
     </application>
 

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
     android:padding="16dp"
-    tools:context="Menus.menuMain" >
+    tools:context="Menus.menuMain">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,66 +17,75 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/appName"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="#fff"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="10dp"
+            android:text="@string/appName"
+            android:textColor="#fff"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/title"
+            android:layout_marginBottom="30dp"
+            android:src="@drawable/ic_launcher" />
 
         <Button
             android:id="@+id/singlePlayerButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/singlePlayerTitle"
-            android:layout_below="@+id/title"
+            android:layout_below="@+id/imageView"
             android:layout_centerHorizontal="true"
-            android:onClick="openSinglePlayerMenu"/>
+            android:onClick="openSinglePlayerMenu"
+            android:text="@string/singlePlayerTitle" />
 
         <Button
             android:id="@+id/settingsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/optionsTitle"
             android:layout_below="@+id/singlePlayerButton"
             android:layout_centerHorizontal="true"
-            android:onClick="openSettingsMenu" />
+            android:onClick="openSettingsMenu"
+            android:text="@string/optionsTitle" />
 
         <Button
             android:id="@+id/highScoresButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/highScoreTitle"
             android:layout_below="@+id/settingsButton"
             android:layout_centerHorizontal="true"
-            android:onClick="openHighScoresMenu"/>
+            android:onClick="openHighScoresMenu"
+            android:text="@string/highScoreTitle" />
 
         <Button
             android:id="@+id/statsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/statisticsTitle"
             android:layout_below="@+id/highScoresButton"
             android:layout_centerHorizontal="true"
-            android:onClick="openStatsMenu"/>
+            android:onClick="openStatsMenu"
+            android:text="@string/statisticsTitle" />
 
         <Button
             android:id="@+id/helpButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/helpTitle"
             android:layout_below="@+id/statsButton"
             android:layout_centerHorizontal="true"
-            android:onClick="openHelpMenu"/>
+            android:onClick="openHelpMenu"
+            android:text="@string/helpTitle" />
 
         <Button
             android:id="@+id/exitButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/exitApp"
             android:layout_below="@+id/helpButton"
             android:layout_centerHorizontal="true"
-            android:onClick="exitApp"/>
+            android:onClick="exitApp"
+            android:text="@string/exitApp" />
 
     </RelativeLayout>
 

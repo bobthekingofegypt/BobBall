@@ -6,7 +6,7 @@
     <string name="timeLeftLabel">"Time Left: %d"</string>
     <string name="livesLabel">"Lives: "</string>
     <string name="scoreLabel">"Score: "</string>
-    <string name="areaClearedLabel">"% Cleared: "</string>
+    <string name="areaClearedLabel">"%% Cleared: "</string>
 
     <!-- menus in game -->
     <string name="confirm">OK</string>
